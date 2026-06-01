@@ -1,0 +1,2246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI辅助巡检预处理中台 V3 · Deep Space Glass</title>
+<style>
+/* ====== V3 Design System: Deep Space Glass ====== */
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Space palette */
+  --space-deep: #060B14;
+  --space-mid: #0B1221;
+  --space-light: #111B2E;
+  --space-card: rgba(15, 23, 42, 0.65);
+  --space-card-hover: rgba(15, 23, 42, 0.82);
+  --space-sidebar: rgba(8, 12, 24, 0.85);
+
+  /* Accent */
+  --primary: #3B82F6;
+  --primary-glow: rgba(59, 130, 246, 0.3);
+  --primary-light: #60A5FA;
+  --cyan: #06B6D4;
+  --cyan-glow: rgba(6, 182, 212, 0.3);
+
+  /* Functional */
+  --success: #22C55E;
+  --success-glow: rgba(34, 197, 94, 0.3);
+  --danger: #EF4444;
+  --danger-glow: rgba(239, 68, 68, 0.3);
+  --warning: #F59E0B;
+  --warning-glow: rgba(245, 158, 11, 0.3);
+  --purple: #8B5CF6;
+  --orange: #F97316;
+
+  /* Text */
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --text-accent: #E2E8F0;
+
+  /* Glass */
+  --glass-bg: rgba(15, 23, 42, 0.55);
+  --glass-border: rgba(148, 163, 184, 0.12);
+  --glass-border-hover: rgba(148, 163, 184, 0.22);
+  --glass-blur: 16px;
+  --glass-highlight: rgba(255, 255, 255, 0.04);
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-pill: 9999px;
+
+  /* Shadows */
+  --shadow-card: 0 1px 2px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.25);
+  --shadow-hover: 0 2px 4px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.35);
+  --shadow-glass: 0 4px 24px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.06);
+  --shadow-glow: 0 0 20px var(--primary-glow);
+
+  /* Layout */
+  --sidebar-w: 230px;
+  --topbar-h: 52px;
+
+  /* Scene colors - toned for dark bg */
+  --c1: #F87171; --c2: #FB923C; --c3: #FACC15; --c4: #4ADE80;
+  --c5: #60A5FA; --c6: #A78BFA; --c7: #F87171; --c8: #FBBF24;
+  --c9: #34D399; --c10: #818CF8; --c11: #9CA3AF; --c12: #6B7280;
+
+  /* Transitions */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 150ms var(--ease);
+  --transition-normal: 250ms var(--ease);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 14px; }
+body {
+  font-family: 'Fira Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  color: var(--text-primary);
+  background: var(--space-deep);
+  line-height: 1.6;
+  overflow: hidden;
+  height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Background ambient */
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(6, 182, 212, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(139, 92, 246, 0.04) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ====== LOGIN ====== */
+.login-pg {
+  display: flex;
+  height: 100vh;
+  position: relative;
+  isolation: isolate;
+}
+.login-pg .bg-deco {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+.login-pg .bg-deco::before {
+  content: '';
+  position: absolute;
+  width: 700px; height: 700px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, rgba(6, 182, 212, 0.06) 40%, transparent 70%);
+  top: -120px; left: -120px;
+  animation: orbFloat 8s ease-in-out infinite;
+}
+.login-pg .bg-deco::after {
+  content: '';
+  position: absolute;
+  width: 500px; height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%);
+  bottom: -80px; right: -80px;
+  animation: orbFloat 10s ease-in-out infinite reverse;
+}
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -30px) scale(1.05); }
+  66% { transform: translate(-20px, 20px) scale(0.95); }
+}
+.login-pg .bg-deco h1 {
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--text-primary);
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  letter-spacing: -0.5px;
+  text-shadow: 0 0 40px var(--primary-glow);
+}
+.login-pg .bg-deco p {
+  color: var(--text-secondary);
+  margin-top: 10px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 300;
+  position: relative;
+  z-index: 1;
+}
+
+.login-card-wrap {
+  width: 440px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+.login-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  padding: 44px 40px;
+  width: 370px;
+  box-shadow: var(--shadow-glass);
+}
+.login-card h2 {
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 28px;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+.login-card .fg { margin-bottom: 16px; }
+.login-card .fg label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.login-card .fg input,
+.login-card .fg select {
+  width: 100%;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 0 14px;
+  font-size: 14px;
+  color: var(--text-primary);
+  outline: none;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+}
+.login-card .fg input::placeholder { color: var(--text-muted); }
+.login-card .fg input:focus,
+.login-card .fg select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+  background: rgba(255, 255, 255, 0.08);
+}
+.login-card .fg select { cursor: pointer; }
+.login-card .fg select option { background: var(--space-mid); color: var(--text-primary); }
+
+.login-card .login-btn {
+  width: 100%;
+  height: 46px;
+  background: linear-gradient(135deg, var(--primary), #2563EB);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: all var(--transition-fast);
+  letter-spacing: 0.3px;
+  position: relative;
+  overflow: hidden;
+}
+.login-card .login-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: left 0.5s;
+}
+.login-card .login-btn:hover {
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-1px);
+}
+.login-card .login-btn:hover::before { left: 100%; }
+.login-card .hint {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 16px;
+  line-height: 1.6;
+}
+
+/* ====== APP SHELL ====== */
+.app { display: none; height: 100vh; position: relative; z-index: 1; }
+.app.show { display: flex; }
+
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--space-sidebar);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-right: 1px solid var(--glass-border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+.sidebar-logo {
+  padding: 16px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-primary);
+  letter-spacing: -0.2px;
+}
+.sidebar-logo .logo-icon {
+  width: 30px; height: 30px;
+  background: linear-gradient(135deg, var(--primary), var(--cyan));
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  box-shadow: 0 0 12px var(--primary-glow);
+}
+
+.sidebar-nav { flex: 1; overflow-y: auto; padding: 8px 0; }
+.nav-group { margin: 1px 0; }
+.nav-group-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-size: 12px;
+  font-weight: 600;
+  user-select: none;
+  letter-spacing: 0.4px;
+}
+.nav-group-title:hover {
+  color: var(--text-accent);
+  background: rgba(255,255,255,0.03);
+}
+.nav-group-title .ng-arrow {
+  font-size: 8px;
+  transition: transform var(--transition-fast);
+  width: 12px;
+  text-align: center;
+  opacity: 0.5;
+}
+.nav-group.open > .nav-group-title .ng-arrow {
+  transform: rotate(90deg);
+  opacity: 0.9;
+}
+.nav-group-title .ng-icon {
+  width: 18px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.nav-group-items {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.3s var(--ease);
+}
+.nav-group.open > .nav-group-items { max-height: 220px; }
+
+.nav-sub-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 20px 9px 38px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-size: 12px;
+  font-weight: 400;
+  border-left: 3px solid transparent;
+}
+.nav-sub-item:hover {
+  color: var(--text-primary);
+  background: rgba(255,255,255,0.04);
+}
+.nav-sub-item.active {
+  color: var(--primary-light);
+  background: rgba(59, 130, 246, 0.1);
+  border-left-color: var(--primary);
+  font-weight: 500;
+  box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.05);
+}
+.nav-sub-item.core { color: var(--warning); }
+.nav-sub-item.core.active {
+  border-left-color: var(--warning);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.sidebar-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--glass-border);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* ====== MAIN AREA ====== */
+.main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+.topbar {
+  height: var(--topbar-h);
+  border-bottom: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  flex-shrink: 0;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.topbar .breadcrumb { font-size: 12px; color: var(--text-secondary); }
+.topbar .breadcrumb span { color: var(--text-primary); font-weight: 500; }
+.topbar-right { display: flex; align-items: center; gap: 16px; }
+.topbar-right .notif {
+  position: relative;
+  cursor: pointer;
+  font-size: 17px;
+  color: var(--text-secondary);
+  transition: color var(--transition-fast);
+}
+.topbar-right .notif:hover { color: var(--text-primary); }
+.topbar-right .notif .dot {
+  position: absolute;
+  top: -3px; right: -3px;
+  width: 8px; height: 8px;
+  background: var(--danger);
+  border-radius: 50%;
+  border: 2px solid var(--space-deep);
+  box-shadow: 0 0 8px var(--danger-glow);
+}
+.topbar-right .user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+.topbar-right .avatar {
+  width: 30px; height: 30px;
+  background: linear-gradient(135deg, var(--primary), var(--cyan));
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 0 10px var(--primary-glow);
+}
+
+.page-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+  background: transparent;
+}
+.page { display: none; animation: fadeIn 0.25s var(--ease); }
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ====== SHARED COMPONENTS ====== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), #2563EB);
+  color: #fff;
+  border-color: rgba(59, 130, 246, 0.3);
+}
+.btn-primary:hover { box-shadow: 0 0 16px var(--primary-glow); transform: translateY(-1px); }
+
+.btn-outline {
+  background: transparent;
+  color: var(--text-accent);
+  border: 1px solid var(--glass-border);
+}
+.btn-outline:hover { background: rgba(255,255,255,0.05); border-color: var(--glass-border-hover); }
+
+.btn-success { background: var(--success); color: #fff; }
+.btn-success:hover { box-shadow: 0 0 14px var(--success-glow); }
+
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-danger:hover { box-shadow: 0 0 14px var(--danger-glow); }
+
+.btn-warning { background: var(--orange); color: #fff; }
+.btn-warning:hover { box-shadow: 0 0 14px var(--warning-glow); }
+
+.btn-info { background: var(--primary); color: #fff; }
+.btn-info:hover { box-shadow: 0 0 14px var(--primary-glow); }
+
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-lg { padding: 10px 22px; font-size: 15px; }
+.btn-xs { padding: 3px 8px; font-size: 11px; }
+
+/* Stats cards */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  transition: all var(--transition-normal);
+}
+.stat-card:hover {
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--shadow-glass);
+  transform: translateY(-2px);
+}
+.stat-card .sc-val {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: 'Fira Code', monospace;
+  letter-spacing: -1px;
+}
+.stat-card .sc-lbl {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* Cards */
+.card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 16px;
+  transition: border-color var(--transition-normal);
+}
+.card:hover { border-color: var(--glass-border-hover); }
+.card-hd {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--glass-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+.card-bd { padding: 20px; }
+
+/* Tags & Badges */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 500;
+  gap: 3px;
+}
+.tag-s { background: rgba(34, 197, 94, 0.15); color: #4ADE80; border: 1px solid rgba(34, 197, 94, 0.2); }
+.tag-d { background: rgba(239, 68, 68, 0.15); color: #F87171; border: 1px solid rgba(239, 68, 68, 0.2); }
+.tag-w { background: rgba(245, 158, 11, 0.15); color: #FBBF24; border: 1px solid rgba(245, 158, 11, 0.2); }
+.tag-i { background: rgba(59, 130, 246, 0.15); color: #60A5FA; border: 1px solid rgba(59, 130, 246, 0.2); }
+.tag-g { background: rgba(100, 116, 139, 0.15); color: #94A3B8; border: 1px solid rgba(100, 116, 139, 0.2); }
+.tag-o { background: rgba(249, 115, 22, 0.15); color: #FB923C; border: 1px solid rgba(249, 115, 22, 0.2); }
+.tag-p { background: rgba(139, 92, 246, 0.15); color: #A78BFA; border: 1px solid rgba(139, 92, 246, 0.2); }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 10px;
+  font-weight: 600;
+}
+.badge-yolo { background: rgba(100, 116, 139, 0.2); color: #94A3B8; }
+.badge-vlm { background: rgba(59, 130, 246, 0.2); color: #60A5FA; }
+.badge-human { background: rgba(249, 115, 22, 0.2); color: #FB923C; }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead { background: rgba(255, 255, 255, 0.03); }
+th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--glass-border);
+}
+td {
+  padding: 11px 16px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+  color: var(--text-primary);
+}
+tr:hover td { background: rgba(59, 130, 246, 0.04); }
+
+/* Filters */
+.filters {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.filters input,
+.filters select {
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-primary);
+  outline: none;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+}
+.filters input::placeholder { color: var(--text-muted); }
+.filters input:focus,
+.filters select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-glow);
+}
+.filters select { cursor: pointer; }
+.filters select option { background: var(--space-mid); color: var(--text-primary); }
+
+/* Modals */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: var(--space-light);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  width: 560px;
+  max-width: 92vw;
+  max-height: 82vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  padding: 28px 32px;
+}
+.modal h3 {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+}
+.modal-hd {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--glass-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.modal-hd .mclose {
+  cursor: pointer;
+  font-size: 20px;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  transition: color var(--transition-fast);
+}
+.modal-hd .mclose:hover { color: var(--text-primary); }
+.modal-bd { padding: 24px; }
+.modal-ft {
+  padding: 14px 24px;
+  border-top: 1px solid var(--glass-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Toast */
+.toast-ctn {
+  position: fixed;
+  top: 20px; right: 20px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toast {
+  padding: 12px 18px;
+  border-radius: var(--radius-md);
+  color: #fff;
+  font-size: 13px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  animation: toastIn 0.3s var(--ease);
+  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+@keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+.toast-s { background: rgba(34, 197, 94, 0.85); }
+.toast-e { background: rgba(239, 68, 68, 0.85); }
+.toast-i { background: rgba(59, 130, 246, 0.85); }
+.toast-w { background: rgba(249, 115, 22, 0.85); }
+
+/* Form fields */
+.fg { margin-bottom: 14px; }
+.fg label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+.fg input,
+.fg select {
+  width: 100%;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 0 12px;
+  font-size: 13px;
+  color: var(--text-primary);
+  outline: none;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+}
+.fg input:focus,
+.fg select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-glow);
+}
+.fg select { cursor: pointer; }
+.fg select option { background: var(--space-mid); color: var(--text-primary); }
+.fg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text-primary);
+  resize: vertical;
+  min-height: 70px;
+  font-family: inherit;
+  outline: none;
+  transition: all var(--transition-fast);
+}
+.form-textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-glow);
+}
+
+/* ====== REVIEW WORKBENCH (DARK THEME WITH GLASS ACCENTS) ====== */
+.review-page {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 900;
+  background: var(--space-deep);
+  flex-direction: column;
+}
+.review-page.show { display: flex; }
+
+.review-topbar {
+  height: 48px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  flex-shrink: 0;
+}
+.review-topbar .rt-left { display: flex; align-items: center; gap: 12px; }
+.review-topbar .rt-back {
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color var(--transition-fast);
+}
+.review-topbar .rt-back:hover { color: var(--primary-light); }
+.review-topbar .rt-title { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+.review-topbar .rt-batch {
+  font-size: 11px; color: var(--text-secondary);
+  background: rgba(255,255,255,0.05);
+  padding: 3px 10px; border-radius: var(--radius-pill);
+  border: 1px solid var(--glass-border);
+}
+.review-topbar .rt-progress { font-size: 13px; color: var(--text-secondary); }
+.review-topbar .rt-progress span { color: var(--warning); font-weight: 600; }
+
+.review-main { flex: 1; display: flex; overflow: hidden; }
+
+.review-left {
+  width: 280px;
+  background: rgba(8, 12, 24, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-right: 1px solid var(--glass-border);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+.review-left .rl-search {
+  padding: 10px;
+  border-bottom: 1px solid var(--glass-border);
+}
+.review-left .rl-search input,
+.review-left .rl-search select {
+  width: 100%; padding: 8px 12px; margin-bottom: 5px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 12px;
+  outline: none;
+  font-family: inherit;
+  transition: all var(--transition-fast);
+}
+.review-left .rl-search input::placeholder { color: var(--text-muted); }
+.review-left .rl-search input:focus,
+.review-left .rl-search select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-glow);
+}
+.review-left .rl-search select { cursor: pointer; }
+.review-left .rl-search select option { background: var(--space-mid); color: var(--text-primary); }
+.review-left .rl-list { flex: 1; overflow-y: auto; }
+
+.rl-item {
+  padding: 11px 14px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border-left: 3px solid transparent;
+}
+.rl-item:hover { background: rgba(255,255,255,0.03); }
+.rl-item.active {
+  background: rgba(59, 130, 246, 0.08);
+  border-left-color: var(--primary);
+}
+.rl-item .rl-name { font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 3px; }
+.rl-item .rl-cam { font-size: 11px; color: var(--text-secondary); margin-bottom: 3px; }
+.rl-item .rl-meta { display: flex; gap: 8px; align-items: center; font-size: 11px; }
+.rl-item .rl-count { color: var(--danger); font-weight: 600; }
+
+.rl-footer {
+  padding: 10px 14px;
+  border-top: 1px solid var(--glass-border);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Canvas area */
+.review-canvas-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background:
+    radial-gradient(ellipse at center, rgba(15, 23, 42, 0.5) 0%, var(--space-deep) 70%);
+}
+.review-canvas-area canvas { max-width: 100%; max-height: 100%; cursor: crosshair; }
+
+.review-canvas-toolbar {
+  position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 4px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 6px 8px;
+  z-index: 10;
+  box-shadow: var(--shadow-glass);
+}
+.review-canvas-toolbar button {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  transition: all var(--transition-fast);
+}
+.review-canvas-toolbar button:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
+.review-canvas-toolbar button.active { background: var(--primary); color: #fff; box-shadow: 0 0 10px var(--primary-glow); }
+
+.edit-toolbar {
+  position: absolute; top: 60px; left: 50%; transform: translateX(-50%);
+  display: none; gap: 4px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 8px 10px;
+  z-index: 10;
+  flex-wrap: wrap;
+  max-width: 620px;
+  box-shadow: var(--shadow-glass);
+}
+.edit-toolbar.show { display: flex; }
+.edit-toolbar button {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px 9px;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  font-family: inherit;
+}
+.edit-toolbar button:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); border-color: var(--glass-border-hover); }
+.edit-toolbar button.sel { background: var(--orange); color: #fff; border-color: var(--orange); box-shadow: 0 0 8px var(--warning-glow); }
+
+/* Right panel */
+.review-right {
+  width: 350px;
+  background: rgba(8, 12, 24, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-left: 1px solid var(--glass-border);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.review-right .rr-section {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--glass-border);
+  flex-shrink: 0;
+}
+.review-right .rr-section.scrollable {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.review-right .rr-section h4 {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.review-right .rr-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+.review-right .rr-row .lbl { color: var(--text-secondary); }
+.review-right .rr-row .val { color: var(--text-primary); font-family: 'Fira Code', monospace; font-size: 11px; }
+
+.rr-detection {
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--glass-border);
+  border-left: 3px solid #555;
+  cursor: pointer;
+  position: relative;
+  transition: all var(--transition-fast);
+}
+.rr-d-field { margin-top: 6px; }
+.rr-d-field .rr-d-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 3px;
+}
+.rr-d-field .rr-d-value {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  background: rgba(0,0,0,0.2);
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  width: 100%;
+  resize: none;
+  font-family: inherit;
+  outline: none;
+  transition: all var(--transition-fast);
+}
+.rr-d-field .rr-d-value:focus {
+  border-color: var(--primary);
+  color: var(--text-primary);
+  box-shadow: 0 0 0 2px var(--primary-glow);
+}
+.rr-d-field .rr-d-value.placeholder { color: var(--text-muted); }
+.rr-detection:hover { background: rgba(255,255,255,0.05); border-color: var(--glass-border-hover); }
+.rr-detection.sel {
+  border-left-color: var(--primary);
+  background: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.2);
+}
+.rr-detection .rr-d-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  padding-right: 24px;
+}
+.rr-detection .rr-d-cls { font-size: 12px; font-weight: 600; white-space: nowrap; }
+.rr-detection .rr-d-conf { font-size: 11px; color: var(--text-secondary); }
+
+.rr-actions {
+  padding: 14px 18px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--glass-border);
+  margin-top: auto;
+}
+.rr-actions button {
+  flex: 1;
+  min-width: 70px;
+  padding: 10px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: #fff;
+  font-family: inherit;
+}
+
+.rr-undo-btn {
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  padding: 2px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: all var(--transition-fast);
+}
+.rr-undo-btn:hover {
+  background: rgba(255,255,255,0.05);
+  color: var(--text-primary);
+  border-color: var(--glass-border-hover);
+}
+
+.rr-del-btn {
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 22px; height: 22px;
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  color: var(--text-muted);
+  border-radius: 50%;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  line-height: 1;
+}
+.rr-del-btn:hover {
+  background: var(--danger);
+  color: #fff;
+  border-color: var(--danger);
+  box-shadow: 0 0 8px var(--danger-glow);
+}
+
+.rr-btn-confirm { background: var(--success); }
+.rr-btn-confirm:hover { box-shadow: 0 0 14px var(--success-glow); transform: translateY(-1px); }
+.rr-btn-reject { background: var(--danger); }
+.rr-btn-reject:hover { box-shadow: 0 0 14px var(--danger-glow); transform: translateY(-1px); }
+.rr-btn-recapture { background: var(--orange); }
+.rr-btn-recapture:hover { box-shadow: 0 0 14px var(--warning-glow); transform: translateY(-1px); }
+.rr-btn-edit { background: var(--primary); }
+.rr-btn-edit:hover { box-shadow: 0 0 14px var(--primary-glow); transform: translateY(-1px); }
+.rr-btn-desc { background: var(--purple); }
+.rr-btn-desc:hover { box-shadow: 0 0 14px rgba(139,92,246,0.3); transform: translateY(-1px); }
+
+.rr-auto-next {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding: 4px 18px 12px;
+}
+.rr-auto-next input[type="checkbox"] {
+  accent-color: var(--primary);
+  width: 14px; height: 14px;
+}
+
+.review-bottom {
+  height: 52px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.review-bottom .shortcut-hint {
+  padding: 3px 7px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  font-family: 'Fira Code', monospace;
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+/* ====== MATRIX TABLE ====== */
+.cs-matrix { overflow-x: auto; font-size: 12px; }
+.cs-matrix th, .cs-matrix td {
+  padding: 7px 10px;
+  text-align: center;
+  border: 1px solid var(--glass-border);
+}
+.cs-matrix th { background: rgba(255, 255, 255, 0.03); font-weight: 600; font-size: 11px; }
+.cs-matrix td:first-child { text-align: left; font-weight: 500; background: rgba(255,255,255,0.02); }
+.cs-matrix input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+.cs-legend { display: flex; gap: 14px; font-size: 11px; margin-bottom: 10px; flex-wrap: wrap; }
+.cs-legend span { display: inline-flex; align-items: center; gap: 4px; color: var(--text-secondary); }
+.cs-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+/* ====== PERMISSION MATRIX ====== */
+.perm-matrix th:first-child, .perm-matrix td:first-child { text-align: left; font-weight: 500; }
+.perm-check { color: var(--success); }
+.perm-cross { color: var(--danger); }
+.perm-partial { color: var(--warning); }
+
+/* ====== SCROLLBARS ====== */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.35); }
+
+/* ====== PAGE-SPECIFIC STYLES ====== */
+/* Login page background */
+.login-pg { background: var(--space-deep); }
+
+/* Links in cards */
+.card-hd a { color: var(--primary-light); text-decoration: none; transition: color var(--transition-fast); }
+.card-hd a:hover { color: var(--cyan); }
+</style>
+</head>
+<body>
+
+<!-- ====== LOGIN ====== -->
+<div id="loginPg" class="login-pg">
+  <div class="bg-deco">
+    <div>
+      <h1>AI 辅助巡检预处理中台</h1>
+      <p>采集 → 识别 → 复核 → 回传 → 迭代 闭环系统</p>
+    </div>
+  </div>
+  <div class="login-card-wrap">
+    <div class="login-card">
+      <h2>登录系统</h2>
+      <div class="fg"><label>用户名</label><input id="loginUser" value="zhangsan" placeholder="输入用户名"></div>
+      <div class="fg"><label>密码</label><input id="loginPass" type="password" value="123456" placeholder="输入密码"></div>
+      <div class="fg"><label>角色</label><select id="loginRole"><option value="reviewer">复核员</option><option value="viewer">查看者</option></select></div>
+      <button class="login-btn" onclick="doLogin()">登 录</button>
+      <div class="hint">测试账号: zhangsan / 123456（复核员）<br>查看者: lisi / 123456</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== APP SHELL ====== -->
+<div id="appShell" class="app">
+  <div class="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon">AI</div>AI巡检中台 V3</div>
+    <div class="sidebar-nav">
+      <div class="nav-group open">
+        <div class="nav-group-title" onclick="toggleNavGroup(this)"><span class="ng-arrow">▶</span><span class="ng-icon">◈</span>巡检工作</div>
+        <div class="nav-group-items">
+          <div class="nav-sub-item active" data-page="dashboard">◉ 工作台总览</div>
+          <div class="nav-sub-item core" data-page="review-entry">◆ 人工复核</div>
+        </div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title" onclick="toggleNavGroup(this)"><span class="ng-arrow">▶</span><span class="ng-icon">◈</span>任务与报告</div>
+        <div class="nav-group-items">
+          <div class="nav-sub-item" data-page="tasks">◉ 任务管理</div>
+          <div class="nav-sub-item" data-page="reports">◉ 巡检报告</div>
+          <div class="nav-sub-item" data-page="feedback">◉ 结果回传</div>
+        </div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title" onclick="toggleNavGroup(this)"><span class="ng-arrow">▶</span><span class="ng-icon">◈</span>基础配置</div>
+        <div class="nav-group-items">
+          <div class="nav-sub-item" data-page="projects">◉ 项目管理</div>
+          <div class="nav-sub-item" data-page="cameras">◉ 摄像头配置</div>
+          <div class="nav-sub-item" data-page="users">◉ 用户管理</div>
+        </div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title" onclick="toggleNavGroup(this)"><span class="ng-arrow">▶</span><span class="ng-icon">◈</span>系统设置</div>
+        <div class="nav-group-items">
+          <div class="nav-sub-item" data-page="model">◉ 模型参数</div>
+          <div class="nav-sub-item" data-page="perm">◉ 权限矩阵</div>
+          <div class="nav-sub-item" data-page="logs">◉ 操作日志</div>
+        </div>
+      </div>
+    </div>
+    <div class="sidebar-footer">© 2026 亿诺凌科 V3.0 · Deep Space Glass</div>
+  </div>
+
+  <div class="main-area">
+    <div class="topbar">
+      <div class="breadcrumb"><span id="pageTitle">工作台总览</span></div>
+      <div class="topbar-right">
+        <span class="notif"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="dot"></span></span>
+        <div class="user"><div class="avatar" id="topAvatar">张</div><span id="topName">张三</span></div>
+        <button class="btn btn-sm btn-outline" onclick="doLogout()">退出</button>
+      </div>
+    </div>
+    <div class="page-content" id="pageContent"></div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-ctn" id="toastCtn"></div>
+
+<!-- Modal container -->
+<div class="modal-overlay" id="modalOverlay"><div class="modal" id="modalBox"></div></div>
+
+<!-- ====== REVIEW WORKBENCH ====== -->
+<div class="review-page" id="reviewPage">
+  <div class="review-topbar">
+    <div class="rt-left">
+      <span class="rt-back" onclick="closeReview()">← 返回工作台</span>
+      <span class="rt-title" id="rtTitle">建发悦府8# — 塔吊A</span>
+      <span class="rt-batch" id="rtBatch">2026-05-28 AM</span>
+    </div>
+    <div class="rt-progress">第 <span id="rtIdx">3</span> / <span id="rtTotal">17</span> 张 | 待复核 <span id="rtPending">37</span> 条</div>
+  </div>
+  <div class="review-main">
+    <div class="review-left">
+      <div class="rl-search">
+        <input type="text" placeholder="搜索项目名称..." id="rlSearch" oninput="filterReviewTasks()">
+        <select id="rlScene" onchange="filterReviewTasks()"><option value="">全部场景</option></select>
+        <select id="rlStatus" onchange="filterReviewTasks()"><option value="">全部状态</option><option value="pending">待复核</option><option value="completed">已完成</option><option value="excluded">已排除</option></select>
+      </div>
+      <div class="rl-list" id="rlList"></div>
+      <div class="rl-footer" id="rlFooter">待复核 37 / 已完成 50</div>
+    </div>
+    <div class="review-canvas-area" id="reviewCanvasArea">
+      <div class="review-canvas-toolbar">
+        <button onclick="reviewZoom(-0.15)">−</button>
+        <button onclick="reviewFit()">⊡</button>
+        <button onclick="reviewZoom(+0.15)">+</button>
+        <button onclick="reviewRatio(1)">1:1</button>
+        <button id="btnEditMode" onclick="toggleEditMode()">✎ 编辑</button>
+      </div>
+      <div class="edit-toolbar" id="editToolbar">
+        <span style="color:var(--text-muted);font-size:10px;padding:4px">类别:</span>
+      </div>
+      <canvas id="reviewCanvas"></canvas>
+    </div>
+    <div class="review-right" id="reviewRight">
+      <div class="rr-section"><h4>项目信息</h4>
+        <div class="rr-row"><span class="lbl">项目</span><span class="val" id="rrProject">建发悦府8#</span></div>
+        <div class="rr-row"><span class="lbl">摄像头</span><span class="val" id="rrCamera">塔吊A</span></div>
+        <div class="rr-row"><span class="lbl">PUID</span><span class="val" id="rrPUID">201115203424327567</span></div>
+        <div class="rr-row"><span class="lbl">抓拍时间</span><span class="val" id="rrTime">2026-05-28 08:15:32</span></div>
+      </div>
+      <div class="rr-section scrollable">
+        <h4>AI检测结果 <button class="rr-undo-btn" onclick="undoEdit()">↩ 撤销</button></h4>
+        <div id="rrDetections"></div>
+      </div>
+      <div class="rr-actions" id="rrActions">
+        <button class="rr-btn-confirm" onclick="doReview('confirm')">✓ 确认<small style="display:block;font-size:10px;opacity:0.8">Enter</small></button>
+        <button class="rr-btn-reject" onclick="doReview('reject')">✗ 排除<small style="display:block;font-size:10px;opacity:0.8">Esc</small></button>
+        <button class="rr-btn-recapture" onclick="doReview('recapture')">⟳ 重采</button>
+        <button class="rr-btn-desc" onclick="doReview('desc')">✎ 描述</button>
+      </div>
+      <div class="rr-auto-next"><input type="checkbox" id="autoNext" checked onchange="S.autoNext=this.checked"> 确认后自动跳转到下一张</div>
+    </div>
+  </div>
+  <div class="review-bottom">
+    <span>快捷键:</span>
+    <span class="shortcut-hint">Enter</span>确认
+    <span class="shortcut-hint">Esc</span>排除
+    <span class="shortcut-hint">1-9</span>类别
+    <span class="shortcut-hint">Delete</span>删框
+    <span class="shortcut-hint">Ctrl+Z</span>撤销
+    <span class="shortcut-hint">←→</span>翻页
+    <span class="shortcut-hint">滚轮</span>缩放
+    <span class="shortcut-hint">?</span>帮助
+  </div>
+</div>
+
+<script>
+// ====== STATE ======
+const S = {
+  user: null,
+  page: 'dashboard',
+  reviewOpen: false,
+  reviewTaskIdx: 0,
+  reviewZoom: 1,
+  reviewOffX: 0, reviewOffY: 0,
+  editMode: false,
+  editScene: 1,
+  isDrawing: false,
+  drawStart: null,
+  selectedBox: -1,
+  undoStack: [],
+  autoNext: true,
+  isPanning: false,
+  panStart: null,
+  projects: [],
+  cameras: [],
+  batches: [],
+  tasks: [],
+  reviewTasks: [],
+  feedbackItems: [],
+  users: [],
+  userIdCounter: 0,
+  logs: []
+};
+
+// ====== MOCK DATA ======
+const SCENES = [
+  {id:1,name:'安全帽佩戴',color:'#F87171',type:'目标检测'},
+  {id:2,name:'安全绳佩戴',color:'#FB923C',type:'目标检测'},
+  {id:3,name:'临边防护缺失',color:'#FACC15',type:'场景理解'},
+  {id:4,name:'电梯搭载人数',color:'#4ADE80',type:'目标检测+计数'},
+  {id:5,name:'工人私自开机',color:'#60A5FA',type:'行为检测'},
+  {id:6,name:'坑边堆载',color:'#A78BFA',type:'场景理解'},
+  {id:7,name:'违规抽烟',color:'#F87171',type:'目标检测'},
+  {id:8,name:'散料吊装',color:'#FBBF24',type:'场景理解'},
+  {id:9,name:'吊篮作业人数',color:'#34D399',type:'目标检测+计数'},
+  {id:10,name:'起重机械安拆人数',color:'#818CF8',type:'目标检测+计数'},
+  {id:11,name:'出入口防护棚',color:'#9CA3AF',type:'存在性检测'},
+  {id:12,name:'工地围挡封闭',color:'#6B7280',type:'场景理解'},
+];
+
+function initMockData() {
+  const projNames = ['建发悦府8#','融信壹号府5#','因德家园3#','三盛中央公园1#','正荣府2#','保利天汇7#','万科金域蓝湾','华润万象城','龙湖春江天玺','旭辉江山境'];
+  const camPrefixes = ['塔吊A','围挡B','临边C','主入口','基坑D','楼顶E','加工区F','通道G'];
+
+  S.projects = projNames.map((n,i)=>({id:i+1,name:n,status:i<8?'active':'suspended',cameras:[]}));
+  S.cameras = [];
+  let cid = 0;
+  S.projects.forEach(p => {
+    let nc = 2 + Math.floor(Math.random()*4);
+    for(let j=0;j<nc;j++) {
+      cid++;
+      let cam = {id:cid, puid:'20111520342432'+String(7567+cid), name:camPrefixes[j%8]+(j>=8?String(Math.floor(j/8)):''), projectId:p.id, projectName:p.name, status:Math.random()>0.15?'online':'offline', scenes:[]};
+      SCENES.forEach(s=>{ if(Math.random()>0.3) cam.scenes.push(s.id); });
+      S.cameras.push(cam);
+      p.cameras.push(cam.id);
+    }
+  });
+
+  S.batches = [];
+  for(let d=0;d<5;d++) {
+    let dt = new Date(2026,4,28-d);
+    ['AM','PM'].forEach(ampm => {
+      S.batches.push({id:S.batches.length+1, date:fmtDate(dt), ampm, projects:Math.floor(Math.random()*100+450), images:Math.floor(Math.random()*200+1100), inferred:Math.floor(Math.random()*200+900), pending:Math.floor(Math.random()*50+20), completed:Math.floor(Math.random()*200+200), status:d===0?'running':(d===0&&ampm==='PM'?'pending':'completed')});
+    });
+  }
+
+  S.tasks = [];
+  for(let i=0;i<30;i++) {
+    let p = S.projects[Math.floor(Math.random()*S.projects.length)];
+    let c = S.cameras.filter(c=>c.projectId===p.id)[0] || S.cameras[0];
+    let hasDanger = Math.random()>0.4;
+    let nDanger = hasDanger ? Math.floor(Math.random()*5)+1 : 0;
+    let status = Math.random()>0.5?'completed':(Math.random()>0.3?'pending_review':'inferring');
+    let batchId = i<18 ? S.batches[0].id : (i<24 ? S.batches[1].id : S.batches[2].id);
+    let detections = [];
+    if(hasDanger) {
+      for(let d=0;d<nDanger;d++) {
+        let sc = SCENES[Math.floor(Math.random()*12)];
+        let conf = Math.random()*0.4+0.6;
+        detections.push({
+          id:d, sceneId:sc.id, sceneName:sc.name, color:sc.color,
+          bbox:{x:0.1+Math.random()*0.4, y:0.1+Math.random()*0.3, w:0.08+Math.random()*0.15, h:0.08+Math.random()*0.15},
+          confidence:conf, source:conf>=0.9?'YOLO':(Math.random()>0.5?'YOLO+VLM':'VLM'),
+          description: `检测到${sc.name}隐患，位于画面${Math.random()>0.5?'左侧':'右侧'}`,
+          suggestion: sc.id===1?'责令立即佩戴安全帽后方可进入施工区域':sc.id===3?'立即搭设临边防护栏杆，设置挡脚板及密目网':sc.id===7?'现场严禁吸烟，对违规人员进行安全教育':`针对${sc.name}问题，建议立即整改并报监理复核`,
+          status:'ai'
+        });
+      }
+    }
+    S.tasks.push({id:i+1, projectId:p.id, projectName:p.name, cameraId:c.id, cameraName:c.name, puid:c.puid, batchId, status, dangerCount:nDanger, detections, reviewHistory:[], time:'2026-05-28 '+(8+Math.floor(Math.random()*6))+':'+String(Math.floor(Math.random()*60)).padStart(2,'0')+':'+String(Math.floor(Math.random()*60)).padStart(2,'0')});
+  }
+
+  let todayId = S.batches[0].id;
+  S.reviewTasks = S.tasks.filter(t=>t.batchId===todayId && (t.status==='pending_review' || t.status==='completed' || t.status==='excluded'));
+  updateReviewStats();
+
+  S.feedbackItems = [];
+  for(let i=0;i<8;i++) {
+    S.feedbackItems.push({id:i+1, taskId:Math.floor(Math.random()*30)+1, project:'建发悦府8#', danger:'安全帽未佩戴', status:['success','success','success','pending','failed'][Math.floor(Math.random()*5)], time:'2026-05-28 09:'+String(15+i*3).padStart(2,'0'), retries:Math.floor(Math.random()*3)});
+  }
+
+  S.logs = [];
+  for(let i=0;i<12;i++) {
+    S.logs.push({id:i+1, user:['张三','李四','王五'][Math.floor(Math.random()*3)], action:['登录系统','确认隐患','排除误报','修改标注','查看报告','同步项目'][Math.floor(Math.random()*6)], target:['建发悦府8#','融信壹号府5#','系统'][Math.floor(Math.random()*3)], time:'2026-05-28 '+(8+Math.floor(Math.random()*8))+':'+String(Math.floor(Math.random()*60)).padStart(2,'0'), ip:'192.168.1.'+Math.floor(Math.random()*255)});
+  }
+
+  S.users = [
+    {id:1, username:'zhangsan', displayName:'张三', role:'reviewer', projectIds:[1,2,3], status:'enabled', lastLogin:'2026-05-30 09:15'},
+    {id:2, username:'lisi', displayName:'李四', role:'viewer', projectIds:[1,2], status:'enabled', lastLogin:'2026-05-29 14:30'},
+    {id:3, username:'wangwu', displayName:'王五', role:'reviewer', projectIds:[1,2,3,4,5], status:'enabled', lastLogin:'2026-05-30 08:00'},
+  ];
+  S.userIdCounter = 4;
+}
+
+function fmtDate(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+
+// ====== MODAL ======
+function showModal(html) {
+  document.getElementById('modalBox').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+document.addEventListener('click', function(e) {
+  if(e.target.id==='modalOverlay') closeModal();
+});
+
+// ====== NAVIGATION ======
+function navTo(page) {
+  S.page = page;
+  document.querySelectorAll('.nav-sub-item').forEach(el=>el.classList.toggle('active', el.dataset.page===page));
+  let activeItem = document.querySelector(`.nav-sub-item[data-page="${page}"]`);
+  if(activeItem) {
+    let group = activeItem.closest('.nav-group');
+    if(group && !group.classList.contains('open')) {
+      group.classList.add('open');
+    }
+  }
+  const titles = {dashboard:'工作台总览','review-entry':'人工复核',tasks:'任务管理',reports:'巡检报告',feedback:'结果回传',projects:'项目管理',cameras:'摄像头配置',users:'用户管理',model:'模型参数',perm:'权限矩阵',logs:'操作日志'};
+  document.getElementById('pageTitle').textContent = titles[page]||page;
+  renderPage(page);
+}
+
+function toggleNavGroup(titleEl) {
+  titleEl.parentElement.classList.toggle('open');
+}
+
+function renderPage(page) {
+  const pc = document.getElementById('pageContent');
+  switch(page) {
+    case 'dashboard': pc.innerHTML = renderDashboard(); break;
+    case 'review-entry': pc.innerHTML = renderReviewEntry(); break;
+    case 'tasks': pc.innerHTML = renderTasks(); break;
+    case 'reports': pc.innerHTML = renderReports(); break;
+    case 'feedback': pc.innerHTML = renderFeedback(); break;
+    case 'projects': pc.innerHTML = renderProjects(); break;
+    case 'cameras': pc.innerHTML = renderCameras(); break;
+    case 'users': pc.innerHTML = renderUsers(); break;
+    case 'model': pc.innerHTML = renderModel(); break;
+    case 'perm': pc.innerHTML = renderPerm(); break;
+    case 'logs': pc.innerHTML = renderLogs(); break;
+  }
+}
+
+// ====== PAGE RENDERERS ======
+function renderDashboard() {
+  let todayBatch = S.batches[0];
+  let todayTasks = S.tasks.filter(t=>t.batchId===todayBatch.id);
+  let totalPending = todayTasks.filter(t=>t.status==='pending_review').length;
+  let totalCompleted = todayTasks.filter(t=>t.status==='completed').length;
+  return `
+<div class="stats-grid">
+<div class="stat-card"><div class="sc-val">5,000+</div><div class="sc-lbl">接入项目</div></div>
+<div class="stat-card"><div class="sc-val">13,000+</div><div class="sc-lbl">监控摄像头</div></div>
+<div class="stat-card"><div class="sc-val" style="color:var(--danger)">${totalPending}</div><div class="sc-lbl">今日待复核</div></div>
+<div class="stat-card"><div class="sc-val" style="color:var(--success)">${totalCompleted}</div><div class="sc-lbl">今日已完成</div></div>
+</div>
+<div class="card"><div class="card-hd">今日巡检批次</div><div class="card-bd">
+<table><thead><tr><th>批次</th><th>日期</th><th>项目数</th><th>图片数</th><th>待复核</th><th>已完成</th><th>状态</th></tr></thead><tbody>
+${S.batches.slice(0,6).map(b=>`
+<tr><td>${b.date} ${b.ampm}</td><td>${b.date}</td><td>${b.projects}</td><td>${b.images}</td><td>${b.pending}</td><td>${b.completed}</td><td><span class="tag ${b.status==='completed'?'tag-s':b.status==='running'?'tag-i':'tag-g'}">${b.status==='completed'?'已完成':b.status==='running'?'进行中':'待执行'}</span></td></tr>
+`).join('')}
+</tbody></table></div></div>
+<div class="card"><div class="card-hd">今日待复核任务 <button class="btn btn-sm btn-primary" onclick="openReviewFromEntry()">开始复核 →</button></div><div class="card-bd">
+<table><thead><tr><th>项目</th><th>摄像头</th><th>隐患数</th><th>状态</th><th>操作</th></tr></thead><tbody>
+${todayTasks.filter(t=>t.status==='pending_review').slice(0,8).map(t=>`
+<tr><td>${t.projectName}</td><td>${t.cameraName}</td><td style="color:var(--danger);font-weight:600">${t.dangerCount}</td><td><span class="tag tag-w">待复核</span></td><td><button class="btn btn-sm btn-primary" onclick="openReview(${t.id})">复核</button></td></tr>
+`).join('')}
+</tbody></table></div></div>`;
+}
+
+function getReviewDateBatches() {
+  if(!S.reviewDate) S.reviewDate = S.batches[0].date;
+  return S.batches.filter(b=>b.date===S.reviewDate);
+}
+
+function setReviewDate(date) {
+  S.reviewDate = date;
+  S.reviewTasks = getReviewDateTasks();
+  S.reviewTaskIdx = 0;
+  renderPage('review-entry');
+}
+
+function getReviewDateTasks() {
+  let dateBatches = getReviewDateBatches();
+  let batchIds = dateBatches.map(b=>b.id);
+  return S.tasks.filter(t=>batchIds.includes(t.batchId) && (t.status==='pending_review'||t.status==='completed'||t.status==='excluded'));
+}
+
+function renderReviewEntry() {
+  if(!S.reviewDate) S.reviewDate = S.batches[0].date;
+  let dateBatches = getReviewDateBatches();
+  let batchIds = dateBatches.map(b=>b.id);
+  let batchTasks = S.tasks.filter(t=>batchIds.includes(t.batchId));
+  let pending = batchTasks.filter(t=>t.status==='pending_review');
+  let completed = batchTasks.filter(t=>t.status==='completed');
+  let excluded = batchTasks.filter(t=>t.status==='excluded');
+  let allDates = [...new Set(S.batches.map(b=>b.date))].sort().reverse();
+  let todayStr = S.batches[0].date;
+  let isToday = S.reviewDate===todayStr;
+  return `
+<div class="card"><div class="card-hd" style="justify-content:flex-start;gap:16px">
+  <span>统计日期</span>
+  <select onchange="setReviewDate(this.value)" style="padding:6px 12px;background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;outline:none;color:var(--text-primary);font-family:inherit">
+    ${allDates.map(d=>`<option value="${d}" ${d===S.reviewDate?'selected':''}>${d}${d===todayStr?' (今天)':''}</option>`).join('')}
+  </select>
+  <span style="font-size:12px;color:var(--text-secondary);font-weight:400">${isToday?'当前批次':dateBatches.length+'个批次'} — ${dateBatches.map(b=>b.ampm).join('、')}</span>
+</div></div>
+<div class="stats-grid">
+<div class="stat-card"><div class="sc-val" style="color:var(--danger)">${pending.length}</div><div class="sc-lbl">${isToday?'本日待复核':S.reviewDate+' 待复核'}</div></div>
+<div class="stat-card"><div class="sc-val" style="color:var(--success)">${completed.length}</div><div class="sc-lbl">${isToday?'本日已完成':S.reviewDate+' 已完成'}</div></div>
+<div class="stat-card"><div class="sc-val" style="color:var(--text-secondary)">${excluded.length}</div><div class="sc-lbl">${isToday?'本日已排除':S.reviewDate+' 已排除'}</div></div>
+<div class="stat-card"><div class="sc-val">${batchTasks.length}</div><div class="sc-lbl">当日总计</div></div>
+</div>
+<div class="card"><div class="card-hd">${isToday?'本日':S.reviewDate} 复核任务队列 <button class="btn btn-sm btn-primary" onclick="openReviewFromEntry()">进入复核工作台 →</button></div><div class="card-bd">
+<div class="filters">
+<input placeholder="搜索项目..." oninput="filterReviewTable(this.value)">
+<select onchange="filterReviewTable(this.value)"><option value="">全部状态</option><option value="pending_review">待复核</option><option value="completed">已完成</option></select>
+</div>
+<table><thead><tr><th>项目</th><th>摄像头</th><th>隐患数</th><th>置信度</th><th>AI来源</th><th>状态</th><th>操作</th></tr></thead><tbody id="reviewTableBody">
+${batchTasks.filter(t=>t.status==='pending_review').concat(batchTasks.filter(t=>t.status!=='pending_review')).map(t=>`
+<tr><td>${t.projectName}</td><td>${t.cameraName}</td><td style="color:${t.dangerCount>0?'var(--danger)':'var(--text-muted)'};font-weight:600">${t.dangerCount}</td>
+<td>${t.detections.length>0?(t.detections[0].confidence*100).toFixed(0)+'%':'—'}</td>
+<td>${t.detections.length>0?`<span class="badge badge-${t.detections[0].source==='YOLO'?'yolo':t.detections[0].source==='YOLO+VLM'?'vlm':'human'}">${t.detections[0].source}</span>`:'—'}</td>
+<td>${statusBadge(t.status)}</td>
+<td>${t.status==='pending_review'?`<button class="btn btn-sm btn-primary" onclick="openReview(${t.id})">复核</button>`:t.status==='completed'?`<button class="btn btn-sm btn-outline" onclick="openReview(${t.id})">查看</button>`:'—'}</td></tr>
+`).join('')}
+</tbody></table></div></div>`;
+}
+
+function renderTasks() {
+  return `
+<div class="card"><div class="card-hd">批次总览</div><div class="card-bd">
+<table><thead><tr><th>批次</th><th>项目数</th><th>图片</th><th>待复核</th><th>已完成</th><th>状态</th></tr></thead><tbody>
+${S.batches.slice(0,8).map(b=>`
+<tr style="cursor:pointer" onclick="S.tasks=S.tasks;renderPage('tasks')"><td>${b.date} ${b.ampm}</td><td>${b.projects}</td><td>${b.images}</td><td>${b.pending}</td><td>${b.completed}</td><td><span class="tag ${b.status==='completed'?'tag-s':'tag-i'}">${b.status==='completed'?'已完成':'进行中'}</span></td></tr>
+`).join('')}
+</tbody></table></div></div>
+<div class="card"><div class="card-hd">全部任务</div><div class="card-bd">
+<div class="filters">
+<input placeholder="搜索项目..."><select><option>全部状态</option><option>待复核</option><option>推理中</option><option>已完成</option><option>失败</option></select>
+</div>
+<table><thead><tr><th>项目</th><th>摄像头</th><th>图片</th><th>隐患数</th><th>状态</th><th>操作</th></tr></thead><tbody>
+${S.tasks.map(t=>`<tr>
+<td>${t.projectName}</td><td>${t.cameraName}</td><td>1张</td>
+<td style="color:${t.dangerCount>0?'var(--danger)':'var(--text-muted)'};font-weight:600">${t.dangerCount}</td>
+<td>${statusBadge(t.status)}</td>
+<td>${t.status==='pending_review'?`<button class="btn btn-sm btn-primary" onclick="openReview(${t.id})">复核</button>`:t.status==='completed'?`<button class="btn btn-sm btn-outline" onclick="openReview(${t.id})">查看</button>`:'—'}</td>
+</tr>`).join('')}
+</tbody></table></div></div>`;
+}
+
+function statusBadge(s) {
+  const map = {pending_review:{c:'tag-w',t:'待复核'},inferring:{c:'tag-i',t:'推理中'},completed:{c:'tag-s',t:'已完成'},excluded:{c:'tag-g',t:'已排除'},failed:{c:'tag-d',t:'失败'}};
+  let m = map[s]||{c:'tag-g',t:s};
+  return `<span class="tag ${m.c}">${m.t}</span>`;
+}
+
+function renderReports() {
+  return `
+<div class="card"><div class="card-hd">巡检报告 <span style="font-weight:400;font-size:12px">| <a href="#" onclick="return false" style="color:var(--primary-light)">项目日报告</a> | <a href="#" onclick="return false" style="color:var(--text-secondary)">管理周报</a></span></div><div class="card-bd">
+<div class="stats-grid"><div class="stat-card"><div class="sc-val">5,000+</div><div class="sc-lbl">巡检覆盖(项目)</div></div>
+<div class="stat-card"><div class="sc-val" style="color:var(--danger)">1,248</div><div class="sc-lbl">发现隐患</div></div>
+<div class="stat-card"><div class="sc-val" style="color:var(--success)">84.5%</div><div class="sc-lbl">AI准确率</div></div>
+<div class="stat-card"><div class="sc-val">89</div><div class="sc-lbl">待整改</div></div></div>
+<div style="display:flex;gap:16px">
+<div class="card" style="flex:1"><div class="card-hd">隐患类型分布</div><div class="card-bd">
+${SCENES.slice(0,6).map(s=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><div style="width:12px;height:12px;border-radius:2px;background:${s.color}"></div><span style="font-size:12px">${s.name}</span><div style="flex:1;background:rgba(255,255,255,0.06);height:6px;border-radius:3px"><div style="width:${20+Math.random()*60}%;height:100%;background:${s.color};border-radius:3px"></div></div><span style="font-size:11px;color:var(--text-secondary)">${Math.floor(Math.random()*30+5)}处</span></div>`).join('')}
+</div></div>
+<div class="card" style="flex:1"><div class="card-hd">高频隐患项目 Top 5</div><div class="card-bd">
+${S.projects.slice(0,5).map((p,i)=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--glass-border)"><span>${i+1}. ${p.name}</span><span style="color:var(--danger);font-weight:600">${Math.floor(Math.random()*50+10)}处</span></div>`).join('')}
+</div></div></div>
+<div style="margin-top:12px"><button class="btn btn-outline">导出PDF</button> <button class="btn btn-outline" style="margin-left:8px">导出Excel</button></div>
+</div></div>`;
+}
+
+function renderFeedback() {
+  return `
+<div class="stats-grid"><div class="stat-card"><div class="sc-val" style="color:var(--success)">${S.feedbackItems.filter(f=>f.status==='success').length}</div><div class="sc-lbl">回传成功</div></div>
+<div class="stat-card"><div class="sc-val" style="color:var(--warning)">${S.feedbackItems.filter(f=>f.status==='pending').length}</div><div class="sc-lbl">待回传</div></div>
+<div class="stat-card"><div class="sc-val" style="color:var(--danger)">${S.feedbackItems.filter(f=>f.status==='failed').length}</div><div class="sc-lbl">回传失败</div></div>
+<div class="stat-card"><div class="sc-val">${S.feedbackItems.length}</div><div class="sc-lbl">总计</div></div></div>
+<div class="card"><div class="card-hd">回传队列</div><div class="card-bd">
+<table><thead><tr><th>ID</th><th>项目</th><th>隐患类型</th><th>时间</th><th>重试次数</th><th>状态</th><th>操作</th></tr></thead><tbody>
+${S.feedbackItems.map(f=>`
+<tr><td>#${f.id}</td><td>${f.project}</td><td>${f.danger}</td><td>${f.time}</td><td>${f.retries}</td>
+<td><span class="tag ${f.status==='success'?'tag-s':f.status==='failed'?'tag-d':'tag-w'}">${f.status==='success'?'已回传':f.status==='failed'?'回传失败':'待回传'}</span></td>
+<td>${f.status==='failed'?`<button class="btn btn-sm btn-warning" onclick="toast('已触发手动重试','i')">重试</button> <button class="btn btn-sm btn-outline" onclick="toast('已放弃回传','w')">放弃</button>`:f.status==='pending'?`<button class="btn btn-sm btn-primary" onclick="toast('已触发手动回传','i')">手动回传</button>`:'—'}</td></tr>
+`).join('')}
+</tbody></table></div></div>
+<div class="card"><div class="card-hd">死信队列 (需人工干预)</div><div class="card-bd"><p style="color:var(--text-secondary)">当前死信队列: <strong style="color:var(--danger)">2</strong> 条积压 | 定时重试: 每30分钟 | <button class="btn btn-sm btn-outline">手动全部重试</button></p></div></div>`;
+}
+
+function renderProjects() {
+  return `
+<div class="card"><div class="card-hd">项目管理 <button class="btn btn-sm btn-primary" onclick="toast('已触发一体化平台数据同步','i')">同步一体化平台</button></div><div class="card-bd">
+<table><thead><tr><th>编号</th><th>项目名称</th><th>摄像头数</th><th>状态</th><th>最后巡检</th><th>操作</th></tr></thead><tbody>
+${S.projects.map(p=>`<tr><td style="font-family:'Fira Code',monospace;font-size:12px">P-${String(p.id).padStart(4,'0')}</td><td>${p.name}</td><td>${p.cameras.length}</td>
+<td><span class="tag ${p.status==='active'?'tag-s':'tag-w'}">${p.status==='active'?'在建':'停工'}</span></td>
+<td>${fmtDate(new Date(2026,4,28-Math.floor(Math.random()*10)))}</td>
+<td><button class="btn btn-sm btn-outline">详情</button> <button class="btn btn-sm btn-warning">手动巡检</button></td></tr>`).join('')}
+</tbody></table></div></div>`;
+}
+
+function renderCameras() {
+  let camSceneMap = {};
+  S.cameras.forEach(c=>{ camSceneMap[c.id]=c.scenes; });
+  return `
+<div class="card"><div class="card-hd">摄像头管理</div><div class="card-bd">
+<table><thead><tr><th>PUID</th><th>所属项目</th><th>安装位置</th><th>状态</th><th>最后抓拍</th></tr></thead><tbody>
+${S.cameras.map(c=>`<tr><td style="font-family:'Fira Code',monospace;font-size:11px">${c.puid}</td><td>${c.projectName}</td><td>${c.name}</td>
+<td><span class="tag ${c.status==='online'?'tag-s':'tag-d'}">${c.status==='online'?'在线':'离线'}</span></td>
+<td>${c.status==='online'?fmtDate(new Date(2026,4,28))+' 0'+Math.floor(Math.random()*8+1)+':'+String(Math.floor(Math.random()*60)).padStart(2,'0'):'—'}</td></tr>`).join('')}
+</tbody></table></div></div>
+<div class="card"><div class="card-hd">摄像头 × 场景配置矩阵 <button class="btn btn-sm btn-primary" onclick="toast('配置已保存','s')">保存配置</button></div><div class="card-bd">
+<div class="cs-legend">${SCENES.slice(0,6).map(s=>`<span><span class="cs-dot" style="background:${s.color}"></span>${s.name}</span>`).join('')}</div>
+<div class="cs-matrix"><table><thead><tr><th>摄像头</th>${SCENES.map(s=>`<th style="font-size:10px"><span class="cs-dot" style="background:${s.color};display:inline-block;margin-right:2px"></span>${s.id}</th>`).join('')}<th style="font-size:10px">全选</th></tr></thead><tbody>
+${S.cameras.slice(0,6).map(c=>`<tr><td>${c.projectName} / ${c.name}</td>
+${SCENES.map(s=>`<td><input type="checkbox" ${camSceneMap[c.id]&&camSceneMap[c.id].includes(s.id)?'checked':''} onchange="let idx=this.closest('tr').rowIndex-1; toggleCamScene(${c.id},${s.id},this.checked)"></td>`).join('')}
+<td><input type="checkbox" checked onchange="let idx=this.closest('tr').rowIndex-1; toggleAllScenes(${c.id},this.checked)"></td></tr>`).join('')}
+</tbody></table></div><p style="font-size:11px;color:var(--text-muted);margin-top:8px">不同摄像头按视野覆盖范围启用对应的检测场景，节省GPU算力和VLM调用成本</p>
+</div></div>`;
+}
+
+function toggleCamScene(cid,sid,val){if(val){if(!S.cameras.find(c=>c.id===cid).scenes.includes(sid))S.cameras.find(c=>c.id===cid).scenes.push(sid)}else{S.cameras.find(c=>c.id===cid).scenes=S.cameras.find(c=>c.id===cid).scenes.filter(s=>s!==sid);}}
+function toggleAllScenes(cid,val){S.cameras.find(c=>c.id===cid).scenes=val?SCENES.map(s=>s.id):[];renderPage('cameras');}
+
+function roleBadge(role) {
+  return role==='reviewer'?'<span class="badge badge-vlm">复核员</span>':'<span class="tag tag-g">查看者</span>';
+}
+
+function renderUsers() {
+  return `
+<div class="card"><div class="card-hd">用户管理 <button class="btn btn-sm btn-primary" onclick="showUserModal()">+ 新增用户</button></div><div class="card-bd">
+<table><thead><tr><th>用户名</th><th>显示名</th><th>角色</th><th>绑定项目数</th><th>状态</th><th>最后登录</th><th>操作</th></tr></thead><tbody>
+${S.users.map(u=>`
+<tr><td>${u.username}</td><td>${u.displayName}</td><td>${roleBadge(u.role)}</td>
+<td>${(u.projectIds||[]).length}</td>
+<td><span class="tag ${u.status==='enabled'?'tag-s':'tag-d'}">${u.status==='enabled'?'启用':'禁用'}</span></td>
+<td>${u.lastLogin||'—'}</td>
+<td><button class="btn btn-sm btn-outline" onclick="showUserModal(${u.id})">编辑</button> <button class="btn btn-sm btn-danger" onclick="toggleUserStatus(${u.id})">${u.status==='enabled'?'禁用':'启用'}</button></td></tr>
+`).join('')}
+</tbody></table></div></div>`;
+}
+
+function showUserModal(editId) {
+  let u = editId ? S.users.find(x=>x.id===editId) : null;
+  let title = u ? '编辑用户' : '新增用户';
+  let projOpts = S.projects.map(p=>`<option value="${p.id}" ${u&&(u.projectIds||[]).includes(p.id)?'selected':''}>${p.name}</option>`).join('');
+  let html = `<h3>${title}</h3>
+<div class="fg"><label>用户名 <span style="color:var(--danger)">*</span></label><input id="muUser" value="${u?u.username:''}" placeholder="英文+数字+下划线，不可重复" ${u?'readonly':''}></div>
+<div class="fg"><label>密码 <span style="color:var(--danger)">${u?'':'*'}</span></label><input id="muPass" type="password" placeholder="${u?'留空则不修改密码':'长度≥8位，含大小写字母+数字'}"></div>
+<div class="fg"><label>显示名 <span style="color:var(--danger)">*</span></label><input id="muName" value="${u?u.displayName:''}" placeholder="中文姓名"></div>
+<div class="fg"><label>角色 <span style="color:var(--danger)">*</span></label><select id="muRole"><option value="reviewer" ${u&&u.role==='reviewer'?'selected':''}>复核员</option><option value="viewer" ${u&&u.role==='viewer'?'selected':''}>查看者</option></select></div>
+<div class="fg"><label>绑定项目 <span style="color:var(--danger)">*</span></label><select id="muProjects" multiple style="height:120px">${projOpts}</select><small style="color:var(--text-secondary)">按住Ctrl多选</small></div>
+<div class="fg"><label>状态</label><select id="muStatus"><option value="enabled" ${u&&u.status==='enabled'?'selected':''}>启用</option><option value="disabled" ${u&&u.status==='disabled'?'selected':''}>禁用</option></select></div>
+<div class="fg"><div style="color:var(--danger);font-size:11px;display:none" id="muError"></div></div>
+<div style="display:flex;gap:8px;justify-content:flex-end">
+<button class="btn btn-outline" onclick="closeModal()">取消</button>
+<button class="btn btn-primary" onclick="saveUser(${editId||0})">保存</button></div>`;
+  showModal(html);
+}
+
+function saveUser(editId) {
+  let username = document.getElementById('muUser')?.value.trim();
+  let password = document.getElementById('muPass')?.value;
+  let displayName = document.getElementById('muName')?.value.trim();
+  let role = document.getElementById('muRole')?.value;
+  let status = document.getElementById('muStatus')?.value;
+  let projSel = document.getElementById('muProjects');
+  let projectIds = [];
+  if(projSel){ for(let o of projSel.options){ if(o.selected) projectIds.push(parseInt(o.value)); } }
+
+  let err = document.getElementById('muError');
+  if(!username){ err.style.display='block'; err.textContent='请输入用户名'; return; }
+  if(!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(username)){ err.style.display='block'; err.textContent='用户名须以字母开头，仅含英文+数字+下划线'; return; }
+  if(!editId && !password){ err.style.display='block'; err.textContent='请输入密码'; return; }
+  if(password && (password.length<8||!/[a-z]/.test(password)||!/[A-Z]/.test(password)||!/[0-9]/.test(password))){ err.style.display='block'; err.textContent='密码长度≥8位，须包含大小写字母和数字'; return; }
+  if(!displayName){ err.style.display='block'; err.textContent='请输入显示名'; return; }
+  if(projectIds.length===0){ err.style.display='block'; err.textContent='请至少绑定1个项目'; return; }
+  if(!editId && S.users.find(x=>x.username===username)){ err.style.display='block'; err.textContent='用户名已存在'; return; }
+
+  err.style.display = 'none';
+  if(editId) {
+    let u = S.users.find(x=>x.id===editId);
+    if(u) {
+      if(password) u.password = password;
+      u.displayName = displayName;
+      u.role = role;
+      u.projectIds = projectIds;
+      u.status = status;
+    }
+    toast('用户信息已更新','s');
+  } else {
+    S.users.push({id:S.userIdCounter++, username, password:password||'', displayName, role, projectIds, status:'enabled', lastLogin:'—'});
+    toast('用户创建成功','s');
+  }
+  closeModal();
+  renderPage('users');
+}
+
+function toggleUserStatus(id) {
+  let u = S.users.find(x=>x.id===id);
+  if(!u) return;
+  let newStatus = u.status==='enabled'?'disabled':'enabled';
+  if(newStatus==='disabled'){
+    showModal(`<h3>确认禁用</h3><p style="color:var(--text-secondary)">确定要禁用用户 "${u.displayName}" 吗？禁用后该用户将无法登录。</p><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px"><button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-danger" onclick="closeModal();S.users.find(x=>x.id===${id}).status='disabled';renderPage('users');toast('已禁用用户 ${u.displayName}','w')">确认禁用</button></div>`);
+  } else {
+    u.status = 'enabled';
+    renderPage('users');
+    toast(`已启用用户 ${u.displayName}`,'s');
+  }
+}
+
+window.showUserModal = showUserModal;
+window.saveUser = saveUser;
+window.toggleUserStatus = toggleUserStatus;
+
+function renderModel() {
+  return `
+<div class="card"><div class="card-hd">模型参数配置</div><div class="card-bd">
+<div style="margin-bottom:16px"><label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-primary)">
+<input type="checkbox" checked style="width:16px;height:16px;accent-color:var(--primary)"> 启用 VLM 大模型复核 (Qwen3.6-27B via vLLM)
+</label></div>
+<table><thead><tr><th>场景</th><th>YOLO直接判定阈值</th><th style="width:180px">调节</th><th>VLM复核阈值</th><th style="width:180px">调节</th><th>模型版本</th></tr></thead><tbody>
+${SCENES.map(s=>`<tr>
+<td><span class="cs-dot" style="background:${s.color};display:inline-block;margin-right:4px"></span>${s.name}</td>
+<td style="font-weight:600">${s.id===1||s.id===7?'95':s.id===3?'85':'90'}%</td>
+<td><input type="range" min="70" max="99" value="${s.id===1||s.id===7?'95':s.id===3?'85':'90'}" style="width:100%;accent-color:var(--primary)"></td>
+<td style="font-weight:600">${s.id===7?'65':s.id===3?'70':'75'}%</td>
+<td><input type="range" min="50" max="90" value="${s.id===7?'65':s.id===3?'70':'75'}" style="width:100%;accent-color:var(--primary)"></td>
+<td style="font-family:'Fira Code',monospace;font-size:11px">YOLO26s-v1.2</td>
+</tr>`).join('')}
+</tbody></table>
+<div style="margin-top:12px"><button class="btn btn-primary" onclick="toast('模型配置已保存','s')">保存配置</button></div>
+<p style="font-size:11px;color:var(--text-muted);margin-top:8px">不同场景的AI模型表现不同，允许为每个场景设置独立的判定阈值和VLM调用策略</p>
+</div></div>`;
+}
+
+function renderPerm() {
+  return `
+<div class="card"><div class="card-hd">角色权限矩阵</div><div class="card-bd">
+<table class="perm-matrix"><thead><tr><th>模块</th><th>管理员</th><th>复核员</th><th>查看者</th></tr></thead><tbody>
+<tr><td>工作台总览</td><td><span class="perm-check">✓ 管理</span></td><td><span class="perm-check">✓ 查看</span></td><td><span class="perm-check">✓ 查看</span></td></tr>
+<tr><td>人工复核 — 查看</td><td><span class="perm-check">✓</span></td><td><span class="perm-check">✓</span></td><td><span class="perm-check">✓</span></td></tr>
+<tr><td>人工复核 — 确认/排除/重采</td><td><span class="perm-check">✓</span></td><td><span class="perm-check">✓</span></td><td><span class="perm-cross">✗</span></td></tr>
+<tr><td>人工复核 — 编辑标注框</td><td><span class="perm-check">✓</span></td><td><span class="perm-check">✓</span></td><td><span class="perm-cross">✗</span></td></tr>
+<tr><td>任务管理</td><td><span class="perm-check">✓ 管理</span></td><td><span class="perm-check">✓ 查看</span></td><td><span class="perm-check">✓ 查看</span></td></tr>
+<tr><td>巡检报告</td><td><span class="perm-check">✓ 全部</span></td><td><span class="perm-check">✓ 绑定项目</span></td><td><span class="perm-check">✓ 绑定项目</span></td></tr>
+<tr><td>结果回传</td><td><span class="perm-check">✓ 管理</span></td><td><span class="perm-cross">✗</span></td><td><span class="perm-cross">✗</span></td></tr>
+<tr><td>项目管理</td><td><span class="perm-check">✓ 管理</span></td><td><span class="perm-cross">✗</span></td><td><span class="perm-cross">✗</span></td></tr>
+<tr><td>摄像头配置</td><td><span class="perm-check">✓ 管理</span></td><td><span class="perm-cross">✗</span></td><td><span class="perm-cross">✗</span></td></tr>
+<tr><td>用户管理</td><td><span class="perm-check">✓ 管理</span></td><td><span class="perm-cross">✗</span></td><td><span class="perm-cross">✗</span></td></tr>
+<tr><td>模型参数</td><td><span class="perm-check">✓ 管理</span></td><td><span class="perm-cross">✗</span></td><td><span class="perm-cross">✗</span></td></tr>
+</tbody></table>
+<p style="font-size:11px;color:var(--text-muted);margin-top:8px">RBAC权限模型，管理员拥有所有权限，复核员仅可操作绑定项目的复核功能</p>
+</div></div>`;
+}
+
+function renderLogs() {
+  return `
+<div class="card"><div class="card-hd">系统操作日志</div><div class="card-bd">
+<div class="filters"><input placeholder="搜索..."><select><option>全部操作</option><option>登录</option><option>复核</option><option>配置</option></select></div>
+<table><thead><tr><th>时间</th><th>用户</th><th>操作</th><th>目标</th><th>IP地址</th></tr></thead><tbody>
+${S.logs.map(l=>`<tr><td>${l.time}</td><td>${l.user}</td><td>${l.action}</td><td>${l.target}</td><td style="font-family:'Fira Code',monospace;font-size:11px">${l.ip}</td></tr>`).join('')}
+</tbody></table></div></div>`;
+}
+
+// ====== REVIEW WORKBENCH ======
+function openReviewFromEntry() {
+  let dateTasks = getReviewDateTasks();
+  S.reviewTasks = dateTasks;
+  S.reviewTaskIdx = 0;
+  let pending = dateTasks.filter(t=>t.status==='pending_review');
+  if(pending.length===0){toast('所选日期没有待复核任务','w');return;}
+  openReview(pending[0].id);
+}
+
+function openReview(taskId) {
+  let task = S.tasks.find(t=>t.id===taskId);
+  if(task && task.batchId) {
+    let batch = S.batches.find(b=>b.id===task.batchId);
+    if(batch) S.reviewDate = batch.date;
+  }
+  let dateTasks = getReviewDateTasks();
+  S.reviewTasks = dateTasks;
+  let idx = S.reviewTasks.findIndex(t=>t.id===taskId);
+  if(idx<0) idx=0;
+  S.reviewTaskIdx = idx;
+  S.editMode = false;
+  S.reviewZoom = 1;
+  S.reviewOffX = 0; S.reviewOffY = 0;
+  S.selectedBox = -1;
+  S.undoStack = [];
+  S.reviewOpen = true;
+  document.getElementById('reviewPage').classList.add('show');
+  document.getElementById('btnEditMode').classList.remove('active');
+  document.getElementById('editToolbar').classList.remove('show');
+  updateReviewUI();
+  drawCanvas();
+}
+
+function closeReview() {
+  S.reviewOpen = false;
+  document.getElementById('reviewPage').classList.remove('show');
+  renderPage(S.page);
+}
+
+function updateReviewUI() {
+  let t = S.reviewTasks[S.reviewTaskIdx];
+  if(!t) return;
+  document.getElementById('rtTitle').textContent = t.projectName + ' — ' + t.cameraName;
+  let batch = S.batches.find(b=>b.id===t.batchId);
+  document.getElementById('rtBatch').textContent = batch ? batch.date+' '+batch.ampm : '';
+  document.getElementById('rtIdx').textContent = S.reviewTaskIdx + 1;
+  document.getElementById('rtTotal').textContent = S.reviewTasks.length;
+  document.getElementById('rrProject').textContent = t.projectName;
+  document.getElementById('rrCamera').textContent = t.cameraName;
+  document.getElementById('rrPUID').textContent = t.puid||'—';
+  document.getElementById('rrTime').textContent = t.time||'—';
+  document.getElementById('rrActions').style.display = (S.user==='viewer')?'none':'flex';
+  document.getElementById('btnEditMode').style.display = (S.user==='viewer')?'none':'inline-flex';
+
+  document.getElementById('rrDetections').innerHTML = t.detections.length===0
+    ? '<div style="color:var(--text-muted);font-size:12px;padding:8px">无AI检测结果（此任务可能无需复核）</div>'
+    : t.detections.map((d,i)=>`
+        <div class="rr-detection${S.selectedBox===i?' sel':''}" onclick="selectBox(${i})" style="border-left-color:${d.color}">
+        <button class="rr-del-btn" onclick="event.stopPropagation();deleteDetection(${i})" title="删除此标注">✕</button>
+        <div class="rr-d-top"><span class="rr-d-cls" style="color:${d.color}">${d.sceneName}</span>
+        <span class="badge badge-${d.source==='YOLO'?'yolo':d.source==='YOLO+VLM'?'vlm':'human'}">${d.source}</span></div>
+        <div class="rr-d-conf">置信度: ${(d.confidence*100).toFixed(0)}%</div>
+        <div class="rr-d-field"><div class="rr-d-label">隐患描述</div>
+        <textarea class="rr-d-value" rows="2" onclick="event.stopPropagation()" onchange="updateDetectionField(${i},'description',this.value)">${d.description||''}</textarea></div>
+        <div class="rr-d-field"><div class="rr-d-label">整改建议</div>
+        <textarea class="rr-d-value" rows="2" onclick="event.stopPropagation()" onchange="updateDetectionField(${i},'suggestion',this.value)">${d.suggestion||''}</textarea></div>
+        ${d.status==='human_new'?'<span class="badge badge-human" style="margin-top:3px">人工新增</span>':''}
+        ${d.status==='human_modified'?'<span class="badge badge-human" style="margin-top:3px">人工修改</span>':''}
+        </div>`).join('');
+  updateReviewTaskList();
+  updateReviewStats();
+}
+
+function updateReviewTaskList() {
+  let list = document.getElementById('rlList');
+  let sceneSel = document.getElementById('rlScene');
+  if(!S._scenePopulated){ sceneSel.innerHTML='<option value="">全部场景</option>'+SCENES.map(s=>`<option value="${s.id}">${s.name}</option>`).join(''); S._scenePopulated=true; }
+  list.innerHTML = S.reviewTasks.map((t,i)=>`<div class="rl-item${i===S.reviewTaskIdx?' active':''}" onclick="navigateReview(${i})">
+<div class="rl-name">${t.projectName}</div><div class="rl-cam">${t.cameraName}</div>
+<div class="rl-meta"><span class="rl-count">${t.dangerCount}</span>
+<span class="tag ${t.status==='completed'?'tag-s':t.status==='excluded'?'tag-g':'tag-w'}">${t.status==='completed'?'已完成':t.status==='excluded'?'已排除':'待复核'}</span></div></div>`).join('');
+}
+
+function navigateReview(idx) {
+  if(idx<0||idx>=S.reviewTasks.length) return;
+  S.reviewTaskIdx = idx;
+  S.editMode = false;
+  S.selectedBox = -1;
+  S.undoStack = [];
+  document.getElementById('btnEditMode').classList.remove('active');
+  document.getElementById('editToolbar').classList.remove('show');
+  updateReviewUI();
+  drawCanvas();
+}
+
+function updateReviewStats() {
+  let pending = S.reviewTasks.filter(t=>t.status==='pending_review').length;
+  let completed = S.reviewTasks.filter(t=>t.status==='completed').length;
+  document.getElementById('rtPending').textContent = pending;
+  let ft = document.getElementById('rlFooter');
+  let dateLabel = S.reviewDate||S.batches[0].date;
+  if(ft) ft.textContent = `${dateLabel} | 待复核 ${pending} / 已完成 ${completed}`;
+}
+
+function filterReviewTasks() {
+  let q = (document.getElementById('rlSearch')?.value||'').toLowerCase();
+  let sc = document.getElementById('rlScene')?.value||'';
+  let st = document.getElementById('rlStatus')?.value||'';
+  let dateBatches = getReviewDateBatches();
+  let batchIds = dateBatches.map(b=>b.id);
+  let filtered = S.tasks.filter(t=>{
+    if(!batchIds.includes(t.batchId)) return false;
+    if(q && !t.projectName.toLowerCase().includes(q)) return false;
+    if(sc && !t.detections.some(d=>d.sceneId==parseInt(sc))) return false;
+    if(st && t.status!==st) return false;
+    return t.status==='pending_review'||t.status==='completed'||t.status==='excluded';
+  });
+  S.reviewTasks = filtered;
+  S.reviewTaskIdx = Math.min(S.reviewTaskIdx, S.reviewTasks.length-1);
+  if(S.reviewTaskIdx<0) S.reviewTaskIdx=0;
+  updateReviewUI();
+  drawCanvas();
+}
+window.filterReviewTasks = filterReviewTasks;
+
+// ====== CANVAS RENDERING ======
+function drawCanvas() {
+  let canvas = document.getElementById('reviewCanvas');
+  let area = document.getElementById('reviewCanvasArea');
+  canvas.width = area.clientWidth;
+  canvas.height = area.clientHeight;
+  let ctx = canvas.getContext('2d');
+  let w = canvas.width, h = canvas.height;
+
+  let imgW = 960, imgH = 540;
+  let scale = S.reviewZoom;
+  let ox = S.reviewOffX + w/2 - imgW*scale/2;
+  let oy = S.reviewOffY + h/2 - imgH*scale/2;
+
+  // Sky
+  ctx.fillStyle = '#1a2332'; ctx.fillRect(ox, oy, imgW*scale, imgH*scale);
+  // Ground
+  ctx.fillStyle = '#2d2416'; ctx.fillRect(ox, oy+imgH*scale*0.7, imgW*scale, imgH*scale*0.3);
+  // Buildings
+  ctx.fillStyle = '#3d3d4a'; ctx.fillRect(ox+imgW*scale*0.6, oy+imgH*scale*0.2, imgW*scale*0.25, imgH*scale*0.5);
+  ctx.fillStyle = '#4a4a55'; ctx.fillRect(ox+imgW*scale*0.15, oy+imgH*scale*0.3, imgW*scale*0.2, imgH*scale*0.4);
+  // Scaffolding
+  ctx.strokeStyle = '#555'; ctx.lineWidth = 1;
+  for(let i=0;i<8;i++){ctx.beginPath();ctx.moveTo(ox+imgW*scale*0.62+i*imgW*scale*0.03,oy+imgH*scale*0.2);ctx.lineTo(ox+imgW*scale*0.62+i*imgW*scale*0.03,oy+imgH*scale*0.7);ctx.stroke();}
+  // Excavation pit
+  ctx.fillStyle = '#3d2e1e'; ctx.beginPath(); ctx.moveTo(ox+imgW*scale*0.35, oy+imgH*scale*0.7); ctx.lineTo(ox+imgW*scale*0.55, oy+imgH*scale*0.7); ctx.lineTo(ox+imgW*scale*0.5, oy+imgH*scale*0.85); ctx.lineTo(ox+imgW*scale*0.3, oy+imgH*scale*0.85); ctx.closePath(); ctx.fill();
+  // Material pile
+  ctx.fillStyle = '#5a4a38'; ctx.fillRect(ox+imgW*scale*0.75, oy+imgH*scale*0.55, imgW*scale*0.08, imgH*scale*0.15);
+  // Stick figure people
+  for(let i=0;i<4;i++) {
+    let px = ox + imgW*scale*(0.1+i*0.15), py = oy + imgH*scale*0.6;
+    ctx.fillStyle = '#ccc'; ctx.beginPath(); ctx.arc(px,py-imgH*scale*0.04,imgH*scale*0.02,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(px,py-imgH*scale*0.02); ctx.lineTo(px,py+imgH*scale*0.04); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(px,py+imgH*scale*0.01); ctx.lineTo(px-imgW*scale*0.015,py+imgH*scale*0.03); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(px,py+imgH*scale*0.01); ctx.lineTo(px+imgW*scale*0.015,py+imgH*scale*0.03); ctx.stroke();
+  }
+
+  // Draw detection boxes
+  let t = S.reviewTasks[S.reviewTaskIdx];
+  if(t && t.detections) {
+    t.detections.forEach((d,i)=>{
+      let bx = ox + d.bbox.x*imgW*scale;
+      let by = oy + d.bbox.y*imgH*scale;
+      let bw = d.bbox.w*imgW*scale;
+      let bh = d.bbox.h*imgH*scale;
+      let isSel = S.selectedBox===i;
+      let isModified = d.status==='human_new'||d.status==='human_modified';
+
+      ctx.strokeStyle = d.color;
+      ctx.lineWidth = isSel?3:(isModified?2:2);
+      ctx.setLineDash(isModified?[6,3]:[]);
+      ctx.strokeRect(bx, by, bw, bh);
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = isModified?'rgba(249,115,22,0.15)':'rgba(255,255,255,0.03)';
+      ctx.fillRect(bx,by,bw,bh);
+
+      // Label
+      let label = `${d.sceneName} ${(d.confidence*100).toFixed(0)}%`;
+      let srcLabel = d.source||'YOLO';
+      if(d.status==='human_new') srcLabel='人工';
+      if(d.status==='human_modified') srcLabel='人工修改';
+      ctx.font = '10px "Fira Sans",sans-serif';
+      let lw = ctx.measureText(label).width+8;
+      ctx.fillStyle = d.color; ctx.fillRect(bx, by-18, lw, 16);
+      ctx.fillStyle = '#fff'; ctx.fillText(label, bx+4, by-5);
+
+      // Source badge
+      let sw = ctx.measureText(srcLabel).width+6;
+      ctx.fillStyle = srcLabel==='YOLO'?'#6b7280':srcLabel==='YOLO+VLM'?'#3b82f6':'#f97316';
+      ctx.fillRect(bx+lw+2, by-18, sw, 16);
+      ctx.fillStyle = '#fff'; ctx.fillText(srcLabel, bx+lw+5, by-5);
+
+      // Handles when selected
+      if(isSel && S.editMode) {
+        ctx.fillStyle='#fff';ctx.strokeStyle='#3B82F6';ctx.lineWidth=1;
+        [[bx,by],[bx+bw,by],[bx,by+bh],[bx+bw,by+bh],
+         [bx+bw/2,by],[bx+bw/2,by+bh],[bx,by+bh/2],[bx+bw,by+bh/2]].forEach(([hx,hy])=>{
+          ctx.fillRect(hx-4,hy-4,8,8);ctx.strokeRect(hx-4,hy-4,8,8);
+        });
+      }
+    });
+  }
+}
+
+// ====== REVIEW INTERACTIONS ======
+function selectBox(idx) {
+  S.selectedBox = S.selectedBox===idx?-1:idx;
+  updateReviewUI();
+  drawCanvas();
+}
+
+function deleteDetection(idx) {
+  let t = S.reviewTasks[S.reviewTaskIdx];
+  if(!t) return;
+  S.undoStack.push({idx:idx, data:JSON.parse(JSON.stringify(t.detections[idx]))});
+  let deleted = t.detections.splice(idx, 1)[0];
+  if(S.selectedBox>=t.detections.length) S.selectedBox = t.detections.length-1;
+  if(t.detections.length===0) S.selectedBox=-1;
+  updateReviewUI();
+  drawCanvas();
+  toast(`已删除标注: ${deleted.sceneName}`,'i');
+}
+window.deleteDetection = deleteDetection;
+
+function updateDetectionField(idx, field, value) {
+  let t = S.reviewTasks[S.reviewTaskIdx];
+  if(!t||!t.detections[idx]) return;
+  t.detections[idx][field] = value;
+  if(t.detections[idx].status==='ai') t.detections[idx].status = 'human_modified';
+  toast(field==='description'?'隐患描述已更新':'整改建议已更新', 's');
+}
+window.updateDetectionField = updateDetectionField;
+
+function doReview(action) {
+  let t = S.reviewTasks[S.reviewTaskIdx];
+  if(!t) return;
+  switch(action) {
+    case 'confirm':
+      t.status = 'completed';
+      t.reviewHistory = t.reviewHistory||[];
+      t.reviewHistory.push({action:'confirm', time:new Date().toLocaleString(), user:S.user});
+      toast('已确认隐患，任务完成','s');
+      break;
+    case 'reject':
+      t.status = 'excluded';
+      t.reviewHistory = t.reviewHistory||[];
+      t.reviewHistory.push({action:'exclude', time:new Date().toLocaleString(), user:S.user});
+      toast('已排除误报，样本入难例库','w');
+      break;
+    case 'recapture':
+      toast('已触发重新抓拍，请稍后复核','i');
+      break;
+    case 'desc':
+      toast('描述修改功能（原型演示）','i');
+      break;
+  }
+  updateReviewUI();
+  updateReviewStats();
+  if(S.autoNext && (action==='confirm'||action==='reject')) {
+    if(S.reviewTaskIdx < S.reviewTasks.length-1) {
+      setTimeout(()=>{ S.reviewTaskIdx++; S.selectedBox=-1; S.editMode=false; updateReviewUI(); drawCanvas(); }, 300);
+    } else {
+      setTimeout(()=>{ toast('所有任务已完成！','s'); }, 300);
+    }
+  }
+}
+window.doReview = doReview;
+
+function toggleEditMode() {
+  if(S.user==='viewer'){toast('查看者无编辑权限','w');return;}
+  S.editMode = !S.editMode;
+  S.selectedBox = S.editMode?0:-1;
+  document.getElementById('btnEditMode').classList.toggle('active', S.editMode);
+  let et = document.getElementById('editToolbar');
+  et.classList.toggle('show', S.editMode);
+  if(S.editMode) {
+    et.innerHTML = '<span style="color:var(--text-muted);font-size:10px;padding:4px">类别:</span>' +
+      SCENES.map((s,i)=>`<button class="${S.editScene===s.id?'sel':''}" onclick="S.editScene=${s.id};toggleEditMode();toggleEditMode();drawCanvas();document.getElementById('editToolbar').querySelectorAll('button').forEach(b=>b.classList.toggle('sel',b.textContent.includes('${s.name}')));">${i+1}.${s.name.substring(0,4)}</button>`).join('') +
+      '<span style="margin-left:8px">|</span><button onclick="if(S.selectedBox>=0){let t=S.reviewTasks[S.reviewTaskIdx];if(t){S.undoStack.push({idx:S.selectedBox,data:JSON.parse(JSON.stringify(t.detections[S.selectedBox]))});t.detections.splice(S.selectedBox,1);S.selectedBox=-1;updateReviewUI();drawCanvas();toast(\'已删除标注框\',\'i\');}}">删除</button>' +
+      '<button onclick="undoEdit()">撤销('+S.undoStack.length+')</button>' +
+      '<button onclick="saveEdits()">保存修改</button>' +
+      '<button onclick="toggleEditMode()">退出</button>';
+  }
+  updateReviewUI();
+  drawCanvas();
+}
+
+function saveEdits() {
+  let t = S.reviewTasks[S.reviewTaskIdx];
+  if(t) {
+    t.detections.forEach(d=>{if(d.status==='human_new'||d.status==='human_modified'){d.status='human_modified';}});
+  }
+  S.undoStack = [];
+  toast('标注修改已保存','s');
+}
+
+function undoEdit() {
+  if(S.undoStack.length===0){toast('无可撤销操作','w');return;}
+  let op = S.undoStack.pop();
+  let t = S.reviewTasks[S.reviewTaskIdx];
+  if(t){t.detections.splice(op.idx,0,op.data);}
+  updateReviewUI(); drawCanvas();
+  toast('已撤销','i');
+}
+window.undoEdit = undoEdit;
+
+function reviewZoom(delta) {
+  S.reviewZoom = Math.max(0.3, Math.min(3, S.reviewZoom+delta));
+  drawCanvas();
+}
+function reviewFit() { S.reviewZoom=1; S.reviewOffX=0; S.reviewOffY=0; drawCanvas(); }
+function reviewRatio(r) { S.reviewZoom=r; S.reviewOffX=0; S.reviewOffY=0; drawCanvas(); }
+
+// ====== CANVAS EVENTS ======
+document.addEventListener('DOMContentLoaded',()=>{
+  initMockData();
+  document.getElementById('reviewCanvas').addEventListener('wheel',(e)=>{
+    if(!S.reviewOpen) return;
+    e.preventDefault();
+    let delta = e.deltaY>0?-0.08:0.08;
+    reviewZoom(delta);
+  });
+  document.getElementById('reviewCanvas').addEventListener('mousedown',(e)=>{
+    if(!S.reviewOpen) return;
+    if(e.button===2||(e.altKey&&e.button===0)){S.isPanning=true;S.panStart={x:e.clientX-S.reviewOffX,y:e.clientY-S.reviewOffY};return;}
+    if(!S.editMode) return;
+    let canvas = document.getElementById('reviewCanvas');
+    let rect = canvas.getBoundingClientRect();
+    S.isDrawing = true;
+    S.drawStart = {x:(e.clientX-rect.left)/canvas.width,y:(e.clientY-rect.top)/canvas.height};
+  });
+  document.getElementById('reviewCanvas').addEventListener('mousemove',(e)=>{
+    if(!S.reviewOpen) return;
+    if(S.isPanning){S.reviewOffX=e.clientX-S.panStart.x;S.reviewOffY=e.clientY-S.panStart.y;drawCanvas();return;}
+    if(!S.isDrawing) return;
+    let canvas = document.getElementById('reviewCanvas');
+    let rect = canvas.getBoundingClientRect();
+    let mx=(e.clientX-rect.left)/canvas.width,my=(e.clientY-rect.top)/canvas.height;
+    drawCanvas();
+    let ctx=canvas.getContext('2d');
+    ctx.strokeStyle='#f97316';ctx.lineWidth=2;ctx.setLineDash([6,3]);
+    ctx.strokeRect(S.drawStart.x*canvas.width,S.drawStart.y*canvas.height,(mx-S.drawStart.x)*canvas.width,(my-S.drawStart.y)*canvas.height);
+    ctx.setLineDash([]);
+  });
+  document.getElementById('reviewCanvas').addEventListener('mouseup',(e)=>{
+    if(S.isPanning){S.isPanning=false;return;}
+    if(!S.isDrawing) return;
+    S.isDrawing=false;
+    let canvas=document.getElementById('reviewCanvas');
+    let rect=canvas.getBoundingClientRect();
+    let mx=(e.clientX-rect.left)/canvas.width,my=(e.clientY-rect.top)/canvas.height;
+    let area=canvas.width*canvas.height;
+    let w=Math.abs((mx-S.drawStart.x)*canvas.width),h=Math.abs((my-S.drawStart.y)*canvas.height);
+    if(w*h<area*0.001) return;
+    let nx=Math.min(S.drawStart.x*canvas.width,(mx)*canvas.width)/canvas.width;
+    let ny=Math.min(S.drawStart.y*canvas.height,(my)*canvas.height)/canvas.height;
+    let nw=w/canvas.width,nh=h/canvas.height;
+    let sc=SCENES.find(s=>s.id===S.editScene)||SCENES[0];
+    let t=S.reviewTasks[S.reviewTaskIdx];
+    if(t){
+      t.detections.push({id:t.detections.length,sceneId:sc.id,sceneName:sc.name,color:sc.color,bbox:{x:nx,y:ny,w:nw,h:nh},confidence:1.0,source:'human',description:'人工新增标注',suggestion:'请填写整改建议',status:'human_new'});
+      S.selectedBox=t.detections.length-1;
+      updateReviewUI();drawCanvas();toast('已添加新标注框','s');
+    }
+  });
+  document.getElementById('reviewCanvas').addEventListener('contextmenu',(e)=>e.preventDefault());
+});
+
+// ====== KEYBOARD ======
+document.addEventListener('keydown',(e)=>{
+  if(!S.reviewOpen) return;
+  if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'||e.target.tagName==='TEXTAREA') return;
+  if(e.key==='Enter'&&!S.editMode){e.preventDefault();doReview('confirm');}
+  else if(e.key==='Escape'&&!S.editMode){e.preventDefault();doReview('reject');}
+  else if(e.key==='Delete'&&S.editMode&&S.selectedBox>=0){e.preventDefault();
+    let t=S.reviewTasks[S.reviewTaskIdx];if(t){S.undoStack.push({idx:S.selectedBox,data:JSON.parse(JSON.stringify(t.detections[S.selectedBox]))});t.detections.splice(S.selectedBox,1);S.selectedBox=-1;updateReviewUI();drawCanvas();toast('已删除标注框','i');}}
+  else if(e.ctrlKey&&e.key==='z'&&S.editMode){e.preventDefault();undoEdit();}
+  else if(e.key>='1'&&e.key<='9'&&S.editMode){e.preventDefault();let id=parseInt(e.key);let sc=SCENES.find(s=>s.id===id);if(sc){S.editScene=id;toast(`已选择: ${sc.name}`,'i');}}
+  else if(e.key==='ArrowRight'&&!S.editMode){e.preventDefault();if(S.reviewTaskIdx<S.reviewTasks.length-1){S.reviewTaskIdx++;S.selectedBox=-1;updateReviewUI();drawCanvas();}}
+  else if(e.key==='ArrowLeft'&&!S.editMode){e.preventDefault();if(S.reviewTaskIdx>0){S.reviewTaskIdx--;S.selectedBox=-1;updateReviewUI();drawCanvas();}}
+  else if(e.key==='?'){e.preventDefault();toast('快捷键: Enter确认 Esc排除 1-9选类别 Delete删框 Ctrl+Z撤销 ←→翻页 滚轮缩放','i');}
+});
+
+// ====== AUTH ======
+function doLogin() {
+  let u = document.getElementById('loginUser').value;
+  let role = document.getElementById('loginRole').value;
+  if(!u){toast('请输入用户名','w');return;}
+  S.user = role;
+  document.getElementById('loginPg').style.display = 'none';
+  document.getElementById('appShell').classList.add('show');
+  document.getElementById('topAvatar').textContent = u[0].toUpperCase();
+  document.getElementById('topName').textContent = u;
+  navTo('dashboard');
+  toast(`欢迎，${u} (${role==='reviewer'?'复核员':'查看者'})`,'s');
+}
+
+function doLogout() {
+  S.user = null;
+  document.getElementById('appShell').classList.remove('show');
+  document.getElementById('loginPg').style.display = 'flex';
+  toast('已退出登录','i');
+}
+
+// ====== GLOBAL ======
+function toast(msg,type) {
+  let c = document.getElementById('toastCtn');
+  let t = document.createElement('div');
+  t.className = 'toast toast-'+(type||'i');
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(()=>{t.remove();},2200);
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('.nav-sub-item').forEach(el=>{
+    el.addEventListener('click',()=>{navTo(el.dataset.page);});
+  });
+  initMockData();
+  updateReviewStats();
+});
+</script>
+</body>
+</html>
