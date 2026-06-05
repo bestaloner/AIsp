@@ -1,0 +1,3071 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI巡检模块 · 项目监管系统 · 一体化平台</title>
+<style>
+/* ====== V3.1 Design System: Enterprise White Theme ====== */
+/* Fonts: system stack, no external dependencies */
+
+:root {
+  /* Layout */
+  --platform-header-h: 48px;
+  --sidebar-w: 240px;
+  --footer-h: 36px;
+
+  /* Primary palette */
+  --color-header-bg: #2E41CD;
+  --color-sidebar-bg: #22369A;
+  --color-sidebar-active: #F57A00;
+  --color-tab-active: #009CFF;
+  --color-content-bg: #F0F2F5;
+  --color-card-bg: #FFFFFF;
+  --color-table-header: #1A2D99;
+
+  /* Text */
+  --text-primary: #262626;
+  --text-secondary: #8C8C8C;
+  --text-white: #FFFFFF;
+
+  /* Borders */
+  --border-color: #D9D9D9;
+  --border-light: #E8E8E8;
+
+  /* Radii */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+
+  /* Shadows */
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-modal: 0 4px 24px rgba(0,0,0,0.15);
+
+  /* Functional colors */
+  --blue-primary: #2E41CD;
+  --blue-light: #009CFF;
+  --orange: #F57A00;
+  --green: #52C41A;
+  --red: #E2091C;
+  --cyan: #06B6D4;
+  --purple: #8B5CF6;
+  --warning: #F59E0B;
+
+  /* Scene colors */
+  --c1: #F87171; --c2: #FB923C; --c3: #FACC15; --c4: #4ADE80;
+  --c5: #60A5FA; --c6: #A78BFA; --c7: #F87171; --c8: #FBBF24;
+  --c9: #34D399; --c10: #818CF8; --c11: #9CA3AF; --c12: #6B7280;
+
+  /* Transition */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 150ms var(--ease);
+  --transition-normal: 250ms var(--ease);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 14px; }
+body {
+  font-family: 'Microsoft YaHei', 'PingFang SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--text-primary);
+  background: var(--color-content-bg);
+  line-height: 1.6;
+  height: 100vh;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ====== LOGIN PAGE ====== */
+.login-pg {
+  display: flex;
+  height: 100vh;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #E8EDF5 0%, #F0F2F5 50%, #E3E8F0 100%);
+  position: relative;
+}
+.login-pg::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 320px;
+  background: linear-gradient(180deg, #2E41CD 0%, #22369A 100%);
+}
+.login-card-wrap {
+  position: relative;
+  z-index: 1;
+  width: 420px;
+}
+.login-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 44px 40px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+}
+.login-card h2 {
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 6px;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+.login-card .subtitle {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-bottom: 24px;
+}
+.login-card .fg { margin-bottom: 16px; }
+.login-card .fg label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+}
+.login-card .fg input,
+.login-card .fg select {
+  width: 100%;
+  height: 42px;
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0 14px;
+  font-size: 14px;
+  color: var(--text-primary);
+  outline: none;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+}
+.login-card .fg input::placeholder { color: #BFBFBF; }
+.login-card .fg input:focus,
+.login-card .fg select:focus {
+  border-color: var(--blue-primary);
+  box-shadow: 0 0 0 2px rgba(46,65,205,0.15);
+}
+.login-card .fg select { cursor: pointer; }
+.login-card .login-btn {
+  width: 100%;
+  height: 44px;
+  background: var(--blue-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all var(--transition-fast);
+  letter-spacing: 0.3px;
+}
+.login-card .login-btn:hover {
+  background: #2539B5;
+  box-shadow: 0 2px 8px rgba(46,65,205,0.3);
+}
+.login-card .hint {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 16px;
+  line-height: 1.6;
+}
+
+/* ====== PLATFORM SHELL ====== */
+.app { display: none; height: 100vh; flex-direction: column; }
+.app.show { display: flex; }
+
+/* Level 1: Platform Header */
+.platform-header {
+  height: 48px;
+  min-height: 48px;
+  max-height: 48px;
+  background: var(--color-header-bg);
+  color: var(--text-white);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+.platform-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.platform-logo {
+  width: 28px; height: 28px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+.platform-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 12px;
+}
+.platform-notif {
+  position: relative;
+  cursor: pointer;
+  font-size: 18px;
+  opacity: 0.85;
+  transition: opacity var(--transition-fast);
+}
+.platform-notif:hover { opacity: 1; }
+.platform-notif .dot {
+  position: absolute;
+  top: -2px; right: -2px;
+  width: 8px; height: 8px;
+  background: var(--red);
+  border-radius: 50%;
+  border: 2px solid var(--color-header-bg);
+}
+.platform-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.platform-avatar {
+  width: 30px; height: 30px;
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Level 1: Subsystem Dropdown (in header) */
+.subsystem-dropdown {
+  margin-left: 24px;
+  position: relative;
+}
+.subsystem-current {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.9;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all var(--transition-fast);
+}
+.subsystem-current:hover { background: rgba(255,255,255,0.1); }
+.subsystem-arrow { font-size: 8px; opacity: 0.6; }
+
+/* Level 2+3: Body */
+.platform-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Left Sidebar */
+.platform-sidebar {
+  width: 240px;
+  min-width: 240px;
+  max-width: 240px;
+  background: var(--color-sidebar-bg);
+  color: var(--text-white);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow-y: auto;
+}
+.sidebar-system-title {
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  opacity: 0.9;
+}
+.menu-tree { flex: 1; padding: 2px 0; }
+.menu-group { margin: 0; }
+.menu-group-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0.75;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+.menu-group-title:hover { opacity: 1; background: rgba(255,255,255,0.05); }
+.menu-group-title .menu-arrow {
+  font-size: 8px;
+  transition: transform var(--transition-fast);
+  width: 12px;
+  text-align: center;
+  opacity: 0.5;
+}
+.menu-group.expanded > .menu-group-title .menu-arrow {
+  transform: rotate(90deg);
+  opacity: 0.9;
+}
+.menu-group-items {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.3s var(--ease);
+}
+.menu-group.expanded > .menu-group-items { max-height: 600px; }
+.menu-item {
+  padding: 8px 16px 8px 36px;
+  cursor: pointer;
+  font-size: 12px;
+  opacity: 0.7;
+  transition: all var(--transition-fast);
+  border-left: 3px solid transparent;
+}
+.menu-item:hover { opacity: 1; background: rgba(255,255,255,0.06); }
+.menu-item.active {
+  background: var(--color-sidebar-active);
+  opacity: 1;
+  border-left-color: var(--color-sidebar-active);
+  font-weight: 500;
+}
+.menu-item.highlight { color: #FFD666; }
+.menu-item.highlight.active {
+  color: #fff;
+  border-left-color: #FFD666;
+  background: rgba(255,214,102,0.15);
+}
+.menu-item-static {
+  padding: 8px 16px 8px 20px;
+  font-size: 12px;
+  opacity: 0.65;
+  cursor: default;
+}
+.menu-sub-group { margin: 0; }
+.menu-sub-group-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px 8px 28px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.65;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+.menu-sub-group-title:hover { opacity: 0.9; background: rgba(255,255,255,0.04); }
+.menu-sub-group-title .menu-arrow {
+  font-size: 7px;
+  transition: transform var(--transition-fast);
+  width: 12px;
+  text-align: center;
+  opacity: 0.5;
+}
+.menu-sub-group.expanded > .menu-sub-group-title .menu-arrow {
+  transform: rotate(90deg);
+  opacity: 0.9;
+}
+.menu-sub-group-items {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.3s var(--ease);
+}
+.menu-sub-group.expanded > .menu-sub-group-items { max-height: 400px; }
+.menu-group-title.active-group {
+  opacity: 1;
+  color: #FFD666;
+}
+
+.sidebar-footer {
+  padding: 12px 20px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  font-size: 10px;
+  opacity: 0.5;
+}
+
+/* Module Content Area */
+.module-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--color-content-bg);
+}
+.module-breadcrumb {
+  padding: 12px 24px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: #FFFFFF;
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+.module-breadcrumb span {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+.content-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+}
+.module-footer {
+  padding: 10px 24px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  background: #FFFFFF;
+  border-top: 1px solid var(--border-light);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* ====== SHARED COMPONENTS ====== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+}
+.btn-primary {
+  background: var(--blue-primary);
+  color: #fff;
+}
+.btn-primary:hover { background: #2539B5; box-shadow: 0 2px 6px rgba(46,65,205,0.3); }
+.btn-outline {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+.btn-outline:hover { border-color: var(--blue-primary); color: var(--blue-primary); }
+.btn-success { background: var(--green); color: #fff; }
+.btn-success:hover { background: #45A614; }
+.btn-danger { background: var(--red); color: #fff; }
+.btn-danger:hover { background: #CA071A; }
+.btn-warning { background: var(--orange); color: #fff; }
+.btn-warning:hover { background: #E06900; }
+.btn-info { background: var(--blue-primary); color: #fff; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-lg { padding: 10px 22px; font-size: 15px; }
+.btn-xs { padding: 3px 8px; font-size: 11px; }
+
+/* Metrics Cards */
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.metrics-row.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.metric-card {
+  background: var(--color-card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-card);
+}
+.metric-card:hover {
+  border-color: var(--blue-primary);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transform: translateY(-1px);
+}
+.metric-card .mc-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -1px;
+}
+.metric-card .mc-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* Panels */
+.panel {
+  background: var(--color-card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-card);
+}
+.panel-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+  background: #FAFAFA;
+}
+.panel-body { padding: 20px; }
+
+/* Tags & Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  gap: 3px;
+}
+.badge-success { background: #F6FFED; color: #389E0D; border: 1px solid #B7EB8F; }
+.badge-danger { background: #FFF2F0; color: #CF1322; border: 1px solid #FFCCC7; }
+.badge-warning { background: #FFF7E6; color: #D46B08; border: 1px solid #FFD591; }
+.badge-info { background: #E6F7FF; color: #096DD9; border: 1px solid #91D5FF; }
+.badge-neutral { background: #FAFAFA; color: #8C8C8C; border: 1px solid #D9D9D9; }
+.badge-orange { background: #FFF7E6; color: #D46B08; border: 1px solid #FFD591; }
+.badge-purple { background: #F9F0FF; color: #531DAB; border: 1px solid #D3ADF7; }
+
+.badge-yolo { background: #FAFAFA; color: #595959; border: 1px solid #D9D9D9; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: 600; }
+.badge-vlm { background: #E6F7FF; color: #096DD9; border: 1px solid #91D5FF; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: 600; }
+.badge-human { background: #FFF7E6; color: #D46B08; border: 1px solid #FFD591; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: 600; }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead { background: var(--color-table-header); }
+th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #FFFFFF;
+  font-size: 12px;
+  border-bottom: 2px solid #152380;
+}
+td {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-primary);
+}
+tr:hover td { background: #F5F7FA; }
+tr.row-selected td { background: #E6F0FF !important; }
+.round-row { cursor: pointer; transition: all var(--transition-fast); }
+.round-row:hover td { background: #F5F7FA; }
+.round-row.selected td { background: #E6F0FF !important; border-left: 3px solid var(--blue-primary); }
+
+/* Pagination */
+.pager { display: flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 12px; color: var(--text-secondary); }
+.pager button { background: #fff; border: 1px solid var(--border-color); color: var(--text-primary); padding: 4px 10px; border-radius: var(--radius-sm); cursor: pointer; font-size: 11px; transition: all var(--transition-fast); }
+.pager button:hover { border-color: var(--blue-primary); color: var(--blue-primary); }
+.pager button:disabled { opacity: 0.3; cursor: default; }
+.pager select { background: #fff; border: 1px solid var(--border-color); color: var(--text-primary); padding: 4px 8px; border-radius: var(--radius-sm); font-size: 11px; outline: none; }
+.pager .pager-info { color: var(--text-secondary); font-size: 11px; }
+
+/* Filter Bar */
+.filter-bar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.filter-bar input,
+.filter-bar select {
+  padding: 8px 12px;
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-primary);
+  outline: none;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+}
+.filter-bar input::placeholder { color: #BFBFBF; }
+.filter-bar input:focus,
+.filter-bar select:focus {
+  border-color: var(--blue-primary);
+  box-shadow: 0 0 0 2px rgba(46,65,205,0.1);
+}
+.filter-bar select { cursor: pointer; }
+
+/* Form fields */
+.fg { margin-bottom: 14px; }
+.fg label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+.fg input,
+.fg select {
+  width: 100%;
+  height: 40px;
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0 12px;
+  font-size: 13px;
+  color: var(--text-primary);
+  outline: none;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+}
+.fg input:focus,
+.fg select:focus {
+  border-color: var(--blue-primary);
+  box-shadow: 0 0 0 2px rgba(46,65,205,0.1);
+}
+.fg select { cursor: pointer; }
+.fg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-textarea {
+  width: 100%;
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text-primary);
+  resize: vertical;
+  min-height: 70px;
+  font-family: inherit;
+  outline: none;
+  transition: all var(--transition-fast);
+}
+.form-textarea:focus {
+  border-color: var(--blue-primary);
+  box-shadow: 0 0 0 2px rgba(46,65,205,0.1);
+}
+
+/* Modals */
+.modal-mask {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+.modal-mask.visible { display: flex; }
+.modal-dialog {
+  background: #FFFFFF;
+  border-radius: 10px;
+  width: 560px;
+  max-width: 92vw;
+  max-height: 82vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-modal);
+}
+.modal-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+.modal-close {
+  cursor: pointer;
+  font-size: 20px;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  transition: color var(--transition-fast);
+}
+.modal-close:hover { color: var(--text-primary); }
+.modal-body { padding: 24px; }
+.modal-footer {
+  padding: 14px 24px;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Toast */
+.toast-container {
+  position: fixed;
+  top: 20px; right: 20px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toast {
+  padding: 12px 18px;
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 13px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  animation: toastIn 0.3s var(--ease);
+  min-width: 240px;
+}
+@keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+.toast-success { background: #F6FFED; border-left: 4px solid var(--green); }
+.toast-error { background: #FFF2F0; border-left: 4px solid var(--red); }
+.toast-info { background: #E6F7FF; border-left: 4px solid var(--blue-primary); }
+.toast-warning { background: #FFF7E6; border-left: 4px solid var(--orange); }
+
+/* Day card */
+.day-card {
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  min-width: 175px;
+  flex: 1;
+}
+.day-card:hover {
+  border-color: var(--blue-primary);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+/* ====== REVIEW WORKBENCH ====== */
+.review-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 900;
+  background: #F0F2F5;
+  flex-direction: column;
+}
+.review-overlay.show { display: flex; }
+.review-topbar {
+  height: 48px;
+  background: #FFFFFF;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.review-topbar .rb-left { display: flex; align-items: center; gap: 12px; }
+.review-topbar .rb-back {
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color var(--transition-fast);
+}
+.review-topbar .rb-back:hover { color: var(--blue-primary); }
+.review-topbar .rb-title { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+.review-topbar .rb-batch {
+  font-size: 11px; color: var(--text-secondary);
+  background: #F5F5F5;
+  padding: 3px 10px; border-radius: 20px;
+  border: 1px solid var(--border-color);
+}
+.review-topbar .rb-progress { font-size: 13px; color: var(--text-secondary); }
+.review-topbar .rb-progress span { color: var(--orange); font-weight: 600; }
+
+.review-body { flex: 1; display: flex; overflow: hidden; }
+
+.review-left-panel {
+  width: 280px;
+  background: #FFFFFF;
+  border-right: 1px solid var(--border-color);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+.review-left-panel .rl-search {
+  padding: 10px;
+  border-bottom: 1px solid var(--border-light);
+}
+.review-left-panel .rl-search input,
+.review-left-panel .rl-search select {
+  width: 100%; padding: 8px 12px; margin-bottom: 5px;
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 12px;
+  outline: none;
+  font-family: inherit;
+  transition: all var(--transition-fast);
+}
+.review-left-panel .rl-search input::placeholder { color: #BFBFBF; }
+.review-left-panel .rl-search input:focus,
+.review-left-panel .rl-search select:focus {
+  border-color: var(--blue-primary);
+  box-shadow: 0 0 0 2px rgba(46,65,205,0.1);
+}
+.review-left-panel .rl-search select { cursor: pointer; }
+.review-left-panel .rl-list { flex: 1; overflow-y: auto; }
+
+.rl-item {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border-light);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border-left: 3px solid transparent;
+}
+.rl-item:hover { background: #F5F7FA; }
+.rl-item.active {
+  background: #E6F0FF;
+  border-left-color: var(--blue-primary);
+}
+.rl-item .rl-name { font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 3px; }
+.rl-item .rl-cam { font-size: 11px; color: var(--text-secondary); margin-bottom: 3px; }
+.rl-item .rl-meta { display: flex; gap: 8px; align-items: center; font-size: 11px; }
+.rl-item .rl-count { color: var(--red); font-weight: 600; }
+.rl-footer {
+  padding: 10px 14px;
+  border-top: 1px solid var(--border-light);
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* Canvas area */
+.canvas-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: #E8EBF0;
+}
+.canvas-area canvas { max-width: 100%; max-height: 100%; cursor: crosshair; }
+
+.canvas-toolbar {
+  position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 4px;
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 6px 8px;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.canvas-toolbar button {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  transition: all var(--transition-fast);
+}
+.canvas-toolbar button:hover { background: #F5F5F5; color: var(--text-primary); }
+.canvas-toolbar button.active { background: var(--blue-primary); color: #fff; }
+
+.edit-toolbar {
+  position: absolute; top: 60px; left: 50%; transform: translateX(-50%);
+  display: none; gap: 4px;
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 8px 10px;
+  z-index: 10;
+  flex-wrap: wrap;
+  max-width: 620px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+.edit-toolbar.show { display: flex; }
+.edit-toolbar button {
+  background: #F5F5F5;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px 9px;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  font-family: inherit;
+}
+.edit-toolbar button:hover { background: #EBEBEB; color: var(--text-primary); border-color: #BFBFBF; }
+.edit-toolbar button.sel { background: var(--orange); color: #fff; border-color: var(--orange); }
+
+/* Right panel */
+.review-right-panel {
+  width: 350px;
+  background: #FFFFFF;
+  border-left: 1px solid var(--border-color);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.review-right-panel .rr-section {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+.review-right-panel .rr-section.scrollable {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.review-right-panel .rr-section h4 {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.review-right-panel .rr-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+.review-right-panel .rr-row .lbl { color: var(--text-secondary); }
+.review-right-panel .rr-row .val { color: var(--text-primary); font-size: 11px; }
+
+.rr-detection {
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: #FAFAFA;
+  border: 1px solid var(--border-color);
+  border-left: 3px solid #BFBFBF;
+  cursor: pointer;
+  position: relative;
+  transition: all var(--transition-fast);
+}
+.rr-detection:hover { background: #F0F0F0; border-color: #BFBFBF; }
+.rr-detection.sel {
+  border-left-color: var(--blue-primary);
+  background: #E6F0FF;
+  border-color: #ADC6FF;
+}
+.rr-detection .rr-d-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  padding-right: 24px;
+}
+.rr-detection .rr-d-cls { font-size: 12px; font-weight: 600; white-space: nowrap; }
+.rr-detection .rr-d-conf { font-size: 11px; color: var(--text-secondary); }
+.rr-d-field { margin-top: 6px; }
+.rr-d-field .rr-d-label {
+  font-size: 10px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 3px;
+}
+.rr-d-field .rr-d-value {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  background: #F5F5F5;
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  width: 100%;
+  resize: none;
+  font-family: inherit;
+  outline: none;
+  transition: all var(--transition-fast);
+}
+.rr-d-field .rr-d-value:focus {
+  border-color: var(--blue-primary);
+  color: var(--text-primary);
+  box-shadow: 0 0 0 2px rgba(46,65,205,0.1);
+}
+.rr-d-field .rr-d-value.placeholder { color: #BFBFBF; }
+
+.rr-del-btn {
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 22px; height: 22px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  border-radius: 50%;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  line-height: 1;
+}
+.rr-del-btn:hover {
+  background: var(--red);
+  color: #fff;
+  border-color: var(--red);
+}
+
+.rr-actions {
+  padding: 14px 18px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--border-light);
+  margin-top: auto;
+}
+.rr-actions button {
+  flex: 1;
+  min-width: 70px;
+  padding: 10px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: #fff;
+  font-family: inherit;
+}
+.rr-actions button small { display: block; font-size: 10px; opacity: 0.8; }
+
+.rr-btn-confirm { background: var(--green); }
+.rr-btn-confirm:hover { background: #45A614; box-shadow: 0 2px 6px rgba(82,196,26,0.3); }
+.rr-btn-reject { background: var(--red); }
+.rr-btn-reject:hover { background: #CA071A; box-shadow: 0 2px 6px rgba(226,9,28,0.3); }
+.rr-btn-recapture { background: var(--orange); }
+.rr-btn-recapture:hover { background: #E06900; box-shadow: 0 2px 6px rgba(245,122,0,0.3); }
+.rr-btn-edit { background: var(--blue-primary); }
+.rr-btn-edit:hover { background: #2539B5; }
+.rr-btn-desc { background: var(--purple); }
+.rr-btn-desc:hover { background: #7B4FE0; }
+
+.rr-undo-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 2px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: all var(--transition-fast);
+}
+.rr-undo-btn:hover {
+  background: #F5F5F5;
+  color: var(--text-primary);
+  border-color: #BFBFBF;
+}
+.rr-auto-next {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding: 4px 18px 12px;
+}
+.rr-auto-next input[type="checkbox"] {
+  accent-color: var(--blue-primary);
+  width: 14px; height: 14px;
+}
+
+.review-footer {
+  height: 48px;
+  background: #FFFFFF;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.review-footer .shortcut-hint {
+  padding: 3px 7px;
+  background: #F5F5F5;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  color: var(--text-primary);
+}
+
+/* ====== MATRIX TABLE ====== */
+.cs-matrix { overflow-x: auto; font-size: 12px; }
+.cs-matrix th, .cs-matrix td {
+  padding: 7px 10px;
+  text-align: center;
+  border: 1px solid var(--border-color);
+}
+.cs-matrix th { background: var(--color-table-header); color: #fff; font-weight: 600; font-size: 11px; }
+.cs-matrix td:first-child { text-align: left; font-weight: 500; background: #FAFAFA; }
+.cs-matrix input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--blue-primary); cursor: pointer; }
+.cs-legend { display: flex; gap: 14px; font-size: 11px; margin-bottom: 10px; flex-wrap: wrap; }
+.cs-legend span { display: inline-flex; align-items: center; gap: 4px; color: var(--text-secondary); }
+.cs-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+/* ====== PERMISSION MATRIX ====== */
+.perm-matrix th:first-child, .perm-matrix td:first-child { text-align: left; font-weight: 500; }
+.perm-check { color: var(--green); font-weight: bold; }
+.perm-cross { color: var(--red); }
+.perm-partial { color: var(--orange); }
+
+/* ====== SCROLLBARS ====== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #F0F2F5; }
+::-webkit-scrollbar-thumb { background: #D9D9D9; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #BFBFBF; }
+
+/* ====== MISC ====== */
+.panel-header a { color: var(--blue-primary); text-decoration: none; transition: color var(--transition-fast); }
+.panel-header a:hover { color: var(--blue-light); }
+
+.scene-config-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+}
+.scene-config-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: #FAFAFA;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-size: 12px;
+}
+.scene-config-item:hover { background: #F0F0F0; border-color: #BFBFBF; }
+.scene-config-item input[type="checkbox"] { accent-color: var(--blue-primary); width: 14px; height: 14px; cursor: pointer; }
+
+.geo-filter-wrap { display: inline-flex; align-items: center; gap: 4px; }
+.geo-filter-wrap select {
+  padding: 4px 8px;
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  color: var(--text-primary);
+  outline: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+.geo-filter-wrap select:focus { border-color: var(--blue-primary); }
+.geo-filter-wrap .geo-clear-btn {
+  font-size: 10px; color: var(--text-secondary); cursor: pointer;
+  padding: 2px 5px; border-radius: var(--radius-sm); border: 1px solid transparent;
+  background: transparent; transition: all var(--transition-fast);
+}
+.geo-filter-wrap .geo-clear-btn:hover { color: var(--red); border-color: var(--border-color); }
+</style>
+</head>
+<body>
+
+<!-- ====== LOGIN PAGE ====== -->
+<div id="loginPg" class="login-pg">
+  <div class="login-card-wrap">
+    <div class="login-card">
+      <h2>一体化平台</h2>
+      <p class="subtitle">项目监管系统 · AI巡检模块</p>
+      <div class="fg"><label>用户名</label><input id="loginUser" value="zhangsan" placeholder="输入用户名"></div>
+      <div class="fg"><label>密码</label><input id="loginPass" type="password" value="123456" placeholder="输入密码"></div>
+      <div class="fg"><label>角色</label><select id="loginRole"><option value="reviewer">复核员</option><option value="viewer">查看者</option></select></div>
+      <button class="login-btn" onclick="doLogin()">登 录</button>
+      <div class="hint">测试账号: zhangsan / 123456（复核员）<br>查看者: lisi / 123456<br><br>接入一体化平台统一认证 · 单点登录(SSO)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== APP SHELL ====== -->
+<div id="appShell" class="app">
+  <!-- Level 1: Platform Header -->
+  <div class="platform-header">
+    <div class="platform-header-left">
+      <div class="platform-logo">平</div>
+      <span>一体化平台</span>
+      <div class="subsystem-dropdown">
+        <span class="subsystem-current">项目监管系统 <span class="subsystem-arrow">▼</span></span>
+      </div>
+    </div>
+    <div class="platform-header-right">
+      <span class="platform-notif">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="dot"></span>
+      </span>
+      <div class="platform-user">
+        <div class="platform-avatar" id="topAvatar">张</div>
+        <span id="topName">张三</span>
+      </div>
+      <button class="btn btn-sm" style="background:rgba(255,255,255,0.15);color:#fff;border:none;padding:4px 12px" onclick="doLogout()">退出</button>
+    </div>
+  </div>
+
+  <!-- Level 2: Body (sidebar + content, header & sidebar connected) -->
+  <div class="platform-body">
+    <!-- Sidebar (项目监管系统 menu, AI巡检 as one module) -->
+    <div class="platform-sidebar">
+      <div class="sidebar-system-title">项目监管系统</div>
+      <div class="menu-tree">
+        <div class="menu-item-static">项目申报</div>
+        <div class="menu-item-static">项目管理</div>
+        <div class="menu-item-static">项目动态监管</div>
+        <div class="menu-item-static">建设工程主要材料报审</div>
+        <div class="menu-item-static">结果信息公示</div>
+        <div class="menu-item-static">施工安全评价</div>
+        <div class="menu-item-static">建筑起重机械管理</div>
+        <div class="menu-item-static">第三方事故预防服务情况</div>
+        <div class="menu-item-static">防台防汛信息管理</div>
+        <div class="menu-item-static">危险源登记</div>
+        <div class="menu-item-static">责任主体自查自纠</div>
+        <div class="menu-item-static">统计分析</div>
+        <div class="menu-item-static">紧急通知管理</div>
+        <div class="menu-group expanded">
+          <div class="menu-group-title" onclick="toggleNavGroup(this)"><span class="menu-arrow">▶</span>AI巡检</div>
+          <div class="menu-group-items">
+            <div class="menu-sub-group expanded">
+              <div class="menu-sub-group-title" onclick="toggleSubGroup(this)"><span class="menu-arrow">▶</span>巡检工作</div>
+              <div class="menu-sub-group-items">
+                <div class="menu-item active" data-page="dashboard">工作台总览</div>
+                <div class="menu-item highlight" data-page="review-entry">人工复核</div>
+              </div>
+            </div>
+            <div class="menu-sub-group">
+              <div class="menu-sub-group-title" onclick="toggleSubGroup(this)"><span class="menu-arrow">▶</span>任务与报告</div>
+              <div class="menu-sub-group-items">
+                <div class="menu-item" data-page="tasks">任务管理</div>
+                <div class="menu-item highlight" data-page="rounds">轮次管理</div>
+                <div class="menu-item" data-page="reports">巡检报告</div>
+                <div class="menu-item" data-page="feedback">结果回传</div>
+              </div>
+            </div>
+            <div class="menu-sub-group">
+              <div class="menu-sub-group-title" onclick="toggleSubGroup(this)"><span class="menu-arrow">▶</span>基础配置</div>
+              <div class="menu-sub-group-items">
+                <div class="menu-item" data-page="projects">项目列表</div>
+                <div class="menu-item" data-page="cameras">摄像头配置</div>
+              </div>
+            </div>
+            <div class="menu-sub-group">
+              <div class="menu-sub-group-title" onclick="toggleSubGroup(this)"><span class="menu-arrow">▶</span>系统设置</div>
+              <div class="menu-sub-group-items">
+                <div class="menu-item" data-page="model">模型参数</div>
+                <div class="menu-item" data-page="perm">权限矩阵</div>
+                <div class="menu-item" data-page="logs">操作日志</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sidebar-footer">© 2026 亿诺凌科 · AI巡检模块 V3.1</div>
+    </div>
+
+    <!-- AI巡检 Module Content -->
+    <div class="module-area">
+      <div class="module-breadcrumb">项目监管系统 &gt; AI巡检 &gt; <span id="pageTitle">工作台总览</span></div>
+      <div class="content-body" id="pageContent"></div>
+      <div class="module-footer">AI 辅助巡检预处理中台 · 采集 → 识别 → 复核 → 回传 → 迭代 闭环系统</div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastCtn"></div>
+
+<!-- Modal container -->
+<div class="modal-mask" id="modalOverlay"><div class="modal-dialog" id="modalBox"></div></div>
+
+<!-- ====== REVIEW WORKBENCH ====== -->
+<div class="review-overlay" id="reviewPage">
+  <div class="review-topbar">
+    <div class="rb-left">
+      <span class="rb-back" onclick="closeReview()">← 返回工作台</span>
+      <span class="rb-title" id="rtTitle">建发悦府8# — 塔吊A</span>
+      <span class="rb-batch" id="rtBatch">2026-05-28 AM</span>
+    </div>
+    <div class="rb-progress">第 <span id="rtIdx">3</span> / <span id="rtTotal">17</span> 张 | 待复核 <span id="rtPending">37</span> 条</div>
+  </div>
+  <div class="review-body">
+    <div class="review-left-panel">
+      <div class="rl-search">
+        <input type="text" placeholder="搜索项目名称..." id="rlSearch" oninput="filterReviewTasks()">
+        <select id="rlScene" onchange="filterReviewTasks()"><option value="">全部场景</option></select>
+        <select id="rlStatus" onchange="filterReviewTasks()"><option value="">全部状态</option><option value="pending">待复核</option><option value="completed">已完成</option><option value="excluded">已排除</option></select>
+      </div>
+      <div class="rl-list" id="rlList"></div>
+      <div class="rl-footer" id="rlFooter">待复核 37 / 已完成 50</div>
+    </div>
+    <div class="canvas-area" id="reviewCanvasArea">
+      <div class="canvas-toolbar">
+        <button onclick="reviewZoom(-0.15)">−</button>
+        <button onclick="reviewFit()">⊡</button>
+        <button onclick="reviewZoom(+0.15)">+</button>
+        <button onclick="reviewRatio(1)">1:1</button>
+        <button id="btnEditMode" onclick="toggleEditMode()">✎ 编辑</button>
+      </div>
+      <div class="edit-toolbar" id="editToolbar">
+        <span style="color:var(--text-secondary);font-size:10px;padding:4px">类别:</span>
+      </div>
+      <canvas id="reviewCanvas"></canvas>
+    </div>
+    <div class="review-right-panel" id="reviewRight">
+      <div class="rr-section"><h4>项目信息</h4>
+        <div class="rr-row"><span class="lbl">项目</span><span class="val" id="rrProject">建发悦府8#</span></div>
+        <div class="rr-row"><span class="lbl">摄像头</span><span class="val" id="rrCamera">塔吊A</span></div>
+        <div class="rr-row"><span class="lbl">PUID</span><span class="val" id="rrPUID">201115203424327567</span></div>
+        <div class="rr-row"><span class="lbl">抓拍时间</span><span class="val" id="rrTime">2026-05-28 08:15:32</span></div>
+      </div>
+      <div class="rr-section scrollable">
+        <h4>AI检测结果 <button class="rr-undo-btn" onclick="undoEdit()">↩ 撤销</button></h4>
+        <div id="rrDetections"></div>
+      </div>
+      <div class="rr-actions" id="rrActions">
+        <button class="rr-btn-confirm" onclick="doReview('confirm')">✓ 确认<small>Enter</small></button>
+        <button class="rr-btn-reject" onclick="doReview('reject')">✗ 排除<small>Esc</small></button>
+        <button class="rr-btn-recapture" onclick="doReview('recapture')">⟳ 重采</button>
+        <button class="rr-btn-desc" onclick="doReview('desc')">✎ 描述</button>
+      </div>
+      <div class="rr-auto-next"><input type="checkbox" id="autoNext" checked onchange="S.autoNext=this.checked"> 确认后自动跳转到下一张</div>
+    </div>
+  </div>
+  <div class="review-footer">
+    <span>快捷键:</span>
+    <span class="shortcut-hint">Enter</span>确认
+    <span class="shortcut-hint">Esc</span>排除
+    <span class="shortcut-hint">1-9</span>类别
+    <span class="shortcut-hint">Delete</span>删框
+    <span class="shortcut-hint">Ctrl+Z</span>撤销
+    <span class="shortcut-hint">←→</span>翻页
+    <span class="shortcut-hint">滚轮</span>缩放
+    <span class="shortcut-hint">?</span>帮助
+  </div>
+</div>
+
+
+<script>
+
+// ====== STATE ======
+const S = {
+  user: null,
+  page: 'dashboard',
+  taskRoundIdx: null, taskPage: 0, tasksPerPage: 50,
+  roundPage: 0, roundsPerPage: 3,
+  reviewOpen: false,
+  reviewTaskIdx: 0,
+  reviewZoom: 1,
+  reviewOffX: 0, reviewOffY: 0,
+  editMode: false,
+  editScene: 1,
+  isDrawing: false,
+  drawStart: null,
+  selectedBox: -1,
+  undoStack: [],
+  autoNext: true,
+  isPanning: false,
+  panStart: null,
+  projects: [],
+  cameras: [],
+  rounds: [],
+  tasks: [],
+  reviewTasks: [],
+  reviewRound: null,
+  feedbackItems: [],
+  logs: [],
+	_taskSearch: '', _taskStatusFilter: '',
+  _revEntrySearch: '', _revEntryStatus: '', _revEntryPage: 0, _revEntryPerPage: 10,
+  _reportTab: 'round', _reportRoundId: null, _reportDay: null,
+  _taskSelectedDay: null, _taskDayPage: 0, _taskDayPerPage: 10,
+  // 模块地理筛选
+  _projCityFilter: '', _projDistrictFilter: '', _projSearch: '', _projStatus: '', _projPage: 0,
+  _camCityFilter: '', _camDistrictFilter: '', _camSearch: '', _camStatus: '', _camPage: 0
+};
+
+// ====== MOCK DATA ======
+const SCENES = [
+  {id:1,name:'安全帽佩戴',color:'#F87171',type:'目标检测'},
+  {id:2,name:'安全绳佩戴',color:'#FB923C',type:'目标检测'},
+  {id:3,name:'临边防护缺失',color:'#FACC15',type:'场景理解'},
+  {id:4,name:'电梯搭载人数',color:'#4ADE80',type:'目标检测+计数'},
+  {id:5,name:'工人私自开机',color:'#60A5FA',type:'行为检测'},
+  {id:6,name:'坑边堆载',color:'#A78BFA',type:'场景理解'},
+  {id:7,name:'违规抽烟',color:'#F87171',type:'目标检测'},
+  {id:8,name:'散料吊装',color:'#FBBF24',type:'场景理解'},
+  {id:9,name:'吊篮作业人数',color:'#34D399',type:'目标检测+计数'},
+  {id:10,name:'起重机械安拆人数',color:'#818CF8',type:'目标检测+计数'},
+  {id:11,name:'出入口防护棚',color:'#9CA3AF',type:'存在性检测'},
+  {id:12,name:'工地围挡封闭',color:'#6B7280',type:'场景理解'},
+];
+
+// ====== 福建省市县层级数据 ======
+const FUJIAN_CITIES = [
+  {city:'福州市', districts:['鼓楼区','台江区','仓山区','马尾区','晋安区','长乐区','闽侯县','连江县','罗源县','闽清县','永泰县','平潭县','福清市']},
+  {city:'厦门市', districts:['思明区','海沧区','湖里区','集美区','同安区','翔安区']},
+  {city:'泉州市', districts:['鲤城区','丰泽区','洛江区','泉港区','惠安县','安溪县','永春县','德化县','石狮市','晋江市','南安市']},
+  {city:'漳州市', districts:['芗城区','龙文区','云霄县','漳浦县','诏安县','长泰县','东山县','南靖县','平和县','华安县','龙海市']},
+  {city:'龙岩市', districts:['新罗区','永定区','长汀县','上杭县','武平县','连城县','漳平市']},
+  {city:'三明市', districts:['梅列区','三元区','明溪县','清流县','宁化县','大田县','尤溪县','沙县','将乐县','泰宁县','建宁县','永安市']},
+  {city:'南平市', districts:['延平区','建阳区','顺昌县','浦城县','光泽县','松溪县','政和县','邵武市','武夷山市','建瓯市']},
+  {city:'莆田市', districts:['城厢区','涵江区','荔城区','秀屿区','仙游县']},
+  {city:'宁德市', districts:['蕉城区','霞浦县','古田县','屏南县','寿宁县','周宁县','柘荣县','福安市','福鼎市']}
+];
+
+function initMockData() {
+  // 生成60个样本项目，覆盖福建9市
+  const projPrefixes = ['建发','融信','保利','万科','华润','龙湖','旭辉','正荣','三盛','世茂','阳光城','泰禾','中骏','联发','国贸'];
+  const projSuffixes = ['悦府','壹号府','中央公园','天汇','金域蓝湾','万象城','春江天玺','江山境','御景台','观澜府','锦绣里','翡翠湾','雍景湾','云栖谷','桃源里'];
+  const camPrefixes = ['塔吊A','围挡B','临边C','主入口','基坑D','楼顶E','加工区F','通道G'];
+  const statuses = ['active','active','active','active','active','active','active','suspended','suspended'];
+  let allDistricts = [];
+  FUJIAN_CITIES.forEach(c => { c.districts.forEach(d => { allDistricts.push({city:c.city, district:d}); }); });
+
+  S.projects = [];
+  S.cameras = [];
+  let cid = 0;
+  for(let i=0;i<60;i++) {
+    let geo = allDistricts[Math.floor(Math.random()*allDistricts.length)];
+    let prefix = projPrefixes[Math.floor(Math.random()*projPrefixes.length)];
+    let suffix = projSuffixes[Math.floor(Math.random()*projSuffixes.length)];
+    let p = {id:i+1, name:prefix+suffix+(i>0&&Math.random()>0.7?'#'+Math.floor(Math.random()*10):''), city:geo.city, district:geo.district, status:statuses[Math.floor(Math.random()*statuses.length)], cameras:[], lastInspect:fmtDate(new Date(2026,4,28-Math.floor(Math.random()*30)))};
+    let nc = 2 + Math.floor(Math.random()*5);
+    for(let j=0;j<nc;j++) {
+      cid++;
+      let cam = {id:cid, puid:'20111520342432'+String(7567+cid), name:camPrefixes[j%8]+(j>=8?String(Math.floor(j/8)):''), projectId:p.id, projectName:p.name, city:geo.city, district:geo.district, status:Math.random()>0.15?'online':'offline', scenes:[], lastCapture:Math.random()>0.15?fmtDate(new Date(2026,4,28))+' 0'+Math.floor(Math.random()*8+1)+':'+String(Math.floor(Math.random()*60)).padStart(2,'0'):null};
+      SCENES.forEach(s=>{ if(Math.random()>0.3) cam.scenes.push(s.id); });
+      S.cameras.push(cam);
+      p.cameras.push(cam.id);
+    }
+    S.projects.push(p);
+  }
+
+  // -- 轮次数据（一个轮次 = 一轮完整 5000 项目覆盖）--
+  S.rounds = [];
+  let roundCycleDays = 10;
+  for(let r=0;r<3;r++) {
+    let roundNum = 8-r;  // 第8轮(当前)、第7轮、第6轮
+    let endDate = new Date(2026,4,28-r*roundCycleDays);
+    let startDate = new Date(endDate.getTime()-(roundCycleDays-1)*86400000);
+    let totalProjects = 5000;
+    let totalCameras = 13000;
+    let dailyTarget = 2600;  // 日均图片识别任务约2,600张（13,000路轮转调度，约20%激活）
+    let totalTarget = dailyTarget * roundCycleDays;  // 整轮目标 = 2,600×10天 = 26,000 张
+
+    let completed = r>0;
+    let progressDays = completed ? roundCycleDays : 6;  // 当前轮次已执行6天
+    let dailyEntries = [];
+    for(let d=1;d<=roundCycleDays;d++) {
+      let dayDate = new Date(startDate.getTime()+(d-1)*86400000);
+      if(d<=progressDays) {
+        let amCap = Math.floor(dailyTarget*0.48+Math.random()*dailyTarget*0.04);  // AM 约1,248~1,352张
+        let pmCap = Math.floor(dailyTarget*0.47+Math.random()*dailyTarget*0.04);  // PM 约1,222~1,326张
+        let amInf = Math.floor(amCap*(0.94+Math.random()*0.05));  // 推理覆盖率 94%~99%
+        let pmInf = Math.floor(pmCap*(0.94+Math.random()*0.05));
+        let amRev = Math.floor(amInf*(0.60+Math.random()*0.15));  // 复核完成率 60%~75%
+        let pmRev = Math.floor(pmInf*(0.60+Math.random()*0.15));
+        dailyEntries.push({day:d, date:fmtDate(dayDate),
+          am:{captured:amCap, inferred:amInf, reviewed:amRev, excluded:Math.floor(amRev*(0.08+Math.random()*0.05))},
+          pm:{captured:pmCap, inferred:pmInf, reviewed:pmRev, excluded:Math.floor(pmRev*(0.06+Math.random()*0.04))}
+        });
+      } else {
+        dailyEntries.push({day:d, date:fmtDate(dayDate),
+          am:{captured:0, inferred:0, reviewed:0, excluded:0},
+          pm:{captured:0, inferred:0, reviewed:0, excluded:0}
+        });
+      }
+    }
+
+    let agg = dailyEntries.reduce((a,d)=>({
+      captured:a.captured+d.am.captured+d.pm.captured,
+      inferred:a.inferred+d.am.inferred+d.pm.inferred,
+      reviewed:a.reviewed+d.am.reviewed+d.pm.reviewed,
+      excluded:a.excluded+d.am.excluded+d.pm.excluded,
+      // 单日失败 = 日目标 - 实际(AM+PM)
+      failed:a.failed+(d.am.captured?Math.max(0,dailyTarget-d.am.captured-d.pm.captured):0)
+    }),{captured:0,inferred:0,reviewed:0,excluded:0,failed:0});
+
+    // 项目覆盖：日覆盖约500项目(2,600张÷5张/项目)，6天累计约60%~72%
+    let prCov = completed ? totalProjects : Math.floor(totalProjects*(0.60+Math.random()*0.12));
+    // 已激活摄像头：日激活约2,600路(20%轮转)，6天累计去重约65%~75%
+    let camCap = completed ? totalCameras : Math.floor(totalCameras*(0.65+Math.random()*0.10));
+
+    S.rounds.push({
+      id:'R-'+String(2026000+roundNum),
+      name:'第'+roundNum+'轮巡检',
+      cycleDays:roundCycleDays,
+      dateRange:{start:fmtDate(startDate),end:fmtDate(endDate)},
+      totalProjects,totalCameras,totalTarget,
+      dailyTarget: dailyTarget,  // 日均抓拍目标2,600张
+      status:completed?'completed':'running',
+      createdBy:'system',
+      createdAt:fmtDate(startDate)+' 05:00:00',
+      startedAt:fmtDate(startDate)+' 06:00:12',
+      completedAt:completed?fmtDate(endDate)+' 17:45:00':null,
+      dailyProgress:dailyEntries,
+      stats:{projectsCovered:prCov, camerasCaptured:camCap,
+        totalCaptures:agg.captured, inferred:agg.inferred,
+        pendingReview:agg.inferred-agg.reviewed-agg.excluded,
+        completedReview:agg.reviewed, excluded:agg.excluded, failed:agg.failed}
+    });
+  }
+
+  S.rounds.sort((a,b)=>b.dateRange.start.localeCompare(a.dateRange.start));
+	let currentRound = S.rounds[0];
+
+  // -- 任务数据关联到轮次 --
+  S.tasks = [];
+  let taskDp = currentRound.dailyProgress.filter(d=>d.am.captured>0||d.pm.captured>0);
+  for(let i=0;i<200;i++) {
+    let p = S.projects[Math.floor(Math.random()*S.projects.length)];
+    let c = S.cameras.filter(c=>c.projectId===p.id)[0] || S.cameras[0];
+    let hasDanger = Math.random()>0.4;
+    let nDanger = hasDanger ? Math.floor(Math.random()*5)+1 : 0;
+    let status = Math.random()>0.5?'completed':(Math.random()>0.3?'pending_review':'inferring');
+    let dp = taskDp[Math.floor(Math.random()*taskDp.length)]||taskDp[0];
+    S.tasks.push({id:i+1, projectId:p.id, projectName:p.name, cameraId:c.id, cameraName:c.name, puid:c.puid,
+      roundId:currentRound.id, roundDay:dp.day, roundAmpm:Math.random()>0.5?'AM':'PM',
+      status, dangerCount:nDanger, detections:[], reviewHistory:[],
+      time:dp.date+' '+(8+Math.floor(Math.random()*6))+':'+String(Math.floor(Math.random()*60)).padStart(2,'0')+':'+String(Math.floor(Math.random()*60)).padStart(2,'0')});
+    if(hasDanger) {
+      for(let d=0;d<nDanger;d++) {
+        let sc = SCENES[Math.floor(Math.random()*12)];
+        let conf = Math.random()*0.4+0.6;
+        S.tasks[i].detections.push({id:d, sceneId:sc.id, sceneName:sc.name, color:sc.color,
+          bbox:{x:0.1+Math.random()*0.4, y:0.1+Math.random()*0.3, w:0.08+Math.random()*0.15, h:0.08+Math.random()*0.15},
+          confidence:conf, source:conf>=0.9?'YOLO':(Math.random()>0.5?'YOLO+VLM':'VLM'),
+          description:`检测到${sc.name}隐患，位于画面${Math.random()>0.5?'左侧':'右侧'}`,
+          suggestion:sc.id===1?'责令立即佩戴安全帽后方可进入施工区域':sc.id===3?'立即搭设临边防护栏杆，设置挡脚板及密目网':sc.id===7?'现场严禁吸烟，对违规人员进行安全教育':`针对${sc.name}问题，建议立即整改并报监理复核`,
+          status:'ai'});
+      }
+    }
+  }
+
+  S.reviewRound = currentRound.id;
+  S.reviewTasks = S.tasks.filter(t=>t.roundId===currentRound.id && (t.status==='pending_review'||t.status==='completed'||t.status==='excluded'));
+  updateReviewStats();
+
+  S.feedbackItems = [];
+  for(let i=0;i<8;i++) {
+    S.feedbackItems.push({id:i+1, taskId:Math.floor(Math.random()*30)+1, project:'建发悦府8#', danger:'安全帽未佩戴', status:['success','success','success','pending','failed'][Math.floor(Math.random()*5)], time:'2026-05-28 09:'+String(15+i*3).padStart(2,'0'), retries:Math.floor(Math.random()*3)});
+  }
+
+  S.logs = [];
+  for(let i=0;i<12;i++) {
+    S.logs.push({id:i+1, user:['张三','李四','王五'][Math.floor(Math.random()*3)], action:['登录系统','确认隐患','排除误报','修改标注','查看报告','同步项目'][Math.floor(Math.random()*6)], target:['建发悦府8#','融信壹号府5#','系统'][Math.floor(Math.random()*3)], time:'2026-05-28 '+(8+Math.floor(Math.random()*8))+':'+String(Math.floor(Math.random()*60)).padStart(2,'0'), ip:'192.168.1.'+Math.floor(Math.random()*255)});
+  }
+}
+
+// ====== 模块地理筛选辅助函数 ======
+function getFilteredProjects() {
+  let projects = S.projects;
+  if(S._projCityFilter) projects = projects.filter(p=>p.city===S._projCityFilter);
+  if(S._projDistrictFilter) projects = projects.filter(p=>p.district===S._projDistrictFilter);
+  return projects;
+}
+function getFilteredCameras() {
+  let cameras = S.cameras;
+  if(S._camCityFilter) cameras = cameras.filter(c=>c.city===S._camCityFilter);
+  if(S._camDistrictFilter) cameras = cameras.filter(c=>c.district===S._camDistrictFilter);
+  return cameras;
+}
+function getDistrictsForCity(cityName) {
+  let city = FUJIAN_CITIES.find(c=>c.city===cityName);
+  return city ? city.districts : [];
+}
+function renderCascadeFilter(prefix) {
+  let h = '<span class="geo-filter-wrap">';
+  let cityKey = '_'+prefix+'CityFilter', districtKey = '_'+prefix+'DistrictFilter';
+  h += '<select onchange="S.'+cityKey+'=this.value;S.'+districtKey+'=\'\';S.'+prefix+'Page=0;renderPage(S.page)"><option value="">全省</option>';
+  FUJIAN_CITIES.forEach(c => {
+    h += '<option value="'+c.city+'"'+(S[cityKey]===c.city?' selected':'')+'>'+c.city+'</option>';
+  });
+  h += '</select>';
+  h += '<select onchange="S.'+districtKey+'=this.value;S.'+prefix+'Page=0;renderPage(S.page)"><option value="">全部区县</option>';
+  if(S[cityKey]) {
+    getDistrictsForCity(S[cityKey]).forEach(d => {
+      h += '<option value="'+d+'"'+(S[districtKey]===d?' selected':'')+'>'+d+'</option>';
+    });
+  }
+  h += '</select>';
+  if(S[cityKey]||S[districtKey]) {
+    h += '<button class="geo-clear-btn" onclick="S.'+cityKey+'=\'\';S.'+districtKey+'=\'\';S.'+prefix+'Page=0;renderPage(S.page)">x</button>';
+  }
+  h += '</span>';
+  return h;
+}
+
+function fmtDate(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+
+// ====== MODAL ======
+function showModal(html) {
+  document.getElementById('modalBox').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+document.addEventListener('click', function(e) {
+  if(e.target.id==='modalOverlay') closeModal();
+});
+
+// ====== NAVIGATION ======
+function navTo(page) {
+  S.page = page;
+  document.querySelectorAll('.menu-item').forEach(el=>el.classList.toggle('active', el.dataset.page===page));
+  let activeItem = document.querySelector(`.menu-item[data-page="${page}"]`);
+  if(activeItem) {
+    // Expand parent sub-group
+    let subGroup = activeItem.closest('.menu-sub-group');
+    if(subGroup && !subGroup.classList.contains('expanded')) {
+      subGroup.classList.add('expanded');
+    }
+    // Expand parent group
+    let group = activeItem.closest('.menu-group');
+    if(group && !group.classList.contains('expanded')) {
+      group.classList.add('expanded');
+    }
+  }
+  const titles = {dashboard:'工作台总览','review-entry':'人工复核',tasks:'任务管理',rounds:'轮次管理',reports:'巡检报告',feedback:'结果回传',projects:'项目列表',cameras:'摄像头配置',model:'模型参数',perm:'权限矩阵',logs:'操作日志'};
+  document.getElementById('pageTitle').textContent = titles[page]||page;
+  renderPage(page);
+}
+
+function toggleNavGroup(titleEl) {
+  titleEl.parentElement.classList.toggle('expanded');
+}
+
+function toggleSubGroup(titleEl) {
+  titleEl.parentElement.classList.toggle('expanded');
+}
+
+function renderPage(page) {
+  const pc = document.getElementById('pageContent');
+  switch(page) {
+    case 'dashboard': pc.innerHTML = renderDashboard(); break;
+    case 'review-entry': pc.innerHTML = renderReviewEntry(); break;
+    case 'tasks': pc.innerHTML = renderTasks(); break;
+    case 'rounds': pc.innerHTML = renderRounds(); break;
+    case 'reports': pc.innerHTML = renderReports(); break;
+    case 'feedback': pc.innerHTML = renderFeedback(); break;
+    case 'projects': pc.innerHTML = renderProjects(); break;
+    case 'cameras': pc.innerHTML = renderCameras(); break;
+    case 'model': pc.innerHTML = renderModel(); break;
+    case 'perm': pc.innerHTML = renderPerm(); break;
+    case 'logs': pc.innerHTML = renderLogs(); break;
+  }
+}
+
+// ====== PAGE RENDERERS ======
+function roundStatusBadge(s) {
+  const map = {pending:{c:'badge-neutral',t:'等待启动'},running:{c:'badge-info',t:'● 进行中'},completed:{c:'badge-success',t:'已完成'},partial:{c:'badge-warning',t:'部分完成'}};
+  let m = map[s]||{c:'badge-neutral',t:s};
+  return `<span class="tag ${m.c}">${m.t}</span>`;
+}
+
+function renderDashboard() {
+  let cr = S.rounds[0];  // 当前轮次
+  let prevR = S.rounds[1]; // 上一轮
+  let crTasks = S.tasks.filter(t=>t.roundId===cr.id);
+  let totalPending = cr.stats.pendingReview;  // 来自轮次统计
+  let totalCompleted = crTasks.filter(t=>t.status==='completed').length;
+  let prCov = cr.totalProjects>0?Math.round(cr.stats.projectsCovered/cr.totalProjects*100):0;
+  let prCap = cr.totalTarget>0?Math.round(cr.stats.totalCaptures/cr.totalTarget*100):0;
+  let prRev = cr.stats.inferred>0?Math.round(cr.stats.completedReview/cr.stats.inferred*100):0;
+  let prevDanger = prevR?prevR.stats.completedReview:'—';
+  return `
+<div class="metrics-row">
+<div class="metric-card"><div class="mc-value" style="color:#60A5FA;font-size:22px">${cr.name} · ${cr.dateRange.start}~${cr.dateRange.end}</div><div class="mc-label">当前轮次 <span style="color:#60A5FA">${roundStatusBadge(cr.status)}</span></div></div>
+<div class="metric-card"><div class="mc-value">${cr.stats.projectsCovered.toLocaleString()} <span style="font-size:14px;color:#8C8C8C">/ ${cr.totalProjects.toLocaleString()}</span></div><div class="mc-label">项目覆盖 (${prCov}%)</div></div>
+<div class="metric-card"><div class="mc-value" style="color:#06B6D4">${cr.stats.totalCaptures.toLocaleString()}</div><div class="mc-label">累计抓拍 (${prCap}%)</div></div>
+<div class="metric-card"><div class="mc-value" style="color:#E2091C">${totalPending.toLocaleString()}</div><div class="mc-label">待复核任务</div></div>
+</div>
+
+<div class="metrics-row cols-3" style="margin-bottom:16px">
+<div class="metric-card"><div class="mc-value" style="color:#52C41A;font-size:18px">${cr.stats.completedReview.toLocaleString()}</div><div class="mc-label">已确认隐患</div></div>
+<div class="metric-card"><div class="mc-value" style="font-size:18px">${cr.stats.excluded.toLocaleString()}</div><div class="mc-label">已排除误报</div></div>
+<div class="metric-card"><div class="mc-value" style="color:#8B5CF6;font-size:18px">${cr.stats.failed.toLocaleString()}</div><div class="mc-label">抓拍失败</div></div>
+</div>
+
+<div class="panel"><div class="panel-header">${cr.name} — 总体进度 <a href="#" onclick="navTo('rounds');return false" style="font-size:11px;color:#60A5FA;margin-left:8px">轮次管理 →</a></div><div class="panel-body">
+<div style="margin-bottom:18px">
+  <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>抓拍进度</span><span style="color:#8C8C8C">${cr.stats.totalCaptures.toLocaleString()} / ${cr.totalTarget.toLocaleString()} (${prCap}%)</span></div>
+  <div style="height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden"><div style="width:${prCap}%;height:100%;background:#3B82F6;border-radius:4px;transition:width .6s"></div></div>
+</div>
+<div style="margin-bottom:18px">
+  <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>推理进度</span><span style="color:#8C8C8C">${cr.stats.inferred.toLocaleString()} / ${cr.stats.totalCaptures.toLocaleString()}</span></div>
+  <div style="height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden"><div style="width:${prCap>0?Math.round(cr.stats.inferred/cr.stats.totalCaptures*100):0}%;height:100%;background:#06B6D4;border-radius:4px;transition:width .6s"></div></div>
+</div>
+<div>
+  <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>复核进度</span><span style="color:#8C8C8C">${cr.stats.completedReview.toLocaleString()} 确认 / ${cr.stats.excluded.toLocaleString()} 排除 / ${cr.stats.pendingReview.toLocaleString()} 待复核</span></div>
+  <div style="height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden"><div style="width:${prRev}%;height:100%;background:#52C41A;border-radius:4px;transition:width .6s"></div></div>
+</div>
+</div></div>
+
+<div class="panel"><div class="panel-header">${cr.name} — 每日子进度 (Day ${cr.dailyProgress.filter(d=>d.am.captured>0||d.pm.captured>0).length} / ${cr.cycleDays})</div><div class="panel-body" style="overflow-x:auto">
+<table style="min-width:1000px"><thead><tr><th>天数</th><th>日期</th><th>AM 抓拍</th><th>AM 推理</th><th>AM 复核</th><th>PM 抓拍</th><th>PM 推理</th><th>PM 复核</th></tr></thead><tbody>
+${cr.dailyProgress.map(d=>`
+<tr style="${d.am.captured===0&&d.pm.captured===0?'opacity:0.35':''}">
+<td style="font-weight:600">Day ${d.day}</td><td style="font-size:11px;color:#8C8C8C">${d.date}</td>
+<td>${d.am.captured>0?d.am.captured.toLocaleString():'—'}</td>
+<td>${d.am.inferred>0?d.am.inferred.toLocaleString():'—'}</td>
+<td>${d.am.reviewed>0?`<span style="color:#52C41A">${d.am.reviewed.toLocaleString()}</span>`:'—'}</td>
+<td>${d.pm.captured>0?d.pm.captured.toLocaleString():'—'}</td>
+<td>${d.pm.inferred>0?d.pm.inferred.toLocaleString():'—'}</td>
+<td>${d.pm.reviewed>0?`<span style="color:#52C41A">${d.pm.reviewed.toLocaleString()}</span>`:'—'}</td>
+</tr>`).join('')}
+</tbody></table></div></div>
+
+<div class="panel"><div class="panel-header">待复核任务 <button class="btn btn-sm btn-primary" onclick="openReviewFromEntry()">开始复核 →</button></div><div class="panel-body">
+<table><thead><tr><th>项目</th><th>摄像头</th><th>轮次内Day</th><th>隐患数</th><th>状态</th><th>操作</th></tr></thead><tbody>
+${crTasks.filter(t=>t.status==='pending_review').slice(0,8).map(t=>`
+<tr><td>${t.projectName}</td><td>${t.cameraName}</td><td style="font-size:11px;color:#8C8C8C">Day ${t.roundDay} ${t.roundAmpm}</td>
+<td style="color:#E2091C;font-weight:600">${t.dangerCount}</td><td><span class="badge badge-warning">待复核</span></td>
+<td><button class="btn btn-sm btn-primary" onclick="openReview(${t.id})">复核</button></td></tr>
+`).join('')}
+</tbody></table></div></div>`;
+}
+
+function getCurrentRoundTasks() {
+  let rid = S.reviewRound || S.rounds[0].id;
+  return S.tasks.filter(t=>t.roundId===rid && (t.status==='pending_review'||t.status==='completed'||t.status==='excluded'));
+}
+
+function setReviewRound(roundId) {
+  S.reviewRound = roundId;
+  S.reviewTasks = getCurrentRoundTasks();
+  S.reviewTaskIdx = 0;
+  S._revEntryPage = 0;  // 切换轮次时重置分页
+  S._revEntrySearch = '';
+  S._revEntryStatus = '';
+  renderPage('review-entry');
+}
+
+function renderReviewEntry() {
+  let selRound = S.rounds.find(r=>r.id===S.reviewRound) || S.rounds[0];
+  if(!S.reviewRound) S.reviewRound = selRound.id;
+  let roundTasks = S.tasks.filter(t=>t.roundId===selRound.id);
+  let pending = roundTasks.filter(t=>t.status==='pending_review');
+  let completed = roundTasks.filter(t=>t.status==='completed');
+  let excluded = roundTasks.filter(t=>t.status==='excluded');
+  let isCurrent = selRound.id===S.rounds[0].id;
+  let prCov = selRound.totalProjects>0?Math.round(selRound.stats.projectsCovered/selRound.totalProjects*100):0;
+  // 统计卡片使用轮次级数据（每张照片=1个任务：抓拍→推理→复核）
+  return `
+<div class="panel"><div class="panel-header" style="justify-content:flex-start;gap:16px">
+  <span>巡检轮次</span>
+  <select onchange="setReviewRound(this.value)" style="padding:6px 12px;background:rgba(255,255,255,0.04);border:1px solid #D9D9D9;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;outline:none;color:#262626;font-family:inherit">
+    ${S.rounds.map(r=>`<option value="${r.id}" ${r.id===selRound.id?'selected':''}>${r.name} (${r.dateRange.start}~${r.dateRange.end})${r.id===S.rounds[0].id?' ← 当前':''}</option>`).join('')}
+  </select>
+  <span style="font-size:12px;color:#8C8C8C;font-weight:400">${isCurrent?'进行中':''} 项目覆盖 ${prCov}% · 周期 ${selRound.cycleDays} 天</span>
+</div></div>
+<div class="metrics-row">
+<div class="metric-card"><div class="mc-value" style="color:#E2091C">${selRound.stats.pendingReview.toLocaleString()}</div><div class="mc-label">待复核</div></div>
+<div class="metric-card"><div class="mc-value" style="color:#52C41A">${selRound.stats.completedReview.toLocaleString()}</div><div class="mc-label">已确认隐患</div></div>
+<div class="metric-card"><div class="mc-value" style="color:#8C8C8C">${selRound.stats.excluded.toLocaleString()}</div><div class="mc-label">已排除误报</div></div>
+<div class="metric-card"><div class="mc-value">${selRound.stats.inferred.toLocaleString()}</div><div class="mc-label">AI推理任务总计</div></div>
+</div>
+<div class="panel"><div class="panel-header">${selRound.name} 复核任务队列 <button class="btn btn-sm btn-primary" onclick="openReviewFromEntry()">进入复核工作台 →</button></div><div class="panel-body">
+<div class="filter-bar">
+<input placeholder="搜索项目..." id="revEntrySearch" value="${S._revEntrySearch||''}" oninput="S._revEntrySearch=this.value;S._revEntryPage=0;renderPage('review-entry')">
+<select id="revEntryStatus" onchange="S._revEntryStatus=this.value;S._revEntryPage=0;renderPage('review-entry')"><option value="">全部状态</option><option value="pending_review" ${S._revEntryStatus==='pending_review'?'selected':''}>待复核</option><option value="completed" ${S._revEntryStatus==='completed'?'selected':''}>已完成</option></select>
+<select id="revEntryPerPage" onchange="S._revEntryPerPage=parseInt(this.value);S._revEntryPage=0;renderPage('review-entry')"><option value="10" ${(S._revEntryPerPage||10)===10?'selected':''}>10条/页</option><option value="20" ${(S._revEntryPerPage||10)===20?'selected':''}>20条/页</option><option value="50" ${(S._revEntryPerPage||10)===50?'selected':''}>50条/页</option></select>
+</div>
+<table><thead><tr><th>项目</th><th>摄像头</th><th>Day</th><th>隐患数</th><th>置信度</th><th>AI来源</th><th>状态</th><th>操作</th></tr></thead><tbody>
+${(()=>{
+  let filtered = pending.concat(roundTasks.filter(t=>t.status!=='pending_review'));
+  let sq = (S._revEntrySearch||'').toLowerCase();
+  if(sq) filtered = filtered.filter(t=>t.projectName.toLowerCase().includes(sq));
+  let st = S._revEntryStatus||'';
+  if(st) filtered = filtered.filter(t=>t.status===st);
+  let perPage = S._revEntryPerPage || 10;
+  let page = S._revEntryPage || 0;
+  let totalPages = Math.ceil(filtered.length / perPage);
+  if(page >= totalPages && totalPages > 0) page = 0;
+  let paged = filtered.slice(page * perPage, (page+1) * perPage);
+  window.__revPg = {total: filtered.length, page: page, perPage: perPage, totalPages: totalPages};
+  return paged.map(t=>`
+<tr><td>${t.projectName}</td><td>${t.cameraName}</td><td style="font-size:11px;color:#8C8C8C">D${t.roundDay} ${t.roundAmpm}</td>
+<td style="color:${t.dangerCount>0?'#E2091C':'#BFBFBF'};font-weight:600">${t.dangerCount}</td>
+<td>${t.detections.length>0?(t.detections[0].confidence*100).toFixed(0)+'%':'—'}</td>
+<td>${t.detections.length>0?`<span class="badge badge-${t.detections[0].source==='YOLO'?'yolo':t.detections[0].source==='YOLO+VLM'?'vlm':'human'}">${t.detections[0].source}</span>`:'—'}</td>
+<td>${statusBadge(t.status)}</td>
+<td>${t.status==='pending_review'?`<button class="btn btn-sm btn-primary" onclick="openReview(${t.id})">复核</button>`:t.status==='completed'?`<button class="btn btn-sm btn-outline" onclick="openReview(${t.id})">查看</button>`:'—'}</td></tr>
+`).join('');
+})()}
+</tbody></table>
+${(()=>{
+  let pg = window.__revPg;
+  if(!pg || pg.totalPages <= 1) return '';
+  let h = '<div class="pager" style="margin-top:12px">';
+  h += `<span class="pager-info">共 ${pg.total} 条</span>`;
+  h += `<button onclick="S._revEntryPage=0;renderPage('review-entry')" ${pg.page===0?'disabled':''}>|<</button>`;
+  h += `<button onclick="S._revEntryPage=Math.max(0,S._revEntryPage-1);renderPage('review-entry')" ${pg.page===0?'disabled':''}><</button>`;
+  h += `<span class="pager-info">${pg.page*pg.perPage+1}-${Math.min((pg.page+1)*pg.perPage, pg.total)} / ${pg.total}</span>`;
+  h += `<button onclick="S._revEntryPage=Math.min(pg.totalPages-1,S._revEntryPage+1);renderPage('review-entry')" ${pg.page>=pg.totalPages-1?'disabled':''}>></button>`;
+  h += `<button onclick="S._revEntryPage=pg.totalPages-1;renderPage('review-entry')" ${pg.page>=pg.totalPages-1?'disabled':''}>>|</button>`;
+  h += '</div>';
+  return h;
+})()}
+</div></div>`;
+}
+
+function renderTasks() {
+  var sortedRounds = S.rounds.slice().sort(function(a,b){return b.dateRange.start.localeCompare(a.dateRange.start);});
+  var rpStart = S.roundPage * S.roundsPerPage;
+  var rpRounds = sortedRounds.slice(rpStart, rpStart + S.roundsPerPage);
+  var rpTotal = Math.ceil(sortedRounds.length / S.roundsPerPage);
+  if(S.taskRoundIdx===null) S.taskRoundIdx=0;
+  var selRound = sortedRounds[S.taskRoundIdx];
+  if(!selRound && sortedRounds.length>0) { S.taskRoundIdx=0; selRound=sortedRounds[0]; }
+
+  // ===== 上半部分：轮次表格 =====
+  var roundRowsHtml = rpRounds.map(function(r,ri){
+    var isSel = selRound && r.id===selRound.id;
+    var realIdx = rpStart + ri;
+    return '<tr class="round-row'+(isSel?' selected':'')+'" onclick="S.taskRoundIdx='+realIdx+';S.taskPage=0;S._taskSelectedDay=null;renderPage(\'tasks\')"><td style="font-family:\'Consolas\',\'Courier New\',monospace;font-size:11px">'+r.id+'</td><td>'+r.name+'</td><td>'+r.cycleDays+'天</td><td style="font-size:11px">'+r.dateRange.start+'~'+r.dateRange.end+'</td><td>'+r.stats.projectsCovered.toLocaleString()+'/'+r.totalProjects.toLocaleString()+'</td><td>'+r.stats.completedReview.toLocaleString()+'/'+r.stats.inferred.toLocaleString()+'</td><td>'+roundStatusBadge(r.status)+(r.status==='running'?' <span style="font-size:10px;color:#60A5FA;margin-left:4px">当前活跃</span>':'')+'</td></tr>';
+  }).join('');
+  if(!roundRowsHtml) roundRowsHtml='<tr><td colspan="7" style="text-align:center;color:#BFBFBF;padding:20px">暂无轮次数据</td></tr>';
+
+  var rpControls = sortedRounds.length <= S.roundsPerPage ? '' : '<div class="pager"><button onclick="S.roundPage=0;renderPage(\'tasks\')" '+(S.roundPage===0?'disabled':'')+'>|<</button><button onclick="S.roundPage=Math.max(0,S.roundPage-1);renderPage(\'tasks\')" '+(S.roundPage===0?'disabled':'')+'><</button><span class="pager-info">轮次 '+(S.roundPage*S.roundsPerPage+1)+'-'+Math.min((S.roundPage+1)*S.roundsPerPage,sortedRounds.length)+' / '+sortedRounds.length+'</span><button onclick="S.roundPage=Math.min(rpTotal-1,S.roundPage+1);renderPage(\'tasks\')" '+(S.roundPage>=rpTotal-1?'disabled':'')+'>></button><button onclick="S.roundPage=rpTotal-1;renderPage(\'tasks\')" '+(S.roundPage>=rpTotal-1?'disabled':'')+'>|></button></div>';
+
+  var roundSection = '<div class="panel"><div class="panel-header" style="justify-content:space-between"><span>轮次总览</span><div style="display:flex;align-items:center;gap:8px"><button class="btn btn-sm btn-outline" onclick="S.taskRoundIdx=0;S.taskPage=0;S.roundPage=0;S._taskSelectedDay=null;renderPage(\'tasks\')" style="font-size:11px">回到当前轮次</button><a href="#" onclick="navTo(\'rounds\');return false" style="font-size:12px;color:#60A5FA">轮次管理 &rarr;</a></div></div><div class="panel-body"><table><thead><tr><th>轮次编号</th><th>名称</th><th>周期</th><th>时间范围</th><th>项目覆盖</th><th>复核进度</th><th>状态</th></tr></thead><tbody>'+roundRowsHtml+'</tbody></table>'+rpControls+'</div></div>';
+
+  if(!selRound) return roundSection + '<div class="panel"><div class="panel-body" style="text-align:center;color:#BFBFBF;padding:40px">请选择一个轮次</div></div>';
+
+  // ===== 中间部分：批次卡片（按日期） =====
+  var activeDays = selRound.dailyProgress.filter(function(d){return d.am.captured>0||d.pm.captured>0;});
+  var dayCardsHtml = '';
+  for(var di=0; di<10; di++){
+    var d = selRound.dailyProgress[di];
+    if(!d) continue;
+    var isActive = d.am.captured>0||d.pm.captured>0;
+    var dailyTotal = (d.am.captured||0)+(d.pm.captured||0);
+    var dailyInf = (d.am.inferred||0)+(d.pm.inferred||0);
+    var dailyRev = (d.am.reviewed||0)+(d.pm.reviewed||0);
+    var dailyExc = (d.am.excluded||0)+(d.pm.excluded||0);
+    var hasPending = dailyInf > dailyRev + dailyExc;
+
+    if(isActive){
+      dayCardsHtml += '<div class="day-card" onclick="S._taskSelectedDay='+d.day+';S._taskDayPage=0;renderPage(\'tasks\')" style="background:#FFFFFF;backdrop-filter:blur(0px);border:1px solid #D9D9D9;border-radius:10px;padding:18px;cursor:pointer;transition:all 250ms cubic-bezier(0.4,0,0.2,1);min-width:175px;flex:1">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'+
+          '<span style="font-size:15px;font-weight:700;color:#262626">Day '+d.day+'</span>'+
+          '<span style="font-size:11px;color:#8C8C8C">'+d.date.substring(5)+'</span>'+
+        '</div>'+
+        '<div style="display:flex;gap:10px;margin-bottom:10px">'+
+          '<div style="flex:1;text-align:center;padding:8px 6px;background:rgba(255,255,255,0.03);border-radius:4px">'+
+            '<div style="font-size:10px;color:#BFBFBF;margin-bottom:3px">AM</div>'+
+            '<div style="font-size:16px;font-weight:700;color:#60A5FA">✓</div>'+
+            '<div style="font-size:10px;color:#8C8C8C">'+d.am.captured.toLocaleString()+'张</div>'+
+          '</div>'+
+          '<div style="flex:1;text-align:center;padding:8px 6px;background:rgba(255,255,255,0.03);border-radius:4px">'+
+            '<div style="font-size:10px;color:#BFBFBF;margin-bottom:3px">PM</div>'+
+            '<div style="font-size:16px;font-weight:700;color:#60A5FA">✓</div>'+
+            '<div style="font-size:10px;color:#8C8C8C">'+d.pm.captured.toLocaleString()+'张</div>'+
+          '</div>'+
+        '</div>'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;font-size:11px">'+
+          '<span style="color:#8C8C8C">合计 <b style="color:#262626">'+dailyTotal.toLocaleString()+'</b> 张</span>'+
+          (hasPending?'<span class="badge badge-warning" style="font-size:10px">待复核</span>':'<span class="badge badge-success" style="font-size:10px">已完成</span>')+
+        '</div>'+
+      '</div>';
+    } else {
+      dayCardsHtml += '<div class="day-card" style="background:rgba(255,255,255,0.02);border:1px dashed #D9D9D9;border-radius:10px;padding:18px;min-width:175px;flex:1;opacity:0.45;cursor:default">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'+
+          '<span style="font-size:15px;font-weight:700;color:#BFBFBF">Day '+d.day+'</span>'+
+          '<span style="font-size:11px;color:#BFBFBF">'+d.date.substring(5)+'</span>'+
+        '</div>'+
+        '<div style="display:flex;gap:10px;margin-bottom:10px">'+
+          '<div style="flex:1;text-align:center;padding:8px 6px;background:rgba(255,255,255,0.02);border-radius:4px"><div style="font-size:10px;color:#BFBFBF">AM</div><div style="font-size:16px;color:#BFBFBF">—</div><div style="font-size:10px;color:#BFBFBF">待执行</div></div>'+
+          '<div style="flex:1;text-align:center;padding:8px 6px;background:rgba(255,255,255,0.02);border-radius:4px"><div style="font-size:10px;color:#BFBFBF">PM</div><div style="font-size:16px;color:#BFBFBF">—</div><div style="font-size:10px;color:#BFBFBF">待执行</div></div>'+
+        '</div>'+
+        '<div style="font-size:11px;color:#BFBFBF;text-align:center">未到执行日期</div>'+
+      '</div>';
+    }
+  }
+
+  var dayCount = activeDays.length;
+  var dayCardsSection = '<div class="panel" style="margin-top:16px"><div class="panel-header" style="justify-content:space-between"><span>'+selRound.name+' — 巡检批次（按日期）</span><span style="font-size:11px;color:#BFBFBF;font-weight:400">已完成 '+dayCount+' / '+selRound.cycleDays+' 天 · 点击卡片查看当日任务</span></div><div class="panel-body"><div style="display:flex;gap:12px;flex-wrap:wrap">'+dayCardsHtml+'</div></div></div>';
+
+  // ===== 下半部分：当日任务明细（点击卡片后显示） =====
+  var taskDetailSection = '';
+  if(S._taskSelectedDay !== null && S._taskSelectedDay !== undefined){
+    var selDay = S._taskSelectedDay;
+    var dayData = selRound.dailyProgress[selDay-1];
+    var dayTasks = S.tasks.filter(function(t){return t.roundId===selRound.id && t.roundDay===selDay;});
+
+    var sq = S._taskSearch||'';
+    var stFilter = S._taskStatusFilter||'';
+    if(sq) dayTasks = dayTasks.filter(function(t){return t.projectName.toLowerCase().indexOf(sq.toLowerCase())>=0;});
+    if(stFilter) dayTasks = dayTasks.filter(function(t){return t.status===stFilter;});
+
+    var tpPerPage = S._taskDayPerPage || 10;
+    var tpPage = S._taskDayPage || 0;
+    var tpTotal = Math.ceil(dayTasks.length / tpPerPage);
+    if(tpPage >= tpTotal && tpTotal > 0) tpPage = 0;
+    var tpStart = tpPage * tpPerPage;
+    var tpTasks = dayTasks.slice(tpStart, tpStart + tpPerPage);
+
+    var taskRowsHtml = tpTasks.map(function(t){
+      return '<tr><td>'+t.projectName+'</td><td>'+t.cameraName+'</td><td style="font-size:11px;color:#8C8C8C">'+t.time+'</td><td style="color:'+(t.dangerCount>0?'#E2091C':'#BFBFBF')+';font-weight:600">'+t.dangerCount+'</td><td>'+statusBadge(t.status)+'</td><td>'+(t.status==='pending_review'?'<button class="btn btn-sm btn-primary" onclick="openReview('+t.id+')">复核</button>':t.status==='completed'?'<button class="btn btn-sm btn-outline" onclick="openReview('+t.id+')">查看</button>':'—')+'</td></tr>';
+    }).join('');
+    if(!taskRowsHtml) taskRowsHtml='<tr><td colspan="6" style="text-align:center;color:#BFBFBF;padding:20px">当日暂无匹配任务</td></tr>';
+
+    var tpControls = dayTasks.length <= tpPerPage ? '' : '<div class="pager"><select onchange="S._taskDayPerPage=parseInt(this.value);S._taskDayPage=0;renderPage(\'tasks\')"><option value="10"'+(tpPerPage===10?' selected':'')+'>10条/页</option><option value="20"'+(tpPerPage===20?' selected':'')+'>20条/页</option><option value="50"'+(tpPerPage===50?' selected':'')+'>50条/页</option></select><button onclick="S._taskDayPage=0;renderPage(\'tasks\')" '+(tpPage===0?'disabled':'')+'>|<</button><button onclick="S._taskDayPage=Math.max(0,S._taskDayPage-1);renderPage(\'tasks\')" '+(tpPage===0?'disabled':'')+'><</button><span class="pager-info">'+(tpStart+1)+'-'+Math.min(tpStart+tpPerPage,dayTasks.length)+' / '+dayTasks.length+' 条</span><button onclick="S._taskDayPage=Math.min(tpTotal-1,S._taskDayPage+1);renderPage(\'tasks\')" '+(tpPage>=tpTotal-1?'disabled':'')+'>></button><button onclick="S._taskDayPage=tpTotal-1;renderPage(\'tasks\')" '+(tpPage>=tpTotal-1?'disabled':'')+'>|></button></div>';
+
+    taskDetailSection = '<div class="panel" style="margin-top:16px"><div class="panel-header" style="justify-content:space-between"><div style="display:flex;align-items:center;gap:12px"><span class="btn btn-sm btn-outline" onclick="S._taskSelectedDay=null;S._taskDayPage=0;renderPage(\'tasks\')" style="cursor:pointer">← 返回批次列表</span><span>Day '+selDay+' · '+(dayData?dayData.date:'')+' — 任务明细</span></div><span style="font-size:11px;color:#BFBFBF;font-weight:400">共 '+dayTasks.length+' 条任务</span></div><div class="panel-body"><div class="filter-bar"><input placeholder="搜索项目..." value="'+sq+'" oninput="S._taskSearch=this.value;S._taskDayPage=0;renderPage(\'tasks\')"><select onchange="S._taskStatusFilter=this.value;S._taskDayPage=0;renderPage(\'tasks\')"><option value="">全部状态</option><option value="pending_review"'+(stFilter==='pending_review'?' selected':'')+'>待复核</option><option value="inferring"'+(stFilter==='inferring'?' selected':'')+'>推理中</option><option value="completed"'+(stFilter==='completed'?' selected':'')+'>已完成</option><option value="failed"'+(stFilter==='failed'?' selected':'')+'>失败</option></select></div><table><thead><tr><th>项目</th><th>摄像头</th><th>拍摄时间</th><th>隐患数</th><th>状态</th><th>操作</th></tr></thead><tbody>'+taskRowsHtml+'</tbody></table>'+tpControls+'</div></div>';
+  }
+
+  return roundSection + dayCardsSection + taskDetailSection;
+}
+
+let _showRoundId = null;
+function showRoundDetail(rid) { _showRoundId = rid; renderPage('rounds'); }
+window.showRoundDetail = showRoundDetail;
+
+function renderRounds() {
+  let selRound = _showRoundId ? S.rounds.find(r=>r.id===_showRoundId) : null;
+  _showRoundId = null;
+  let running = S.rounds.filter(r=>r.status==='running').length;
+
+  let mainHtml = `
+<div class="metrics-row">
+<div class="metric-card"><div class="mc-value">${S.rounds.length}</div><div class="mc-label">累计轮次</div></div>
+<div class="metric-card"><div class="mc-value" style="color:#60A5FA">${running}</div><div class="mc-label">进行中</div></div>
+<div class="metric-card"><div class="mc-value" style="color:#52C41A">${S.rounds.filter(r=>r.status==='completed').length}</div><div class="mc-label">已完成</div></div>
+<div class="metric-card"><div class="mc-value">${S.rounds[0].cycleDays}天</div><div class="mc-label">轮询周期</div></div>
+</div>
+<div class="panel"><div class="panel-header">轮次列表</div><div class="panel-body">
+<table><thead><tr><th>轮次编号</th><th>名称</th><th>周期</th><th>时间范围</th><th>项目覆盖</th><th>累计抓拍</th><th>复核进度</th><th>状态</th></tr></thead><tbody>
+${S.rounds.map(r=>`
+<tr style="cursor:pointer" onclick="showRoundDetail('${r.id}')" class="${selRound&&selRound.id===r.id?'row-selected':''}">
+<td style="font-family:\'Consolas\',\'Courier New\',monospace;font-size:11px">${r.id}</td><td>${r.name}</td><td>${r.cycleDays}天</td>
+<td style="font-size:11px">${r.dateRange.start}~${r.dateRange.end}</td>
+<td><div style="display:flex;align-items:center;gap:4px"><div style="width:50px;height:4px;background:rgba(255,255,255,0.1);border-radius:2px"><div style="width:${r.totalProjects>0?Math.round(r.stats.projectsCovered/r.totalProjects*100):0}%;height:100%;background:#3B82F6;border-radius:2px"></div></div><span style="font-size:10px;color:#8C8C8C">${Math.round(r.totalProjects>0?r.stats.projectsCovered/r.totalProjects*100:0)}%</span></div></td>
+<td>${r.stats.totalCaptures.toLocaleString()}</td>
+<td><div style="display:flex;align-items:center;gap:4px"><div style="width:50px;height:4px;background:rgba(255,255,255,0.1);border-radius:2px"><div style="width:${r.stats.inferred>0?Math.round(r.stats.completedReview/r.stats.inferred*100):0}%;height:100%;background:#52C41A;border-radius:2px"></div></div><span style="font-size:10px;color:#8C8C8C">${Math.round(r.stats.inferred>0?r.stats.completedReview/r.stats.inferred*100:0)}%</span></div></td>
+<td>${roundStatusBadge(r.status)}</td></tr>
+`).join('')}
+</tbody></table></div></div>`;
+
+  let detailHtml = '';
+  if(selRound) {
+    let rt = S.tasks.filter(t=>t.roundId===selRound.id);
+    let pendingT = rt.filter(t=>t.status==='pending_review');
+    let prCov = selRound.totalProjects>0?Math.round(selRound.stats.projectsCovered/selRound.totalProjects*100):0;
+    let prCap = selRound.totalTarget>0?Math.round(selRound.stats.totalCaptures/selRound.totalTarget*100):0;
+    let prRev = selRound.stats.inferred>0?Math.round(selRound.stats.completedReview/selRound.stats.inferred*100):0;
+    let prInf = selRound.stats.totalCaptures>0?Math.round(selRound.stats.inferred/selRound.stats.totalCaptures*100):0;
+    detailHtml = `
+<div class="panel" style="margin-top:16px"><div class="panel-header">${selRound.name} — 轮次详情</div><div class="panel-body">
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px">
+<div><div style="font-size:11px;color:#8C8C8C;margin-bottom:4px">轮次编号</div><div style="font-family:\'Consolas\',\'Courier New\',monospace;font-size:13px">${selRound.id}</div></div>
+<div><div style="font-size:11px;color:#8C8C8C;margin-bottom:4px">轮询周期</div><div>${selRound.cycleDays} 天</div></div>
+<div><div style="font-size:11px;color:#8C8C8C;margin-bottom:4px">时间范围</div><div>${selRound.dateRange.start} ~ ${selRound.dateRange.end}</div></div>
+<div><div style="font-size:11px;color:#8C8C8C;margin-bottom:4px">覆盖项目</div><div>${selRound.totalProjects.toLocaleString()} 个</div></div>
+<div><div style="font-size:11px;color:#8C8C8C;margin-bottom:4px">覆盖摄像头</div><div>${selRound.totalCameras.toLocaleString()} 路</div></div>
+<div><div style="font-size:11px;color:#8C8C8C;margin-bottom:4px">目标抓拍量</div><div>${selRound.totalTarget.toLocaleString()} 张 (日均${(selRound.dailyTarget||2600).toLocaleString()}张 × ${selRound.cycleDays}天)</div></div>
+<div><div style="font-size:11px;color:#8C8C8C;margin-bottom:4px">创建方式</div><div>${selRound.createdBy==='system'?'系统自动':'管理员'}</div></div>
+<div><div style="font-size:11px;color:#8C8C8C;margin-bottom:4px">状态</div><div>${roundStatusBadge(selRound.status)}</div></div>
+</div>
+
+<div style="margin-bottom:18px">
+<div style="font-size:12px;font-weight:600;margin-bottom:8px">项目覆盖 ${prCov}%</div>
+<div style="height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden"><div style="width:${prCov}%;height:100%;background:#3B82F6;border-radius:4px"></div></div>
+<div style="font-size:10px;color:#8C8C8C;margin-top:3px">${selRound.stats.projectsCovered.toLocaleString()} / ${selRound.totalProjects.toLocaleString()}</div>
+</div>
+<div style="margin-bottom:18px">
+<div style="font-size:12px;font-weight:600;margin-bottom:8px">抓拍进度 ${prCap}%</div>
+<div style="height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden"><div style="width:${prCap}%;height:100%;background:#06B6D4;border-radius:4px"></div></div>
+<div style="font-size:10px;color:#8C8C8C;margin-top:3px">${selRound.stats.totalCaptures.toLocaleString()} / ${selRound.totalTarget.toLocaleString()} | 失败 ${selRound.stats.failed.toLocaleString()}</div>
+</div>
+<div style="margin-bottom:18px">
+<div style="font-size:12px;font-weight:600;margin-bottom:8px">推理进度 ${prInf}%</div>
+<div style="height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden"><div style="width:${prInf}%;height:100%;background:#F59E0B;border-radius:4px"></div></div>
+</div>
+<div style="margin-bottom:18px">
+<div style="font-size:12px;font-weight:600;margin-bottom:8px">复核进度 ${prRev}%</div>
+<div style="height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden"><div style="width:${prRev}%;height:100%;background:#52C41A;border-radius:4px"></div></div>
+<div style="display:flex;justify-content:space-between;font-size:10px;color:#8C8C8C;margin-top:3px"><span>确认 ${selRound.stats.completedReview.toLocaleString()} / 排除 ${selRound.stats.excluded.toLocaleString()}</span><span>待复核 ${selRound.stats.pendingReview.toLocaleString()}</span></div>
+</div>
+
+<div style="display:flex;gap:8px">
+<button class="btn btn-sm btn-primary" onclick="S.reviewRound=\'${selRound.id}\';S.reviewTasks=S.tasks.filter(t=>t.roundId===\'${selRound.id}\'&&(t.status===\'pending_review\'||t.status===\'completed\'||t.status===\'excluded\'));S.reviewTaskIdx=0;navTo(\'review-entry\')">进入复核工作台</button>
+<button class="btn btn-sm btn-outline">${selRound.status==='completed'?'导出轮次报告':'导出当前进度'}</button>
+</div>
+
+<div class="panel" style="margin-top:16px"><div class="panel-header">每日子进度 AM / PM</div><div class="panel-body" style="overflow-x:auto">
+<table style="min-width:900px"><thead><tr><th>Day</th><th>日期</th><th>AM 抓拍</th><th>AM 推理</th><th>AM 复核</th><th>AM 排除</th><th>PM 抓拍</th><th>PM 推理</th><th>PM 复核</th><th>PM 排除</th></tr></thead><tbody>
+${selRound.dailyProgress.map(d=>`
+<tr style="${d.am.captured===0&&d.pm.captured===0?'opacity:0.35':''}">
+<td style="font-weight:600">${d.day}/${selRound.cycleDays}</td>
+<td style="font-size:11px;color:#8C8C8C">${d.date}</td>
+<td>${d.am.captured>0?d.am.captured.toLocaleString():'—'}</td>
+<td>${d.am.inferred>0?d.am.inferred.toLocaleString():'—'}</td>
+<td style="color:${d.am.reviewed>0?'#52C41A':''}">${d.am.reviewed>0?d.am.reviewed.toLocaleString():'—'}</td>
+<td style="color:#8C8C8C">${d.am.excluded>0?d.am.excluded:''}</td>
+<td>${d.pm.captured>0?d.pm.captured.toLocaleString():'—'}</td>
+<td>${d.pm.inferred>0?d.pm.inferred.toLocaleString():'—'}</td>
+<td style="color:${d.pm.reviewed>0?'#52C41A':''}">${d.pm.reviewed>0?d.pm.reviewed.toLocaleString():'—'}</td>
+<td style="color:#8C8C8C">${d.pm.excluded>0?d.pm.excluded:''}</td>
+</tr>`).join('')}
+</tbody></table></div></div>
+${pendingT.length>0?`
+<div style="margin-top:16px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">待复核任务 (${pendingT.length}条)</div>
+<table><thead><tr><th>项目</th><th>摄像头</th><th>Day</th><th>隐患数</th><th>操作</th></tr></thead><tbody>
+${pendingT.slice(0,10).map(t=>`<tr><td>${t.projectName}</td><td>${t.cameraName}</td><td>D${t.roundDay} ${t.roundAmpm}</td><td style="color:#E2091C;font-weight:600">${t.dangerCount}</td><td><button class="btn btn-sm btn-primary" onclick="openReview(${t.id})">复核</button></td></tr>`).join('')}
+</tbody></table></div>`:''}
+</div></div>`;
+  }
+  return mainHtml + detailHtml;
+}
+
+function statusBadge(s) {
+  const map = {pending_review:{c:'badge-warning',t:'待复核'},inferring:{c:'badge-info',t:'推理中'},completed:{c:'badge-success',t:'已完成'},excluded:{c:'badge-neutral',t:'已排除'},failed:{c:'badge-danger',t:'失败'}};
+  let m = map[s]||{c:'badge-neutral',t:s};
+  return `<span class="tag ${m.c}">${m.t}</span>`;
+}
+
+function renderReports() {
+  let tab = S._reportTab || 'round';
+  let tabs = [
+    {id:'round', label:'轮次报告', icon:'◉'},
+    {id:'daily', label:'日次报告', icon:'☀'},
+    {id:'monthly', label:'月次报告', icon:'◈'},
+    {id:'compare', label:'轮次对比', icon:'↔'}
+  ];
+  let tabBar = '<div class="panel" style="margin-bottom:16px"><div class="panel-header" style="gap:0;padding:0;border-bottom:none"><div style="display:flex;width:100%">'+
+    tabs.map(t=>`<div onclick="S._reportTab='${t.id}';renderPage('reports')" style="flex:1;text-align:center;padding:14px 16px;cursor:pointer;font-size:13px;font-weight:600;transition:all 150ms cubic-bezier(0.4,0,0.2,1);border-bottom:2px solid ${tab===t.id?'#3B82F6':'transparent'};color:${tab===t.id?'#60A5FA':'#8C8C8C'};background:${tab===t.id?'rgba(59,130,246,0.08)':'transparent'}">${t.icon} ${t.label}</div>`).join('')+
+    '</div></div></div>';
+
+  let body;
+  switch(tab) {
+    case 'round': body = renderRoundReport(); break;
+    case 'daily': body = renderDailyReport(); break;
+    case 'monthly': body = renderMonthlyReport(); break;
+    case 'compare': body = renderRoundCompare(); break;
+    default: body = renderRoundReport();
+  }
+  return tabBar + body;
+}
+
+function renderRoundReport() {
+  let selRound = S.rounds.find(r=>r.id===(S._reportRoundId||S.rounds[0].id)) || S.rounds[0];
+  if(!S._reportRoundId) S._reportRoundId = selRound.id;
+  let prCov = selRound.totalProjects>0?Math.round(selRound.stats.projectsCovered/selRound.totalProjects*100):0;
+  let prCap = selRound.totalTarget>0?Math.round(selRound.stats.totalCaptures/selRound.totalTarget*100):0;
+  let prRev = selRound.stats.inferred>0?Math.round(selRound.stats.completedReview/selRound.stats.inferred*100):0;
+  let aiAcc = (selRound.stats.completedReview+selRound.stats.excluded)>0?Math.round(selRound.stats.completedReview/(selRound.stats.completedReview+selRound.stats.excluded)*100):0;
+  // Hazard distribution by scene (simulated)
+  let totalHazards = selRound.stats.completedReview;
+  let sceneDist = SCENES.map(s=>{
+    let pct = 2+Math.random()*16; // 2%~18% per scene
+    return {name:s.name, color:s.color, count:Math.floor(totalHazards*pct/100), pct:Math.round(pct)};
+  });
+  sceneDist.sort((a,b)=>b.count-a.count);
+  // Top projects (simulated)
+  let topProjects = [...S.projects].sort(()=>Math.random()-0.5).slice(0,8).map((p,i)=>({
+    name:p.name, count:Math.floor(totalHazards*(0.5+Math.random()*2)/100)
+  })).sort((a,b)=>b.count-a.count);
+
+  return `
+<div class="panel"><div class="panel-header" style="justify-content:flex-start;gap:16px">
+  <span style="font-weight:600">选择轮次</span>
+  <select onchange="S._reportRoundId=this.value;renderPage('reports')" style="padding:6px 14px;background:rgba(255,255,255,0.04);border:1px solid #D9D9D9;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;outline:none;color:#262626;font-family:inherit;min-width:280px">
+    ${S.rounds.map(r=>`<option value="${r.id}" ${r.id===selRound.id?'selected':''}>${r.name} (${r.dateRange.start}~${r.dateRange.end}) ${r.status==='running'?'● 进行中':r.status==='completed'?'✓ 已完成':''}</option>`).join('')}
+  </select>
+  <span style="font-size:11px;color:#8C8C8C">${selRound.status==='completed'?'已完成轮次，可导出完整报告':'进行中，数据为当前快照'}</span>
+</div></div>
+<div class="metrics-row">
+<div class="metric-card"><div class="mc-value">${selRound.stats.projectsCovered.toLocaleString()}<span style="font-size:14px;color:#8C8C8C"> / ${selRound.totalProjects.toLocaleString()}</span></div><div class="mc-label">项目覆盖 (${prCov}%)</div></div>
+<div class="metric-card"><div class="mc-value" style="color:#E2091C">${selRound.stats.completedReview.toLocaleString()}</div><div class="mc-label">确认隐患数</div></div>
+<div class="metric-card"><div class="mc-value" style="color:#52C41A">${aiAcc}%</div><div class="mc-label">AI准确率 (确认/(确认+排除))</div></div>
+<div class="metric-card"><div class="mc-value">${selRound.stats.pendingReview.toLocaleString()}</div><div class="mc-label">待复核</div></div>
+</div>
+
+<div class="panel" style="margin-bottom:16px"><div class="panel-header">${selRound.name} — 数据流漏斗</div><div class="panel-body">
+<div style="margin-bottom:14px">
+  <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>📷 抓拍进度</span><span style="color:#8C8C8C">${selRound.stats.totalCaptures.toLocaleString()} / ${selRound.totalTarget.toLocaleString()} (${prCap}%)</span></div>
+  <div style="height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden"><div style="width:${prCap}%;height:100%;background:#3B82F6;border-radius:4px"></div></div>
+</div>
+<div style="margin-bottom:14px">
+  <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>🧠 推理覆盖率</span><span style="color:#8C8C8C">${selRound.stats.inferred.toLocaleString()} / ${selRound.stats.totalCaptures.toLocaleString()} (${selRound.stats.totalCaptures>0?Math.round(selRound.stats.inferred/selRound.stats.totalCaptures*100):0}%)</span></div>
+  <div style="height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden"><div style="width:${selRound.stats.totalCaptures>0?Math.round(selRound.stats.inferred/selRound.stats.totalCaptures*100):0}%;height:100%;background:#06B6D4;border-radius:4px"></div></div>
+</div>
+<div style="margin-bottom:14px">
+  <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>✅ 复核完成率</span><span style="color:#8C8C8C">${selRound.stats.completedReview.toLocaleString()} / ${selRound.stats.inferred.toLocaleString()} (${prRev}%)</span></div>
+  <div style="height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden"><div style="width:${prRev}%;height:100%;background:#52C41A;border-radius:4px"></div></div>
+</div>
+<div style="display:flex;gap:16px;font-size:11px;color:#8C8C8C">
+  <span>排除误报: ${selRound.stats.excluded.toLocaleString()}</span>
+  <span>抓拍失败: ${selRound.stats.failed.toLocaleString()}</span>
+</div>
+</div></div>
+
+<div style="display:flex;gap:16px;margin-bottom:16px">
+<div class="panel" style="flex:1"><div class="panel-header">${selRound.name} — 隐患类型分布 (Top 6)</div><div class="panel-body">
+${sceneDist.slice(0,6).map(s=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><div style="width:12px;height:12px;border-radius:2px;background:${s.color};flex-shrink:0"></div><span style="font-size:11px;width:80px;flex-shrink:0">${s.name}</span><div style="flex:1;background:rgba(255,255,255,0.06);height:6px;border-radius:3px"><div style="width:${Math.min(s.pct,100)}%;height:100%;background:${s.color};border-radius:3px"></div></div><span style="font-size:11px;color:#8C8C8C;width:50px;text-align:right">${s.count.toLocaleString()}</span></div>`).join('')}
+<div style="font-size:10px;color:#BFBFBF;margin-top:6px">数据基于审核确认的 ${totalHazards.toLocaleString()} 处隐患统计</div>
+</div></div>
+<div class="panel" style="flex:1"><div class="panel-header">隐患项目 Top 8</div><div class="panel-body">
+${topProjects.map((p,i)=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(148,163,184,0.06)"><span style="font-size:12px"><span style="color:#BFBFBF;font-weight:600;width:20px;display:inline-block">${i+1}.</span>${p.name}</span><span style="color:#E2091C;font-weight:600;font-size:12px">${p.count.toLocaleString()} 处</span></div>`).join('')}
+</div></div>
+</div>
+
+<div class="panel" style="margin-bottom:16px"><div class="panel-header">${selRound.name} — 每日趋势</div><div class="panel-body" style="overflow-x:auto">
+<table style="min-width:900px"><thead><tr><th>Day</th><th>日期</th><th>AM 抓拍</th><th>AM 推理</th><th>AM 复核</th><th>PM 抓拍</th><th>PM 推理</th><th>PM 复核</th></tr></thead><tbody>
+${selRound.dailyProgress.map(d=>`<tr style="${d.am.captured===0&&d.pm.captured===0?'opacity:0.35':''}">
+<td style="font-weight:600">${d.day}/${selRound.cycleDays}</td><td style="font-size:11px;color:#8C8C8C">${d.date}</td>
+<td>${d.am.captured>0?d.am.captured.toLocaleString():'—'}</td>
+<td>${d.am.inferred>0?d.am.inferred.toLocaleString():'—'}</td>
+<td style="color:${d.am.reviewed>0?'#52C41A':''}">${d.am.reviewed>0?d.am.reviewed.toLocaleString():'—'}</td>
+<td>${d.pm.captured>0?d.pm.captured.toLocaleString():'—'}</td>
+<td>${d.pm.inferred>0?d.pm.inferred.toLocaleString():'—'}</td>
+<td style="color:${d.pm.reviewed>0?'#52C41A':''}">${d.pm.reviewed>0?d.pm.reviewed.toLocaleString():'—'}</td>
+</tr>`).join('')}
+</tbody></table></div></div>
+
+<div style="display:flex;gap:8px">
+<button class="btn btn-primary" onclick="toast('轮次报告PDF已生成','s')">📥 导出PDF</button>
+<button class="btn btn-outline" onclick="toast('轮次报告Excel已生成','s')">📊 导出Excel</button>
+${selRound.status==='completed'?`<button class="btn btn-outline" onclick="toast('已发送至一体化平台','s')">📤 推送一体化平台</button>`:''}
+</div>`;
+}
+
+function renderDailyReport() {
+  let selRound = S.rounds.find(r=>r.id===(S._reportRoundId||S.rounds[0].id)) || S.rounds[0];
+  if(!S._reportRoundId) S._reportRoundId = selRound.id;
+  let activeDays = selRound.dailyProgress.filter(d=>d.am.captured>0||d.pm.captured>0);
+  let selDayIdx = S._reportDay!=null?S._reportDay:activeDays.length-1;
+  let selDay = selRound.dailyProgress[selDayIdx];
+  if(!selDay) selDay = activeDays[activeDays.length-1];
+  let dailyTotal = (selDay.am.captured||0)+(selDay.pm.captured||0);
+  let dailyInf = (selDay.am.inferred||0)+(selDay.pm.inferred||0);
+  let dailyRev = (selDay.am.reviewed||0)+(selDay.pm.reviewed||0);
+  let dailyExc = (selDay.am.excluded||0)+(selDay.pm.excluded||0);
+
+  return `
+<div class="panel"><div class="panel-header" style="justify-content:flex-start;gap:16px;flex-wrap:wrap">
+  <span style="font-weight:600">选择轮次</span>
+  <select onchange="S._reportRoundId=this.value;S._reportDay=null;renderPage('reports')" style="padding:6px 14px;background:rgba(255,255,255,0.04);border:1px solid #D9D9D9;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;outline:none;color:#262626;font-family:inherit">
+    ${S.rounds.map(r=>`<option value="${r.id}" ${r.id===selRound.id?'selected':''}>${r.name} (${r.dateRange.start}~${r.dateRange.end})</option>`).join('')}
+  </select>
+  <span style="font-weight:600;margin-left:8px">选择日期</span>
+  <select onchange="S._reportDay=parseInt(this.value);renderPage('reports')" style="padding:6px 14px;background:rgba(255,255,255,0.04);border:1px solid #D9D9D9;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;outline:none;color:#262626;font-family:inherit">
+    ${selRound.dailyProgress.map((d,i)=>`<option value="${i}" ${i===selDayIdx?'selected':''}>Day ${d.day} · ${d.date} ${d.am.captured>0||d.pm.captured>0?'':'（未执行）'}</option>`).join('')}
+  </select>
+</div></div>
+
+<div class="metrics-row">
+<div class="metric-card"><div class="mc-value">${dailyTotal.toLocaleString()}</div><div class="mc-label">当日抓拍 (AM+PM)</div></div>
+<div class="metric-card"><div class="mc-value" style="color:#06B6D4">${dailyInf.toLocaleString()}</div><div class="mc-label">当日AI推理完成</div></div>
+<div class="metric-card"><div class="mc-value" style="color:#52C41A">${dailyRev.toLocaleString()}</div><div class="mc-label">当日确认隐患</div></div>
+<div class="metric-card"><div class="mc-value" style="color:#8C8C8C">${dailyExc.toLocaleString()}</div><div class="mc-label">当日排除误报</div></div>
+</div>
+
+<div style="display:flex;gap:16px;margin-bottom:16px">
+<div class="panel" style="flex:1"><div class="panel-header">Day ${selDay.day} · ${selDay.date} — AM 批次</div><div class="panel-body">
+<table><thead><tr><th>指标</th><th>数值</th></tr></thead><tbody>
+<tr><td>抓拍</td><td style="font-weight:600">${selDay.am.captured>0?selDay.am.captured.toLocaleString():'—'}</td></tr>
+<tr><td>AI推理</td><td>${selDay.am.inferred>0?selDay.am.inferred.toLocaleString():'—'}</td></tr>
+<tr><td>人工复核</td><td style="color:#52C41A">${selDay.am.reviewed>0?selDay.am.reviewed.toLocaleString():'—'}</td></tr>
+<tr><td>排除误报</td><td>${selDay.am.excluded>0?selDay.am.excluded.toLocaleString():'—'}</td></tr>
+</tbody></table></div></div>
+<div class="panel" style="flex:1"><div class="panel-header">PM 批次</div><div class="panel-body">
+<table><thead><tr><th>指标</th><th>数值</th></tr></thead><tbody>
+<tr><td>抓拍</td><td style="font-weight:600">${selDay.pm.captured>0?selDay.pm.captured.toLocaleString():'—'}</td></tr>
+<tr><td>AI推理</td><td>${selDay.pm.inferred>0?selDay.pm.inferred.toLocaleString():'—'}</td></tr>
+<tr><td>人工复核</td><td style="color:#52C41A">${selDay.pm.reviewed>0?selDay.pm.reviewed.toLocaleString():'—'}</td></tr>
+<tr><td>排除误报</td><td>${selDay.pm.excluded>0?selDay.pm.excluded.toLocaleString():'—'}</td></tr>
+</tbody></table></div></div>
+</div>
+
+<div class="panel"><div class="panel-header">${selRound.name} · Day ${selDay.day} — 当日汇总报告</div><div class="panel-body">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div>
+  <div style="font-size:11px;color:#BFBFBF;margin-bottom:8px">基本信息</div>
+  <table><tbody>
+    <tr><td style="color:#8C8C8C">轮次</td><td>${selRound.name}</td></tr>
+    <tr><td style="color:#8C8C8C">日期</td><td>${selDay.date}</td></tr>
+    <tr><td style="color:#8C8C8C">巡检天数</td><td>Day ${selDay.day} / ${selRound.cycleDays}</td></tr>
+    <tr><td style="color:#8C8C8C">当日抓拍总量</td><td style="font-weight:600">${dailyTotal.toLocaleString()} 张</td></tr>
+    <tr><td style="color:#8C8C8C">当日抓拍成功率</td><td>${(selRound.dailyTarget||2600)>0?Math.round(dailyTotal/(selRound.dailyTarget||2600)*100):0}%</td></tr>
+  </tbody></table>
+</div>
+<div>
+  <div style="font-size:11px;color:#BFBFBF;margin-bottom:8px">复核统计</div>
+  <table><tbody>
+    <tr><td style="color:#8C8C8C">确认隐患</td><td style="color:#52C41A;font-weight:600">${dailyRev.toLocaleString()}</td></tr>
+    <tr><td style="color:#8C8C8C">排除误报</td><td>${dailyExc.toLocaleString()}</td></tr>
+    <tr><td style="color:#8C8C8C">待复核</td><td style="color:#F59E0B">${(dailyInf-dailyRev-dailyExc).toLocaleString()}</td></tr>
+    <tr><td style="color:#8C8C8C">AI准确率</td><td>${(dailyRev+dailyExc)>0?Math.round(dailyRev/(dailyRev+dailyExc)*100):0}%</td></tr>
+  </tbody></table>
+</div>
+</div>
+</div></div>
+
+<div style="display:flex;gap:8px;margin-top:16px">
+<button class="btn btn-primary" onclick="toast('日报告PDF已生成','s')">📥 导出日报告PDF</button>
+<button class="btn btn-outline" onclick="toast('日报告Excel已生成','s')">📊 导出日报告Excel</button>
+</div>`;
+}
+
+function renderMonthlyReport() {
+  // Group rounds by month
+  let monthMap = {};
+  S.rounds.forEach(r=>{
+    let m = r.dateRange.start.substring(0,7); // "2026-05"
+    if(!monthMap[m]) monthMap[m] = {label:m+'年'+(parseInt(m.split('-')[1]))+'月', rounds:[]};
+    monthMap[m].rounds.push(r);
+  });
+  let months = Object.values(monthMap);
+  let selMonth = S._reportRoundId || (months.length>0?Object.keys(monthMap)[0]:'2026-05');
+  let monthData = monthMap[selMonth];
+  if(!monthData) monthData = months[0];
+  if(!monthData) return '<div class="panel"><div class="panel-body" style="text-align:center;color:#BFBFBF;padding:40px">暂无月度数据</div></div>';
+
+  // Aggregate stats across rounds in this month
+  let agg = monthData.rounds.reduce((a,r)=>({
+    projectsCovered: Math.max(a.projectsCovered, r.stats.projectsCovered),
+    totalCaptures: a.totalCaptures + r.stats.totalCaptures,
+    inferred: a.inferred + r.stats.inferred,
+    completedReview: a.completedReview + r.stats.completedReview,
+    excluded: a.excluded + r.stats.excluded,
+    failed: a.failed + r.stats.failed,
+    pendingReview: a.pendingReview + r.stats.pendingReview
+  }),{projectsCovered:0,totalCaptures:0,inferred:0,completedReview:0,excluded:0,failed:0,pendingReview:0});
+
+  let aiAcc = (agg.completedReview+agg.excluded)>0?Math.round(agg.completedReview/(agg.completedReview+agg.excluded)*100):0;
+
+  return `
+<div class="panel"><div class="panel-header" style="justify-content:flex-start;gap:16px">
+  <span style="font-weight:600">选择月份</span>
+  <select onchange="S._reportRoundId=this.value;renderPage('reports')" style="padding:6px 14px;background:rgba(255,255,255,0.04);border:1px solid #D9D9D9;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;outline:none;color:#262626;font-family:inherit;min-width:200px">
+    ${months.map(m=>`<option value="${m.rounds[0].dateRange.start.substring(0,7)}" ${m.rounds[0].dateRange.start.substring(0,7)===selMonth?'selected':''}>${m.label} (${m.rounds.length}个轮次)</option>`).join('')}
+  </select>
+  <span style="font-size:11px;color:#8C8C8C">汇总 ${monthData.rounds.length} 个轮次 · ${monthData.rounds.map(r=>r.name).join('、')}</span>
+</div></div>
+
+<div class="metrics-row">
+<div class="metric-card"><div class="mc-value">${agg.projectsCovered.toLocaleString()}</div><div class="mc-label">覆盖项目（当月最大值）</div></div>
+<div class="metric-card"><div class="mc-value" style="color:#E2091C">${agg.completedReview.toLocaleString()}</div><div class="mc-label">确认隐患（当月合计）</div></div>
+<div class="metric-card"><div class="mc-value" style="color:#52C41A">${aiAcc}%</div><div class="mc-label">AI综合准确率</div></div>
+<div class="metric-card"><div class="mc-value">${agg.totalCaptures.toLocaleString()}</div><div class="mc-label">累计抓拍（当月合计）</div></div>
+</div>
+
+<div class="panel" style="margin-bottom:16px"><div class="panel-header">${monthData.label} — 月度数据汇总</div><div class="panel-body">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div>
+  <div style="font-size:11px;color:#BFBFBF;margin-bottom:8px">总体统计</div>
+  <table><tbody>
+    <tr><td style="color:#8C8C8C">包含轮次</td><td>${monthData.rounds.length} 个 (${monthData.rounds.map(r=>r.name).join(', ')})</td></tr>
+    <tr><td style="color:#8C8C8C">累计抓拍</td><td style="font-weight:600">${agg.totalCaptures.toLocaleString()} 张</td></tr>
+    <tr><td style="color:#8C8C8C">AI推理完成</td><td>${agg.inferred.toLocaleString()}</td></tr>
+    <tr><td style="color:#8C8C8C">抓拍失败</td><td style="color:#F59E0B">${agg.failed.toLocaleString()}</td></tr>
+  </tbody></table>
+</div>
+<div>
+  <div style="font-size:11px;color:#BFBFBF;margin-bottom:8px">复核统计</div>
+  <table><tbody>
+    <tr><td style="color:#8C8C8C">确认隐患</td><td style="color:#52C41A;font-weight:600">${agg.completedReview.toLocaleString()}</td></tr>
+    <tr><td style="color:#8C8C8C">排除误报</td><td>${agg.excluded.toLocaleString()}</td></tr>
+    <tr><td style="color:#8C8C8C">待复核</td><td style="color:#F59E0B">${agg.pendingReview.toLocaleString()}</td></tr>
+    <tr><td style="color:#8C8C8C">AI准确率</td><td style="font-weight:600">${aiAcc}%</td></tr>
+  </tbody></table>
+</div>
+</div>
+</div></div>
+
+<div class="panel" style="margin-bottom:16px"><div class="panel-header">${monthData.label} — 各轮次对比概览</div><div class="panel-body">
+<table><thead><tr><th>轮次</th><th>状态</th><th>抓拍</th><th>推理</th><th>确认隐患</th><th>排除误报</th><th>AI准确率</th></tr></thead><tbody>
+${monthData.rounds.map(r=>{
+  let acc = (r.stats.completedReview+r.stats.excluded)>0?Math.round(r.stats.completedReview/(r.stats.completedReview+r.stats.excluded)*100):0;
+  return `<tr>
+    <td style="font-weight:500">${r.name}</td>
+    <td>${roundStatusBadge(r.status)}</td>
+    <td>${r.stats.totalCaptures.toLocaleString()}</td>
+    <td>${r.stats.inferred.toLocaleString()}</td>
+    <td style="color:#52C41A;font-weight:600">${r.stats.completedReview.toLocaleString()}</td>
+    <td>${r.stats.excluded.toLocaleString()}</td>
+    <td>${acc}%</td>
+  </tr>`;
+}).join('')}
+</tbody></table></div></div>
+
+<div style="display:flex;gap:8px">
+<button class="btn btn-primary" onclick="toast('月度报告PDF已生成','s')">📥 导出月度报告PDF</button>
+<button class="btn btn-outline" onclick="toast('月度报告Excel已生成','s')">📊 导出月度报告Excel</button>
+</div>`;
+}
+
+function renderRoundCompare() {
+  return `
+<div class="panel"><div class="panel-header" style="justify-content:space-between"><span>轮次对比分析</span><span style="font-size:11px;color:#BFBFBF;font-weight:400">选择需要对比的轮次维度</span></div><div class="panel-body">
+<p style="color:#8C8C8C;margin-bottom:16px">对比 ${S.rounds.length} 个轮次的关键指标，追踪巡检质量趋势变化</p>
+<div style="overflow-x:auto">
+<table style="min-width:900px"><thead><tr><th>指标</th>${S.rounds.map(r=>`<th>${r.name}<br><span style="font-size:10px;color:#8C8C8C;font-weight:400">${r.dateRange.start}~${r.dateRange.end}</span></th>`).join('')}<th>趋势</th></tr></thead><tbody>
+<tr>
+  <td style="font-weight:500">覆盖项目</td>
+  ${S.rounds.map(r=>`<td style="font-weight:600">${r.stats.projectsCovered.toLocaleString()} <span style="font-size:11px;color:#8C8C8C">/ ${r.totalProjects.toLocaleString()}</span></td>`).join('')}
+  <td style="color:#52C41A">↑ 稳定</td>
+</tr>
+<tr>
+  <td style="font-weight:500">累计抓拍</td>
+  ${S.rounds.map(r=>`<td style="font-weight:600">${r.stats.totalCaptures.toLocaleString()}</td>`).join('')}
+  <td>${S.rounds.length>=2?(S.rounds[0].stats.totalCaptures>S.rounds[1].stats.totalCaptures?'<span style="color:#E2091C">↑</span>':'<span style="color:#52C41A">↓</span>'):'—'}</td>
+</tr>
+<tr>
+  <td style="font-weight:500">AI推理完成</td>
+  ${S.rounds.map(r=>`<td>${r.stats.inferred.toLocaleString()}</td>`).join('')}
+  <td>—</td>
+</tr>
+<tr>
+  <td style="font-weight:500;color:#52C41A">确认隐患</td>
+  ${S.rounds.map(r=>`<td style="color:#52C41A;font-weight:600">${r.stats.completedReview.toLocaleString()}</td>`).join('')}
+  ${S.rounds.length>=2?(()=>{
+    let delta=Math.abs(Math.round((S.rounds[0].stats.completedReview-S.rounds[1].stats.completedReview)/S.rounds[1].stats.completedReview*100));
+    let arrow=S.rounds[0].stats.completedReview>S.rounds[1].stats.completedReview?'↑':'↓';
+    return `<td style="color:${arrow==='↑'?'#E2091C':'#52C41A'}">${arrow} ${delta}%</td>`;
+  })():'<td>—</td>'}
+</tr>
+<tr>
+  <td style="font-weight:500">排除误报</td>
+  ${S.rounds.map(r=>`<td>${r.stats.excluded.toLocaleString()}</td>`).join('')}
+  ${S.rounds.length>=2?(()=>{
+    let delta=Math.abs(Math.round((S.rounds[0].stats.excluded-S.rounds[1].stats.excluded)/Math.max(S.rounds[1].stats.excluded,1)*100));
+    let arrow=S.rounds[0].stats.excluded>S.rounds[1].stats.excluded?'↑':'↓';
+    return `<td>${arrow} ${delta}%</td>`;
+  })():'<td>—</td>'}
+</tr>
+<tr>
+  <td style="font-weight:500">AI准确率</td>
+  ${S.rounds.map(r=>{
+    let acc=(r.stats.completedReview+r.stats.excluded)>0?Math.round(r.stats.completedReview/(r.stats.completedReview+r.stats.excluded)*100):0;
+    return `<td style="font-weight:600">${acc}%</td>`;
+  }).join('')}
+  ${S.rounds.length>=2?(()=>{
+    let a0=(S.rounds[0].stats.completedReview+S.rounds[0].stats.excluded)>0?Math.round(S.rounds[0].stats.completedReview/(S.rounds[0].stats.completedReview+S.rounds[0].stats.excluded)*100):0;
+    let a1=(S.rounds[1].stats.completedReview+S.rounds[1].stats.excluded)>0?Math.round(S.rounds[1].stats.completedReview/(S.rounds[1].stats.completedReview+S.rounds[1].stats.excluded)*100):0;
+    let arrow=a0>a1?'↑':'↓';
+    let delta=Math.abs(a0-a1);
+    return `<td style="color:${arrow==='↑'?'#52C41A':'#F59E0B'}">${arrow} ${delta}pp</td>`;
+  })():'<td>—</td>'}
+</tr>
+<tr>
+  <td style="font-weight:500">抓拍失败</td>
+  ${S.rounds.map(r=>`<td style="color:#F59E0B">${r.stats.failed.toLocaleString()}</td>`).join('')}
+  ${S.rounds.length>=2?(()=>{
+    let arrow=S.rounds[0].stats.failed>S.rounds[1].stats.failed?'↑':'↓';
+    return `<td style="color:${arrow==='↑'?'#E2091C':'#52C41A'}">${arrow}</td>`;
+  })():'<td>—</td>'}
+</tr>
+</tbody></table></div>
+
+<div style="margin-top:20px">
+  <div style="font-size:12px;font-weight:600;margin-bottom:12px">📊 关键发现</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    ${(()=>{
+      let findings = [];
+      if(S.rounds.length>=2){
+        let cr=S.rounds[0], pr=S.rounds[1];
+        if(cr.stats.completedReview>pr.stats.completedReview) findings.push(`<div class="metric-card" style="padding:12px"><span style="color:#E2091C;font-size:11px">⚠ 隐患上升</span><div style="font-size:12px;margin-top:4px">${cr.name}比${pr.name}确认隐患增加，需关注安全趋势</div></div>`);
+        let a0=(cr.stats.completedReview+cr.stats.excluded)>0?Math.round(cr.stats.completedReview/(cr.stats.completedReview+cr.stats.excluded)*100):0;
+        let a1=(pr.stats.completedReview+pr.stats.excluded)>0?Math.round(pr.stats.completedReview/(pr.stats.completedReview+pr.stats.excluded)*100):0;
+        if(a0>a1) findings.push(`<div class="metric-card" style="padding:12px"><span style="color:#52C41A;font-size:11px">✓ AI持续优化</span><div style="font-size:12px;margin-top:4px">AI准确率从${a1}%提升至${a0}%，难例库训练效果显现</div></div>`);
+        if(cr.stats.failed<pr.stats.failed) findings.push(`<div class="metric-card" style="padding:12px"><span style="color:#52C41A;font-size:11px">✓ 设备稳定性提升</span><div style="font-size:12px;margin-top:4px">抓拍失败数下降，摄像头运维效果显著</div></div>`);
+      }
+      findings.push(`<div class="metric-card" style="padding:12px"><span style="color:#60A5FA;font-size:11px">ℹ 覆盖稳定</span><div style="font-size:12px;margin-top:4px">各轮次项目覆盖保持稳定，巡检执行率良好</div></div>`);
+      return findings.join('');
+    })()}
+  </div>
+</div>
+</div></div>
+
+<div style="display:flex;gap:8px;margin-top:16px">
+<button class="btn btn-primary" onclick="toast('对比报告PDF已生成','s')">📥 导出对比报告PDF</button>
+<button class="btn btn-outline" onclick="toast('对比报告Excel已生成','s')">📊 导出对比报告Excel</button>
+</div>`;
+}
+
+function renderFeedback() {
+  return `
+<div class="metrics-row"><div class="metric-card"><div class="mc-value" style="color:#52C41A">${S.feedbackItems.filter(f=>f.status==='success').length}</div><div class="mc-label">回传成功</div></div>
+<div class="metric-card"><div class="mc-value" style="color:#F59E0B">${S.feedbackItems.filter(f=>f.status==='pending').length}</div><div class="mc-label">待回传</div></div>
+<div class="metric-card"><div class="mc-value" style="color:#E2091C">${S.feedbackItems.filter(f=>f.status==='failed').length}</div><div class="mc-label">回传失败</div></div>
+<div class="metric-card"><div class="mc-value">${S.feedbackItems.length}</div><div class="mc-label">总计</div></div></div>
+<div class="panel"><div class="panel-header">回传队列</div><div class="panel-body">
+<table><thead><tr><th>ID</th><th>项目</th><th>隐患类型</th><th>时间</th><th>重试次数</th><th>状态</th><th>操作</th></tr></thead><tbody>
+${S.feedbackItems.map(f=>`
+<tr><td>#${f.id}</td><td>${f.project}</td><td>${f.danger}</td><td>${f.time}</td><td>${f.retries}</td>
+<td><span class="tag ${f.status==='success'?'badge-success':f.status==='failed'?'badge-danger':'badge-warning'}">${f.status==='success'?'已回传':f.status==='failed'?'回传失败':'待回传'}</span></td>
+<td>${f.status==='failed'?`<button class="btn btn-sm btn-warning" onclick="toast('已触发手动重试','i')">重试</button> <button class="btn btn-sm btn-outline" onclick="toast('已放弃回传','w')">放弃</button>`:f.status==='pending'?`<button class="btn btn-sm btn-primary" onclick="toast('已触发手动回传','i')">手动回传</button>`:'—'}</td></tr>
+`).join('')}
+</tbody></table></div></div>
+<div class="panel"><div class="panel-header">死信队列 (需人工干预)</div><div class="panel-body"><p style="color:#8C8C8C">当前死信队列: <strong style="color:#E2091C">2</strong> 条积压 | 定时重试: 每30分钟 | <button class="btn btn-sm btn-outline">手动全部重试</button></p></div></div>`;
+}
+
+function renderProjects() {
+  let filtered = getFilteredProjects();
+  let perPage = 15, page = S._projPage || 0;
+  let totalPages = Math.ceil(filtered.length / perPage);
+  if(page >= totalPages && totalPages > 0) page = 0;
+  S._projPage = page;
+  let paged = filtered.slice(page*perPage, (page+1)*perPage);
+  let filterInfo = (S._projCityFilter||S._projDistrictFilter) ? '<span style="font-size:11px;color:#F59E0B;margin-left:8px">'+ (S._projCityFilter||'') +' '+ (S._projDistrictFilter||'') +' — '+filtered.length+' 个项目</span>' : '';
+  return `
+<div class="panel"><div class="panel-header">项目管理 <span style="font-size:11px;color:#BFBFBF;font-weight:400">共 ${S.projects.length} 个项目 / 覆盖 ${FUJIAN_CITIES.length} 市</span>${filterInfo}</div><div class="panel-body">
+<div class="filter-bar">
+  ${renderCascadeFilter('proj')}
+  <input placeholder="搜索项目名称..." value="${S._projSearch||''}" oninput="S._projSearch=this.value;S._projPage=0;renderPage('projects')">
+  <select onchange="S._projStatus=this.value;S._projPage=0;renderPage('projects')">
+    <option value="">全部状态</option><option value="active" ${S._projStatus==='active'?'selected':''}>在建</option><option value="suspended" ${S._projStatus==='suspended'?'selected':''}>停工</option>
+  </select>
+</div>
+<table><thead><tr><th>编号</th><th>项目名称</th><th style="width:70px">市</th><th style="width:70px">区县</th><th>摄像头数</th><th>状态</th><th>最后巡检</th><th>操作</th></tr></thead><tbody>
+${(()=>{
+  let data = paged;
+  let sq = (S._projSearch||'').toLowerCase();
+  if(sq) data = data.filter(p=>p.name.toLowerCase().includes(sq));
+  let st = S._projStatus||'';
+  if(st) data = data.filter(p=>p.status===st);
+  return data.map(p=>`<tr><td style="font-family:'Consolas','Courier New',monospace;font-size:11px">P-${String(p.id).padStart(4,'0')}</td><td>${p.name}</td><td style="font-size:11px;color:#8C8C8C">${p.city||'—'}</td><td style="font-size:11px;color:#8C8C8C">${p.district||'—'}</td><td>${p.cameras.length}路</td><td><span class="tag ${p.status==='active'?'badge-success':'badge-warning'}">${p.status==='active'?'在建':'停工'}</span></td><td>${p.lastInspect||'—'}</td><td><button class="btn btn-sm btn-outline">详情</button> <button class="btn btn-sm btn-warning" onclick="manualInspect(${p.id})">手动巡检</button></td></tr>`).join('');
+})()}
+</tbody></table>
+${totalPages>1?`<div class="pager"><span class="pager-info">共 ${filtered.length} 条</span><button onclick="S._projPage=0;renderPage('projects')" ${page===0?'disabled':''}>|<</button><button onclick="S._projPage=Math.max(0,S._projPage-1);renderPage('projects')" ${page===0?'disabled':''}><</button><span class="pager-info">${page*perPage+1}-${Math.min((page+1)*perPage,filtered.length)} / ${filtered.length}</span><button onclick="S._projPage=Math.min(totalPages-1,S._projPage+1);renderPage('projects')" ${page>=totalPages-1?'disabled':''}>></button><button onclick="S._projPage=totalPages-1;renderPage('projects')" ${page>=totalPages-1?'disabled':''}>>|</button></div>`:''}
+</div></div>`;
+}
+
+function renderCameras() {
+  let filtered = getFilteredCameras();
+  let sq = (S._camSearch||'').toLowerCase();
+  if(sq) filtered = filtered.filter(c=>c.projectName.toLowerCase().includes(sq)||c.puid.toLowerCase().includes(sq)||c.name.toLowerCase().includes(sq));
+  let st = S._camStatus||'';
+  if(st) filtered = filtered.filter(c=>c.status===st);
+  let perPage = 15, page = S._camPage || 0;
+  let totalPages = Math.ceil(filtered.length / perPage);
+  if(page >= totalPages && totalPages > 0) page = 0;
+  S._camPage = page;
+  let paged = filtered.slice(page*perPage, (page+1)*perPage);
+  let filterInfo = (S._camCityFilter||S._camDistrictFilter) ? '<span style="font-size:11px;color:#F59E0B;margin-left:8px">'+ (S._camCityFilter||'') +' '+ (S._camDistrictFilter||'') +' — '+filtered.length+' 路</span>' : '';
+  let totalOnline = S.cameras.filter(c=>c.status==='online').length;
+  return `
+<div class="panel"><div class="panel-header">摄像头管理 <span style="font-size:11px;color:#BFBFBF;font-weight:400">共 ${S.cameras.length} 路 / 在线 ${totalOnline} 路</span>${filterInfo}</div><div class="panel-body">
+<div class="filter-bar">
+  ${renderCascadeFilter('cam')}
+  <input placeholder="搜索PUID/项目/位置..." value="${S._camSearch||''}" oninput="S._camSearch=this.value;S._camPage=0;renderPage('cameras')">
+  <select onchange="S._camStatus=this.value;S._camPage=0;renderPage('cameras')">
+    <option value="">全部状态</option><option value="online" ${S._camStatus==='online'?'selected':''}>在线</option><option value="offline" ${S._camStatus==='offline'?'selected':''}>离线</option>
+  </select>
+  <select onchange="S._camSceneFilter=this.value;S._camPage=0;renderPage('cameras')">
+    <option value="">全部场景</option>
+    ${SCENES.map(s=>`<option value="${s.id}" ${(S._camSceneFilter||'')===String(s.id)?'selected':''}>${s.name}</option>`).join('')}
+  </select>
+</div>
+<table><thead><tr><th>PUID</th><th>所属项目</th><th style="width:60px">市</th><th style="width:70px">区县</th><th>安装位置</th><th>状态</th><th>已启用场景</th><th>最后抓拍</th><th>操作</th></tr></thead><tbody>
+${(()=>{
+  let data = paged;
+  let scF = S._camSceneFilter?parseInt(S._camSceneFilter):0;
+  if(scF) data = data.filter(c=>c.scenes.includes(scF));
+  return data.map(c=>`<tr><td style="font-family:'Consolas','Courier New',monospace;font-size:10px">${c.puid}</td><td style="font-size:12px">${c.projectName}</td><td style="font-size:11px;color:#8C8C8C">${c.city||'—'}</td><td style="font-size:11px;color:#8C8C8C">${c.district||'—'}</td><td>${c.name}</td><td><span class="tag ${c.status==='online'?'badge-success':'badge-danger'}">${c.status==='online'?'在线':'离线'}</span></td><td style="font-size:10px">${c.scenes.length>0?c.scenes.map(sid=>{let s=SCENES.find(x=>x.id===sid);return s?'<span class="cs-dot" style="background:'+s.color+';display:inline-block;width:8px;height:8px;border-radius:2px;margin:1px" title="'+s.name+'"></span>':'';}).join(''):'<span style="color:#BFBFBF">未配置</span>'}</td><td>${c.lastCapture||'—'}</td><td><button class="btn btn-sm btn-outline" onclick="showCameraSceneModal(${c.id})">⚙ 场景</button></td></tr>`).join('');
+})()}
+</tbody></table>
+${totalPages>1?`<div class="pager"><span class="pager-info">共 ${filtered.length} 路</span><button onclick="S._camPage=0;renderPage('cameras')" ${page===0?'disabled':''}>|<</button><button onclick="S._camPage=Math.max(0,S._camPage-1);renderPage('cameras')" ${page===0?'disabled':''}><</button><span class="pager-info">${page*perPage+1}-${Math.min((page+1)*perPage,filtered.length)} / ${filtered.length}</span><button onclick="S._camPage=Math.min(totalPages-1,S._camPage+1);renderPage('cameras')" ${page>=totalPages-1?'disabled':''}>></button><button onclick="S._camPage=totalPages-1;renderPage('cameras')" ${page>=totalPages-1?'disabled':''}>>|</button></div>`:''}
+</div></div>`;
+}
+
+function showCameraSceneModal(cid) {
+  let cam = S.cameras.find(c=>c.id===cid);
+  if(!cam) return;
+  let html = '<h3>'+cam.projectName+' / '+cam.name+' — 场景配置</h3>';
+  html += '<div style="font-size:11px;color:#8C8C8C;margin-bottom:12px">PUID: '+cam.puid+' | '+cam.city+' '+cam.district+'</div>';
+  html += '<div class="scene-config-grid">';
+  SCENES.forEach(s=>{
+    let checked = cam.scenes.includes(s.id);
+    html += '<label class="scene-config-item"><input type="checkbox" '+(checked?'checked':'')+' onchange="window._toggleScene('+cid+','+s.id+',this.checked)"><span class="cs-dot" style="background:'+s.color+';width:10px;height:10px;border-radius:2px;display:inline-block;flex-shrink:0"></span>'+s.name+' <span style="font-size:10px;color:#BFBFBF;margin-left:auto">'+s.type+'</span></label>';
+  });
+  html += '</div>';
+  html += '<div style="display:flex;gap:8px;justify-content:space-between;margin-top:16px">';
+  html += '<div><button class="btn btn-sm btn-outline" onclick="window._camSelectAll('+cid+',true)">全选</button> <button class="btn btn-sm btn-outline" onclick="window._camSelectAll('+cid+',false)">清空</button></div>';
+  html += '<div><button class="btn btn-sm btn-outline" onclick="closeModal()">关闭</button> ';
+  html += '<button class="btn btn-sm btn-primary" onclick="window._saveCamScene('+cid+')">保存</button></div>';
+  html += '</div>';
+  showModal(html);
+  window._cid = cid;
+}
+window._toggleScene = function(cid,sid,val) {
+  let cam = S.cameras.find(c=>c.id===cid);
+  if(!cam) return;
+  if(val){ if(!cam.scenes.includes(sid)) cam.scenes.push(sid); }
+  else { cam.scenes = cam.scenes.filter(s=>s!==sid); }
+};
+window._camSelectAll = function(cid,val) {
+  let cam = S.cameras.find(c=>c.id===cid);
+  if(!cam) return;
+  cam.scenes = val ? SCENES.map(s=>s.id) : [];
+  showCameraSceneModal(cid);
+};
+window._saveCamScene = function(cid) {
+  closeModal();
+  renderPage('cameras');
+  var cam = S.cameras.find(function(c){return c.id===cid;});
+  if(cam) { toast('场景配置已保存: '+cam.projectName+' / '+cam.name,'s'); }
+};
+window.showCameraSceneModal = showCameraSceneModal;
+
+function manualInspect(pid) {
+  let p = S.projects.find(function(x){return x.id===pid;});
+  if(!p) return;
+  if(p.status==='suspended') { toast('停工项目无法触发巡检','w'); return; }
+  let cams = S.cameras.filter(function(c){return c.projectId===pid;});
+  let onlineCams = cams.filter(function(c){return c.status==='online';});
+  let offlineCount = cams.length - onlineCams.length;
+  let html = '<h3>手动巡检 — '+p.name+'</h3>';
+  html += '<div style="font-size:11px;color:#8C8C8C;margin-bottom:14px">'+p.city+' '+p.district+' | 共 '+cams.length+' 路摄像头 | 最后巡检: '+(p.lastInspect||'无记录')+'</div>';
+  html += '<div style="background:rgba(255,255,255,0.03);border:1px solid #D9D9D9;border-radius:8px;padding:12px;margin-bottom:12px;max-height:200px;overflow-y:auto">';
+  html += '<div style="font-size:12px;font-weight:600;margin-bottom:8px;color:#8C8C8C">待触发摄像头清单</div>';
+  html += '<table><thead><tr><th>PUID</th><th>安装位置</th><th>状态</th><th>场景数</th></tr></thead><tbody>';
+  cams.forEach(function(c){
+    html += '<tr><td style="font-family:\'Consolas\',\'Courier New\',monospace;font-size:10px">'+c.puid+'</td><td style="font-size:12px">'+c.name+'</td>';
+    html += '<td><span class="tag '+(c.status==='online'?'badge-success':'badge-danger')+'">'+(c.status==='online'?'在线':'离线')+'</span></td>';
+    html += '<td style="font-size:11px">'+(c.scenes?c.scenes.length:0)+' 个</td></tr>';
+  });
+  html += '</tbody></table></div>';
+  if(offlineCount>0) {
+    html += '<div style="font-size:11px;color:#F59E0B;margin-bottom:10px;padding:6px 10px;background:rgba(245,158,11,0.08);border-radius:4px">⚠ '+offlineCount+' 路离线摄像头将被跳过，仅对 '+onlineCams.length+' 路在线设备执行抓拍</div>';
+  }
+  if(onlineCams.length===0) {
+    html += '<div style="font-size:11px;color:#E2091C;margin-bottom:10px;padding:6px 10px;background:rgba(239,68,68,0.08);border-radius:4px">该项目无在线摄像头，无法执行巡检</div>';
+  }
+  html += '<div id="inspectResult" style="display:none"></div>';
+  html += '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">';
+  html += '<button class="btn btn-outline" onclick="closeModal()">取消</button>';
+  if(onlineCams.length>0) {
+    html += '<button class="btn btn-warning" id="btnDoInspect" onclick="window._doManualInspect('+pid+')">确认触发巡检</button>';
+  }
+  html += '</div>';
+  showModal(html);
+}
+window.manualInspect = manualInspect;
+window._doManualInspect = function(pid) {
+  var p = S.projects.find(function(x){return x.id===pid;});
+  if(!p) return;
+  var cams = S.cameras.filter(function(c){return c.projectId===pid;});
+  var onlineCams = cams.filter(function(c){return c.status==='online';});
+  var btn = document.getElementById('btnDoInspect');
+  if(btn) { btn.disabled = true; btn.textContent = '巡检执行中...'; btn.className = 'btn btn-outline'; }
+  setTimeout(function(){
+    var captured = 0, failed = 0, hazards = 0;
+    onlineCams.forEach(function(c){
+      if(Math.random()>0.08) { captured++; hazards += Math.floor(Math.random()*4); }
+      else { failed++; }
+    });
+    var now = new Date();
+    p.lastInspect = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    var resultDiv = document.getElementById('inspectResult');
+    if(resultDiv) {
+      resultDiv.style.display = 'block';
+      resultDiv.innerHTML = '<div style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);border-radius:8px;padding:14px;margin-top:12px">'+
+        '<div style="font-size:15px;font-weight:700;color:#52C41A;margin-bottom:10px">✓ 手动巡检执行完毕</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;font-size:12px">'+
+        '<div><div style="color:#BFBFBF;margin-bottom:2px">触发摄像头</div><div style="font-size:18px;font-weight:700">'+onlineCams.length+' <span style="font-size:11px;color:#8C8C8C">路</span></div></div>'+
+        '<div><div style="color:#BFBFBF;margin-bottom:2px">成功抓拍</div><div style="font-size:18px;font-weight:700;color:#52C41A">'+captured+' <span style="font-size:11px;color:#8C8C8C">张</span></div></div>'+
+        '<div><div style="color:#BFBFBF;margin-bottom:2px">AI标记隐患</div><div style="font-size:18px;font-weight:700;color:#E2091C">'+hazards+' <span style="font-size:11px;color:#8C8C8C">处</span></div></div>'+
+        '</div>'+
+        (failed>0?'<div style="font-size:11px;color:#F59E0B;margin-top:8px">⚠ '+failed+' 路摄像头抓拍失败，已加入重试队列</div>':'')+
+        '<div style="font-size:10px;color:#BFBFBF;margin-top:8px">执行时间: '+p.lastInspect+'</div>'+
+        '</div>';
+    }
+    if(btn) { btn.textContent = '已完成'; btn.className = 'btn btn-success'; btn.disabled = true; }
+    toast(p.name+' 手动巡检完成: '+captured+'张抓拍, AI标记'+hazards+'处隐患','s');
+    setTimeout(function(){ closeModal(); renderPage('projects'); }, 2500);
+  }, 1200);
+};
+
+
+function renderModel() {
+  return `
+<div class="panel"><div class="panel-header">模型参数配置</div><div class="panel-body">
+<div style="margin-bottom:16px"><label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#262626">
+<input type="checkbox" checked style="width:16px;height:16px;accent-color:#3B82F6"> 启用 VLM 大模型复核 (Qwen3.6-27B via vLLM)
+</label></div>
+<table><thead><tr><th>场景</th><th>YOLO直接判定阈值</th><th style="width:180px">调节</th><th>VLM复核阈值</th><th style="width:180px">调节</th><th>模型版本</th></tr></thead><tbody>
+${SCENES.map(s=>`<tr>
+<td><span class="cs-dot" style="background:${s.color};display:inline-block;margin-right:4px"></span>${s.name}</td>
+<td style="font-weight:600">${s.id===1||s.id===7?'95':s.id===3?'85':'90'}%</td>
+<td><input type="range" min="70" max="99" value="${s.id===1||s.id===7?'95':s.id===3?'85':'90'}" style="width:100%;accent-color:#3B82F6"></td>
+<td style="font-weight:600">${s.id===7?'65':s.id===3?'70':'75'}%</td>
+<td><input type="range" min="50" max="90" value="${s.id===7?'65':s.id===3?'70':'75'}" style="width:100%;accent-color:#3B82F6"></td>
+<td style="font-family:'Consolas','Courier New',monospace;font-size:11px">YOLO26s-v1.2</td>
+</tr>`).join('')}
+</tbody></table>
+<div style="margin-top:12px"><button class="btn btn-primary" onclick="toast('模型配置已保存','s')">保存配置</button></div>
+<p style="font-size:11px;color:#BFBFBF;margin-top:8px">不同场景的AI模型表现不同，允许为每个场景设置独立的判定阈值和VLM调用策略</p>
+</div></div>`;
+}
+
+function renderPerm() {
+  return `
+<div class="panel"><div class="panel-header">角色权限矩阵</div><div class="panel-body">
+<table class="perm-matrix"><thead><tr><th>模块</th><th>管理员</th><th>复核员</th><th>查看者</th></tr></thead><tbody>
+<tr><td>工作台总览</td><td><span class="perm-check">✓ 管理</span></td><td><span class="perm-check">✓ 查看</span></td><td><span class="perm-check">✓ 查看</span></td></tr>
+<tr><td>人工复核 — 查看</td><td><span class="perm-check">✓</span></td><td><span class="perm-check">✓</span></td><td><span class="perm-check">✓</span></td></tr>
+<tr><td>人工复核 — 确认/排除/重采</td><td><span class="perm-check">✓</span></td><td><span class="perm-check">✓</span></td><td><span class="perm-cross">✗</span></td></tr>
+<tr><td>人工复核 — 编辑标注框</td><td><span class="perm-check">✓</span></td><td><span class="perm-check">✓</span></td><td><span class="perm-cross">✗</span></td></tr>
+<tr><td>任务管理</td><td><span class="perm-check">✓ 管理</span></td><td><span class="perm-check">✓ 查看</span></td><td><span class="perm-check">✓ 查看</span></td></tr>
+<tr><td>巡检报告</td><td><span class="perm-check">✓ 全部</span></td><td><span class="perm-check">✓ 绑定项目</span></td><td><span class="perm-check">✓ 绑定项目</span></td></tr>
+<tr><td>结果回传</td><td><span class="perm-check">✓ 管理</span></td><td><span class="perm-cross">✗</span></td><td><span class="perm-cross">✗</span></td></tr>
+<tr><td>项目管理</td><td><span class="perm-check">✓ 管理</span></td><td><span class="perm-cross">✗</span></td><td><span class="perm-cross">✗</span></td></tr>
+<tr><td>摄像头配置</td><td><span class="perm-check">✓ 管理</span></td><td><span class="perm-cross">✗</span></td><td><span class="perm-cross">✗</span></td></tr>
+<tr><td>用户管理</td><td><span class="perm-check">✓ 管理</span></td><td><span class="perm-cross">✗</span></td><td><span class="perm-cross">✗</span></td></tr>
+<tr><td>模型参数</td><td><span class="perm-check">✓ 管理</span></td><td><span class="perm-cross">✗</span></td><td><span class="perm-cross">✗</span></td></tr>
+</tbody></table>
+<p style="font-size:11px;color:#BFBFBF;margin-top:8px">RBAC权限模型，管理员拥有所有权限，复核员仅可操作绑定项目的复核功能</p>
+</div></div>`;
+}
+
+function renderLogs() {
+  return `
+<div class="panel"><div class="panel-header">系统操作日志</div><div class="panel-body">
+<div class="filter-bar"><input placeholder="搜索..."><select><option>全部操作</option><option>登录</option><option>复核</option><option>配置</option></select></div>
+<table><thead><tr><th>时间</th><th>用户</th><th>操作</th><th>目标</th><th>IP地址</th></tr></thead><tbody>
+${S.logs.map(l=>`<tr><td>${l.time}</td><td>${l.user}</td><td>${l.action}</td><td>${l.target}</td><td style="font-family:'Consolas','Courier New',monospace;font-size:11px">${l.ip}</td></tr>`).join('')}
+</tbody></table></div></div>`;
+}
+
+// ====== REVIEW WORKBENCH ======
+function openReviewFromEntry() {
+  let roundTasks = getCurrentRoundTasks();
+  S.reviewTasks = roundTasks;
+  S.reviewTaskIdx = 0;
+  let pending = roundTasks.filter(t=>t.status==='pending_review');
+  if(pending.length===0){toast('当前轮次没有待复核任务','w');return;}
+  openReview(pending[0].id);
+}
+
+function openReview(taskId) {
+  let task = S.tasks.find(t=>t.id===taskId);
+  if(task && task.roundId) {
+    let round = S.rounds.find(r=>r.id===task.roundId);
+    if(round) S.reviewRound = round.id;
+  }
+  S.reviewTasks = getCurrentRoundTasks();
+  let idx = S.reviewTasks.findIndex(t=>t.id===taskId);
+  if(idx<0) idx=0;
+  S.reviewTaskIdx = idx;
+  S.editMode = false;
+  S.reviewZoom = 1;
+  S.reviewOffX = 0; S.reviewOffY = 0;
+  S.selectedBox = -1;
+  S.undoStack = [];
+  S.reviewOpen = true;
+  document.getElementById('reviewPage').classList.add('show');
+  document.getElementById('btnEditMode').classList.remove('active');
+  document.getElementById('editToolbar').classList.remove('show');
+  updateReviewUI();
+  drawCanvas();
+}
+
+function closeReview() {
+  S.reviewOpen = false;
+  document.getElementById('reviewPage').classList.remove('show');
+  renderPage(S.page);
+}
+
+function updateReviewUI() {
+  let t = S.reviewTasks[S.reviewTaskIdx];
+  if(!t) return;
+  document.getElementById('rtTitle').textContent = t.projectName + ' — ' + t.cameraName;
+  let round = S.rounds.find(r=>r.id===t.roundId);
+  document.getElementById('rtBatch').textContent = round ? round.name+' · Day '+t.roundDay+' '+t.roundAmpm : '';
+  document.getElementById('rtIdx').textContent = S.reviewTaskIdx + 1;
+  document.getElementById('rtTotal').textContent = S.reviewTasks.length;
+  document.getElementById('rrProject').textContent = t.projectName;
+  document.getElementById('rrCamera').textContent = t.cameraName;
+  document.getElementById('rrPUID').textContent = t.puid||'—';
+  document.getElementById('rrTime').textContent = t.time||'—';
+  document.getElementById('rrActions').style.display = (S.user==='viewer')?'none':'flex';
+  document.getElementById('btnEditMode').style.display = (S.user==='viewer')?'none':'inline-flex';
+
+  document.getElementById('rrDetections').innerHTML = t.detections.length===0
+    ? '<div style="color:#BFBFBF;font-size:12px;padding:8px">无AI检测结果（此任务可能无需复核）</div>'
+    : t.detections.map((d,i)=>`
+        <div class="rr-detection${S.selectedBox===i?' selected':''}" onclick="selectBox(${i})" style="border-left-color:${d.color}">
+        <button class="rr-del-btn" onclick="event.stopPropagation();deleteDetection(${i})" title="删除此标注">✕</button>
+        <div class="rr-d-top"><span class="rr-d-cls" style="color:${d.color}">${d.sceneName}</span>
+        <span class="badge badge-${d.source==='YOLO'?'yolo':d.source==='YOLO+VLM'?'vlm':'human'}">${d.source}</span></div>
+        <div class="rr-d-conf">置信度: ${(d.confidence*100).toFixed(0)}%</div>
+        <div class="rr-d-field"><div class="rr-d-label">隐患描述</div>
+        <textarea class="rr-d-value" rows="2" onclick="event.stopPropagation()" onchange="updateDetectionField(${i},'description',this.value)">${d.description||''}</textarea></div>
+        <div class="rr-d-field"><div class="rr-d-label">整改建议</div>
+        <textarea class="rr-d-value" rows="2" onclick="event.stopPropagation()" onchange="updateDetectionField(${i},'suggestion',this.value)">${d.suggestion||''}</textarea></div>
+        ${d.status==='human_new'?'<span class="badge badge-human" style="margin-top:3px">人工新增</span>':''}
+        ${d.status==='human_modified'?'<span class="badge badge-human" style="margin-top:3px">人工修改</span>':''}
+        </div>`).join('');
+  updateReviewTaskList();
+  updateReviewStats();
+}
+
+function updateReviewTaskList() {
+  let list = document.getElementById('rlList');
+  let sceneSel = document.getElementById('rlScene');
+  if(!S._scenePopulated){ sceneSel.innerHTML='<option value="">全部场景</option>'+SCENES.map(s=>`<option value="${s.id}">${s.name}</option>`).join(''); S._scenePopulated=true; }
+  list.innerHTML = S.reviewTasks.map((t,i)=>`<div class="rl-item${i===S.reviewTaskIdx?' active':''}" onclick="navigateReview(${i})">
+<div class="rl-name">${t.projectName}</div><div class="rl-cam">${t.cameraName}</div>
+<div class="rl-meta"><span class="rl-count">${t.dangerCount}</span>
+<span class="tag ${t.status==='completed'?'badge-success':t.status==='excluded'?'badge-neutral':'badge-warning'}">${t.status==='completed'?'已完成':t.status==='excluded'?'已排除':'待复核'}</span></div></div>`).join('');
+}
+
+function navigateReview(idx) {
+  if(idx<0||idx>=S.reviewTasks.length) return;
+  S.reviewTaskIdx = idx;
+  S.editMode = false;
+  S.selectedBox = -1;
+  S.undoStack = [];
+  document.getElementById('btnEditMode').classList.remove('active');
+  document.getElementById('editToolbar').classList.remove('show');
+  updateReviewUI();
+  drawCanvas();
+}
+
+function updateReviewStats() {
+  let pending = S.reviewTasks.filter(t=>t.status==='pending_review').length;
+  let completed = S.reviewTasks.filter(t=>t.status==='completed').length;
+  document.getElementById('rtPending').textContent = pending;
+  let ft = document.getElementById('rlFooter');
+  let round = S.rounds.find(r=>r.id===S.reviewRound);
+  let label = round ? round.name : '';
+  if(ft) ft.textContent = `${label} | 待复核 ${pending} / 已完成 ${completed}`;
+}
+
+function filterReviewTasks() {
+  let q = (document.getElementById('rlSearch')?.value||'').toLowerCase();
+  let sc = document.getElementById('rlScene')?.value||'';
+  let st = document.getElementById('rlStatus')?.value||'';
+  let rid = S.reviewRound || S.rounds[0].id;
+  let filtered = S.tasks.filter(t=>{
+    if(t.roundId!==rid) return false;
+    if(q && !t.projectName.toLowerCase().includes(q)) return false;
+    if(sc && !t.detections.some(d=>d.sceneId==parseInt(sc))) return false;
+    if(st && t.status!==st) return false;
+    return t.status==='pending_review'||t.status==='completed'||t.status==='excluded';
+  });
+  S.reviewTasks = filtered;
+  S.reviewTaskIdx = Math.min(S.reviewTaskIdx, S.reviewTasks.length-1);
+  if(S.reviewTaskIdx<0) S.reviewTaskIdx=0;
+  updateReviewUI();
+  drawCanvas();
+}
+window.filterReviewTasks = filterReviewTasks;
+
+// ====== CANVAS RENDERING ======
+function drawCanvas() {
+  let canvas = document.getElementById('reviewCanvas');
+  let area = document.getElementById('reviewCanvasArea');
+  canvas.width = area.clientWidth;
+  canvas.height = area.clientHeight;
+  let ctx = canvas.getContext('2d');
+  let w = canvas.width, h = canvas.height;
+
+  let imgW = 960, imgH = 540;
+  let scale = S.reviewZoom;
+  let ox = S.reviewOffX + w/2 - imgW*scale/2;
+  let oy = S.reviewOffY + h/2 - imgH*scale/2;
+
+  // Sky
+  ctx.fillStyle = '#1a2332'; ctx.fillRect(ox, oy, imgW*scale, imgH*scale);
+  // Ground
+  ctx.fillStyle = '#2d2416'; ctx.fillRect(ox, oy+imgH*scale*0.7, imgW*scale, imgH*scale*0.3);
+  // Buildings
+  ctx.fillStyle = '#3d3d4a'; ctx.fillRect(ox+imgW*scale*0.6, oy+imgH*scale*0.2, imgW*scale*0.25, imgH*scale*0.5);
+  ctx.fillStyle = '#4a4a55'; ctx.fillRect(ox+imgW*scale*0.15, oy+imgH*scale*0.3, imgW*scale*0.2, imgH*scale*0.4);
+  // Scaffolding
+  ctx.strokeStyle = '#555'; ctx.lineWidth = 1;
+  for(let i=0;i<8;i++){ctx.beginPath();ctx.moveTo(ox+imgW*scale*0.62+i*imgW*scale*0.03,oy+imgH*scale*0.2);ctx.lineTo(ox+imgW*scale*0.62+i*imgW*scale*0.03,oy+imgH*scale*0.7);ctx.stroke();}
+  // Excavation pit
+  ctx.fillStyle = '#3d2e1e'; ctx.beginPath(); ctx.moveTo(ox+imgW*scale*0.35, oy+imgH*scale*0.7); ctx.lineTo(ox+imgW*scale*0.55, oy+imgH*scale*0.7); ctx.lineTo(ox+imgW*scale*0.5, oy+imgH*scale*0.85); ctx.lineTo(ox+imgW*scale*0.3, oy+imgH*scale*0.85); ctx.closePath(); ctx.fill();
+  // Material pile
+  ctx.fillStyle = '#5a4a38'; ctx.fillRect(ox+imgW*scale*0.75, oy+imgH*scale*0.55, imgW*scale*0.08, imgH*scale*0.15);
+  // Stick figure people
+  for(let i=0;i<4;i++) {
+    let px = ox + imgW*scale*(0.1+i*0.15), py = oy + imgH*scale*0.6;
+    ctx.fillStyle = '#ccc'; ctx.beginPath(); ctx.arc(px,py-imgH*scale*0.04,imgH*scale*0.02,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(px,py-imgH*scale*0.02); ctx.lineTo(px,py+imgH*scale*0.04); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(px,py+imgH*scale*0.01); ctx.lineTo(px-imgW*scale*0.015,py+imgH*scale*0.03); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(px,py+imgH*scale*0.01); ctx.lineTo(px+imgW*scale*0.015,py+imgH*scale*0.03); ctx.stroke();
+  }
+
+  // Draw detection boxes
+  let t = S.reviewTasks[S.reviewTaskIdx];
+  if(t && t.detections) {
+    t.detections.forEach((d,i)=>{
+      let bx = ox + d.bbox.x*imgW*scale;
+      let by = oy + d.bbox.y*imgH*scale;
+      let bw = d.bbox.w*imgW*scale;
+      let bh = d.bbox.h*imgH*scale;
+      let isSel = S.selectedBox===i;
+      let isModified = d.status==='human_new'||d.status==='human_modified';
+
+      ctx.strokeStyle = d.color;
+      ctx.lineWidth = isSel?3:(isModified?2:2);
+      ctx.setLineDash(isModified?[6,3]:[]);
+      ctx.strokeRect(bx, by, bw, bh);
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = isModified?'rgba(249,115,22,0.15)':'rgba(255,255,255,0.03)';
+      ctx.fillRect(bx,by,bw,bh);
+
+      // Label
+      let label = `${d.sceneName} ${(d.confidence*100).toFixed(0)}%`;
+      let srcLabel = d.source||'YOLO';
+      if(d.status==='human_new') srcLabel='人工';
+      if(d.status==='human_modified') srcLabel='人工修改';
+      ctx.font = '10px "Fira Sans",sans-serif';
+      let lw = ctx.measureText(label).width+8;
+      ctx.fillStyle = d.color; ctx.fillRect(bx, by-18, lw, 16);
+      ctx.fillStyle = '#fff'; ctx.fillText(label, bx+4, by-5);
+
+      // Source badge
+      let sw = ctx.measureText(srcLabel).width+6;
+      ctx.fillStyle = srcLabel==='YOLO'?'#6b7280':srcLabel==='YOLO+VLM'?'#3b82f6':'#f97316';
+      ctx.fillRect(bx+lw+2, by-18, sw, 16);
+      ctx.fillStyle = '#fff'; ctx.fillText(srcLabel, bx+lw+5, by-5);
+
+      // Handles when selected
+      if(isSel && S.editMode) {
+        ctx.fillStyle='#fff';ctx.strokeStyle='#3B82F6';ctx.lineWidth=1;
+        [[bx,by],[bx+bw,by],[bx,by+bh],[bx+bw,by+bh],
+         [bx+bw/2,by],[bx+bw/2,by+bh],[bx,by+bh/2],[bx+bw,by+bh/2]].forEach(([hx,hy])=>{
+          ctx.fillRect(hx-4,hy-4,8,8);ctx.strokeRect(hx-4,hy-4,8,8);
+        });
+      }
+    });
+  }
+}
+
+// ====== REVIEW INTERACTIONS ======
+function selectBox(idx) {
+  S.selectedBox = S.selectedBox===idx?-1:idx;
+  updateReviewUI();
+  drawCanvas();
+}
+
+function deleteDetection(idx) {
+  let t = S.reviewTasks[S.reviewTaskIdx];
+  if(!t) return;
+  S.undoStack.push({idx:idx, data:JSON.parse(JSON.stringify(t.detections[idx]))});
+  let deleted = t.detections.splice(idx, 1)[0];
+  if(S.selectedBox>=t.detections.length) S.selectedBox = t.detections.length-1;
+  if(t.detections.length===0) S.selectedBox=-1;
+  updateReviewUI();
+  drawCanvas();
+  toast(`已删除标注: ${deleted.sceneName}`,'i');
+}
+window.deleteDetection = deleteDetection;
+
+function updateDetectionField(idx, field, value) {
+  let t = S.reviewTasks[S.reviewTaskIdx];
+  if(!t||!t.detections[idx]) return;
+  t.detections[idx][field] = value;
+  if(t.detections[idx].status==='ai') t.detections[idx].status = 'human_modified';
+  toast(field==='description'?'隐患描述已更新':'整改建议已更新', 's');
+}
+window.updateDetectionField = updateDetectionField;
+
+function doReview(action) {
+  let t = S.reviewTasks[S.reviewTaskIdx];
+  if(!t) return;
+  switch(action) {
+    case 'confirm':
+      t.status = 'completed';
+      t.reviewHistory = t.reviewHistory||[];
+      t.reviewHistory.push({action:'confirm', time:new Date().toLocaleString(), user:S.user});
+      toast('已确认隐患，任务完成','s');
+      break;
+    case 'reject':
+      t.status = 'excluded';
+      t.reviewHistory = t.reviewHistory||[];
+      t.reviewHistory.push({action:'exclude', time:new Date().toLocaleString(), user:S.user});
+      toast('已排除误报，样本入难例库','w');
+      break;
+    case 'recapture':
+      toast('已触发重新抓拍，请稍后复核','i');
+      break;
+    case 'desc':
+      toast('描述修改功能（原型演示）','i');
+      break;
+  }
+  updateReviewUI();
+  updateReviewStats();
+  if(S.autoNext && (action==='confirm'||action==='reject')) {
+    if(S.reviewTaskIdx < S.reviewTasks.length-1) {
+      setTimeout(()=>{ S.reviewTaskIdx++; S.selectedBox=-1; S.editMode=false; updateReviewUI(); drawCanvas(); }, 300);
+    } else {
+      setTimeout(()=>{ toast('所有任务已完成！','s'); }, 300);
+    }
+  }
+}
+window.doReview = doReview;
+
+function toggleEditMode() {
+  if(S.user==='viewer'){toast('查看者无编辑权限','w');return;}
+  S.editMode = !S.editMode;
+  S.selectedBox = S.editMode?0:-1;
+  document.getElementById('btnEditMode').classList.toggle('active', S.editMode);
+  let et = document.getElementById('editToolbar');
+  et.classList.toggle('show', S.editMode);
+  if(S.editMode) {
+    et.innerHTML = '<span style="color:#BFBFBF;font-size:10px;padding:4px">类别:</span>' +
+      SCENES.map((s,i)=>`<button class="${S.editScene===s.id?'sel':''}" onclick="S.editScene=${s.id};toggleEditMode();toggleEditMode();drawCanvas();document.getElementById('editToolbar').querySelectorAll('button').forEach(b=>b.classList.toggle('sel',b.textContent.includes('${s.name}')));">${i+1}.${s.name.substring(0,4)}</button>`).join('') +
+      '<span style="margin-left:8px">|</span><button onclick="if(S.selectedBox>=0){let t=S.reviewTasks[S.reviewTaskIdx];if(t){S.undoStack.push({idx:S.selectedBox,data:JSON.parse(JSON.stringify(t.detections[S.selectedBox]))});t.detections.splice(S.selectedBox,1);S.selectedBox=-1;updateReviewUI();drawCanvas();toast(\'已删除标注框\',\'i\');}}">删除</button>' +
+      '<button onclick="undoEdit()">撤销('+S.undoStack.length+')</button>' +
+      '<button onclick="saveEdits()">保存修改</button>' +
+      '<button onclick="toggleEditMode()">退出</button>';
+  }
+  updateReviewUI();
+  drawCanvas();
+}
+
+function saveEdits() {
+  let t = S.reviewTasks[S.reviewTaskIdx];
+  if(t) {
+    t.detections.forEach(d=>{if(d.status==='human_new'||d.status==='human_modified'){d.status='human_modified';}});
+  }
+  S.undoStack = [];
+  toast('标注修改已保存','s');
+}
+
+function undoEdit() {
+  if(S.undoStack.length===0){toast('无可撤销操作','w');return;}
+  let op = S.undoStack.pop();
+  let t = S.reviewTasks[S.reviewTaskIdx];
+  if(t){t.detections.splice(op.idx,0,op.data);}
+  updateReviewUI(); drawCanvas();
+  toast('已撤销','i');
+}
+window.undoEdit = undoEdit;
+
+function reviewZoom(delta) {
+  S.reviewZoom = Math.max(0.3, Math.min(3, S.reviewZoom+delta));
+  drawCanvas();
+}
+function reviewFit() { S.reviewZoom=1; S.reviewOffX=0; S.reviewOffY=0; drawCanvas(); }
+function reviewRatio(r) { S.reviewZoom=r; S.reviewOffX=0; S.reviewOffY=0; drawCanvas(); }
+
+// ====== CANVAS EVENTS ======
+document.addEventListener('DOMContentLoaded',()=>{
+  initMockData();
+  document.getElementById('reviewCanvas').addEventListener('wheel',(e)=>{
+    if(!S.reviewOpen) return;
+    e.preventDefault();
+    let delta = e.deltaY>0?-0.08:0.08;
+    reviewZoom(delta);
+  });
+  document.getElementById('reviewCanvas').addEventListener('mousedown',(e)=>{
+    if(!S.reviewOpen) return;
+    if(e.button===2||(e.altKey&&e.button===0)){S.isPanning=true;S.panStart={x:e.clientX-S.reviewOffX,y:e.clientY-S.reviewOffY};return;}
+    if(!S.editMode) return;
+    let canvas = document.getElementById('reviewCanvas');
+    let rect = canvas.getBoundingClientRect();
+    S.isDrawing = true;
+    S.drawStart = {x:(e.clientX-rect.left)/canvas.width,y:(e.clientY-rect.top)/canvas.height};
+  });
+  document.getElementById('reviewCanvas').addEventListener('mousemove',(e)=>{
+    if(!S.reviewOpen) return;
+    if(S.isPanning){S.reviewOffX=e.clientX-S.panStart.x;S.reviewOffY=e.clientY-S.panStart.y;drawCanvas();return;}
+    if(!S.isDrawing) return;
+    let canvas = document.getElementById('reviewCanvas');
+    let rect = canvas.getBoundingClientRect();
+    let mx=(e.clientX-rect.left)/canvas.width,my=(e.clientY-rect.top)/canvas.height;
+    drawCanvas();
+    let ctx=canvas.getContext('2d');
+    ctx.strokeStyle='#f97316';ctx.lineWidth=2;ctx.setLineDash([6,3]);
+    ctx.strokeRect(S.drawStart.x*canvas.width,S.drawStart.y*canvas.height,(mx-S.drawStart.x)*canvas.width,(my-S.drawStart.y)*canvas.height);
+    ctx.setLineDash([]);
+  });
+  document.getElementById('reviewCanvas').addEventListener('mouseup',(e)=>{
+    if(S.isPanning){S.isPanning=false;return;}
+    if(!S.isDrawing) return;
+    S.isDrawing=false;
+    let canvas=document.getElementById('reviewCanvas');
+    let rect=canvas.getBoundingClientRect();
+    let mx=(e.clientX-rect.left)/canvas.width,my=(e.clientY-rect.top)/canvas.height;
+    let area=canvas.width*canvas.height;
+    let w=Math.abs((mx-S.drawStart.x)*canvas.width),h=Math.abs((my-S.drawStart.y)*canvas.height);
+    if(w*h<area*0.001) return;
+    let nx=Math.min(S.drawStart.x*canvas.width,(mx)*canvas.width)/canvas.width;
+    let ny=Math.min(S.drawStart.y*canvas.height,(my)*canvas.height)/canvas.height;
+    let nw=w/canvas.width,nh=h/canvas.height;
+    let sc=SCENES.find(s=>s.id===S.editScene)||SCENES[0];
+    let t=S.reviewTasks[S.reviewTaskIdx];
+    if(t){
+      t.detections.push({id:t.detections.length,sceneId:sc.id,sceneName:sc.name,color:sc.color,bbox:{x:nx,y:ny,w:nw,h:nh},confidence:1.0,source:'human',description:'人工新增标注',suggestion:'请填写整改建议',status:'human_new'});
+      S.selectedBox=t.detections.length-1;
+      updateReviewUI();drawCanvas();toast('已添加新标注框','s');
+    }
+  });
+  document.getElementById('reviewCanvas').addEventListener('contextmenu',(e)=>e.preventDefault());
+});
+
+// ====== KEYBOARD ======
+document.addEventListener('keydown',(e)=>{
+  if(!S.reviewOpen) return;
+  if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'||e.target.tagName==='TEXTAREA') return;
+  if(e.key==='Enter'&&!S.editMode){e.preventDefault();doReview('confirm');}
+  else if(e.key==='Escape'&&!S.editMode){e.preventDefault();doReview('reject');}
+  else if(e.key==='Delete'&&S.editMode&&S.selectedBox>=0){e.preventDefault();
+    let t=S.reviewTasks[S.reviewTaskIdx];if(t){S.undoStack.push({idx:S.selectedBox,data:JSON.parse(JSON.stringify(t.detections[S.selectedBox]))});t.detections.splice(S.selectedBox,1);S.selectedBox=-1;updateReviewUI();drawCanvas();toast('已删除标注框','i');}}
+  else if(e.ctrlKey&&e.key==='z'&&S.editMode){e.preventDefault();undoEdit();}
+  else if(e.key>='1'&&e.key<='9'&&S.editMode){e.preventDefault();let id=parseInt(e.key);let sc=SCENES.find(s=>s.id===id);if(sc){S.editScene=id;toast(`已选择: ${sc.name}`,'i');}}
+  else if(e.key==='ArrowRight'&&!S.editMode){e.preventDefault();if(S.reviewTaskIdx<S.reviewTasks.length-1){S.reviewTaskIdx++;S.selectedBox=-1;updateReviewUI();drawCanvas();}}
+  else if(e.key==='ArrowLeft'&&!S.editMode){e.preventDefault();if(S.reviewTaskIdx>0){S.reviewTaskIdx--;S.selectedBox=-1;updateReviewUI();drawCanvas();}}
+  else if(e.key==='?'){e.preventDefault();toast('快捷键: Enter确认 Esc排除 1-9选类别 Delete删框 Ctrl+Z撤销 ←→翻页 滚轮缩放','i');}
+});
+
+// ====== AUTH ======
+function doLogin() {
+  let u = document.getElementById('loginUser').value;
+  let role = document.getElementById('loginRole').value;
+  if(!u){toast('请输入用户名','w');return;}
+  S.user = role;
+  document.getElementById('loginPg').style.display = 'none';
+  document.getElementById('appShell').classList.add('show');
+  document.getElementById('topAvatar').textContent = u[0].toUpperCase();
+  document.getElementById('topName').textContent = u;
+  navTo('dashboard');
+  toast(`欢迎，${u} (${role==='reviewer'?'复核员':'查看者'})`,'s');
+}
+
+function doLogout() {
+  S.user = null;
+  document.getElementById('appShell').classList.remove('show');
+  document.getElementById('loginPg').style.display = 'flex';
+  toast('已退出登录','i');
+}
+
+// ====== GLOBAL ======
+function toast(msg,type) {
+  let c = document.getElementById('toastCtn');
+  let t = document.createElement('div');
+  t.className = 'toast toast-'+(type||'i');
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(()=>{t.remove();},2200);
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('.menu-item').forEach(el=>{
+    el.addEventListener('click',()=>{navTo(el.dataset.page);});
+  });
+});
+
+</script>
+</body>
+</html>
