@@ -1779,7 +1779,7 @@ function renderReviewTasks() {
   html+='<div class="metric-card" style="text-align:center;padding:14px"><div class="mc-value" style="font-size:22px;color:#F57A00">'+filtered.length.toLocaleString()+'</div><div class="mc-label">筛选合计</div></div></div>';
 
   // Filter bar - single row
-  html+='<div class="panel"><div class="panel-header"><span>复核任务列表 <button class="btn btn-sm btn-warning" onclick="batchConfirmAll()" style="margin-left:12px">默认复核</button></span><button class="btn btn-sm btn-primary" onclick="openReviewFromEntry()">进入复核工作台 &rarr;</button></div><div class="panel-body">';
+  html+='<div class="panel"><div class="panel-header">复核任务列表 <button class="btn btn-sm btn-primary" onclick="openReviewFromEntry()">进入复核工作台 &rarr;</button></div><div class="panel-body">';
   html+='<div class="filter-bar" style="flex-wrap:wrap;gap:6px">';
   html+='<input placeholder="搜索项目/摄像头..." value="'+S._rvSearch+'" oninput="S._rvSearch=this.value" style="width:160px">';
   html+='<input type="date" value="'+S._rvDateFrom+'" onchange="S._rvDateFrom=this.value" style="width:130px;padding:6px 8px;border:1px solid #D9D9D9;border-radius:4px;font-size:12px;font-family:inherit" title="开始日期">';
@@ -2954,6 +2954,31 @@ function openReview(taskId) {
   updateReviewUI();
   drawCanvas();
 }
+
+function batchConfirmWorkbench() {
+  let pending = S.reviewTasks.filter(t=>t.status==='pending_review');
+  if(pending.length===0){toast('当前没有待复核任务','w');return;}
+  let html='<h3>默认复核确认</h3>';
+  html+='<div style="font-size:12px;color:#8C8C8C;margin-bottom:14px">将当前工作台中所有待复核任务按AI标记一键确认</div>';
+  html+='<div style="background:#FFF7E6;border:1px solid #F59E0B;border-radius:8px;padding:14px;margin-bottom:14px">';
+  html+='<div style="font-size:13px;font-weight:600;color:#F57A00;margin-bottom:8px">确认摘要</div>';
+  html+='<div style="font-size:12px">待复核: <b>'+pending.length.toLocaleString()+'</b> 张 | 隐患: <b>'+pending.reduce((s,t)=>s+t.dangerCount,0)+'</b> 处</div>';
+  html+='<div style="font-size:10px;color:#8C8C8C;margin-top:8px">全部采用AI原始标记，确认所有隐患成立</div></div>';
+  html+='<div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-warning" onclick="window._doWbBatch();closeModal()">确认</button></div>';
+  showModal(html);
+  window._wbPending = pending;
+}
+window._doWbBatch = function(){
+  let pending=window._wbPending||[];
+  pending.forEach(t=>{
+    t.status='completed';
+    t.detections.forEach(d=>{d.confirmed=true;});
+    let round=S.rounds.find(r=>r.id===t.roundId);
+    if(round){round.stats.completedReview++;round.stats.pendingReview--;}
+  });
+  updateReviewUI();
+  toast('已完成 '+pending.length.toLocaleString()+' 条默认复核','s');
+};
 
 function closeReview() {
   S.reviewOpen = false;
