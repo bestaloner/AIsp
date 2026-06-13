@@ -1694,6 +1694,50 @@ function roundStatusBadge(s) {
   return `<span class="tag ${m.c}">${m.t}</span>`;
 }
 
+function batchConfirmAll() {
+  let allTasks=[];
+  S.rounds.forEach(r=>{S.tasks.filter(t=>t.roundId===r.id).forEach(t=>{allTasks.push({...t,roundName:r.name});});});
+  let filtered=allTasks;
+  if(S._rvRound&&S._rvRound!=='all') filtered=filtered.filter(t=>t.roundId===S._rvRound);
+  if(S._rvStatus) filtered=filtered.filter(t=>t.status===S._rvStatus);
+  if(S._rvSearch){let q=S._rvSearch.toLowerCase();filtered=filtered.filter(t=>t.projectName.toLowerCase().includes(q));}
+  let pending=filtered.filter(t=>t.status==='pending_review');
+  if(pending.length===0){toast('没有待复核任务','w');return;}
+  let html='<h3>默认复核确认</h3>';
+  html+='<div style="font-size:12px;color:#8C8C8C;margin-bottom:14px">将按照AI标记的隐患，一键确认当前筛选条件下的所有待复核任务</div>';
+  html+='<div style="background:#FFF7E6;border:1px solid #F59E0B;border-radius:8px;padding:14px;margin-bottom:14px">';
+  html+='<div style="font-size:13px;font-weight:600;color:#F57A00;margin-bottom:8px">确认操作摘要</div>';
+  html+='<div style="display:flex;gap:24px;font-size:12px"><div>待复核任务: <b>'+pending.length.toLocaleString()+'</b> 条</div><div>涉及隐患: <b>'+pending.reduce((s,t)=>s+t.dangerCount,0)+'</b> 处</div><div>涉及项目: <b>'+[...new Set(pending.map(t=>t.projectName))].length+'</b> 个</div></div>';
+  html+='<div style="font-size:10px;color:#8C8C8C;margin-top:8px">默认复核将全部采用AI原始标记，确认所有隐患成立</div>';
+  html+='</div>';
+  html+='<div style="display:flex;gap:8px;justify-content:flex-end">';
+  html+='<button class="btn btn-outline" onclick="closeModal()">取消</button>';
+  html+='<button class="btn btn-warning" id="btnBatchDo" onclick="window._doBatchConfirm('+pending.length+')">确认一键复核</button>';
+  html+='</div>';
+  showModal(html);
+  window._batchPending = pending;
+}
+window._doBatchConfirm = function(count) {
+  let btn=document.getElementById('btnBatchDo');
+  if(btn){btn.disabled=true;btn.textContent='处理中...';}
+  let pending=window._batchPending||[];
+  // Mark all pending tasks as completed, detections as confirmed
+  pending.forEach(t=>{
+    t.status='completed';
+    t.detections.forEach(d=>{d.confirmed=true;});
+    // Update round stats
+    let round=S.rounds.find(r=>r.id===t.roundId);
+    if(round){
+      round.stats.completedReview++; round.stats.pendingReview--;
+    }
+  });
+  setTimeout(()=>{
+    closeModal();
+    toast('已完成 '+count.toLocaleString()+' 条默认复核','s');
+    renderPage('review-entry');
+  },800);
+};
+
 function renderReviewTasks() {
   if(!S._rvRound) S._rvRound='all';
   if(!S._rvSearch) S._rvSearch='';
@@ -1735,7 +1779,7 @@ function renderReviewTasks() {
   html+='<div class="metric-card" style="text-align:center;padding:14px"><div class="mc-value" style="font-size:22px;color:#F57A00">'+filtered.length.toLocaleString()+'</div><div class="mc-label">筛选合计</div></div></div>';
 
   // Filter bar - single row
-  html+='<div class="panel"><div class="panel-header">复核任务列表 <button class="btn btn-sm btn-primary" onclick="openReviewFromEntry()">进入复核工作台 &rarr;</button></div><div class="panel-body">';
+  html+='<div class="panel"><div class="panel-header">复核任务列表 <button class="btn btn-sm btn-warning" onclick="batchConfirmAll()" style="margin-right:8px">默认复核</button><button class="btn btn-sm btn-primary" onclick="openReviewFromEntry()">进入复核工作台 &rarr;</button></div><div class="panel-body">';
   html+='<div class="filter-bar" style="flex-wrap:wrap;gap:6px">';
   html+='<input placeholder="搜索项目/摄像头..." value="'+S._rvSearch+'" oninput="S._rvSearch=this.value" style="width:160px">';
   html+='<input type="date" value="'+S._rvDateFrom+'" onchange="S._rvDateFrom=this.value" style="width:130px;padding:6px 8px;border:1px solid #D9D9D9;border-radius:4px;font-size:12px;font-family:inherit" title="开始日期">';
