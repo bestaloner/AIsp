@@ -1941,11 +1941,12 @@ function renderDashboard() {
       let paged=dayTasks.slice(pg*pp,(pg+1)*pp);
       html+='<div class="panel" style="margin-top:14px"><div class="panel-header" style="justify-content:space-between"><div style="display:flex;align-items:center;gap:12px"><span>Day '+sd+' &middot; '+(dayData?dayData.date:'')+' — 任务明细</span></div><span style="font-size:11px;color:#BFBFBF">共 '+dayTasks.length+' 条任务</span></div><div class="panel-body">';
       html+='<div class="filter-bar"><input placeholder="搜索项目..." value="'+sq+'" oninput="S._dbTaskSearch=this.value;S._dbTaskPg=0;renderPage(\'dashboard\')"><select onchange="S._dbTaskFilter=this.value;S._dbTaskPg=0;renderPage(\'dashboard\')"><option value="">全部状态</option><option value="pending_review"'+(sf==='pending_review'?' selected':'')+'>待复核</option><option value="completed"'+(sf==='completed'?' selected':'')+'>已完成</option><option value="failed"'+(sf==='failed'?' selected':'')+'>失败</option></select></div>';
-      html+='<table><thead><tr><th>项目</th><th>摄像头</th><th>拍摄时间</th><th>隐患数</th><th>状态</th><th>操作</th></tr></thead><tbody>';
+      html+='<table><thead><tr><th>项目</th><th>摄像头</th><th>拍摄时间</th><th>隐患数</th><th>状态</th><th>复核状态</th><th>操作</th></tr></thead><tbody>';
       paged.forEach(t=>{
-        html+='<tr><td>'+t.projectName+'</td><td>'+t.cameraName+'</td><td style="font-size:11px;color:#8C8C8C">'+t.time+'</td><td style="color:'+(t.dangerCount>0?'#E2091C':'#BFBFBF')+';font-weight:600">'+t.dangerCount+'</td><td>'+statusBadge(t.status)+'</td><td>'+(t.status==='pending_review'?'<button class="btn btn-sm btn-primary" onclick="openReview('+t.id+')">复核</button>':t.status==='completed'?'<button class="btn btn-sm btn-outline" onclick="openReview('+t.id+')">查看</button>':'—')+'</td></tr>';
+        let reviewStatus=t.status==='completed'?'<span style="color:#52C41A;font-weight:600">已复核</span>':t.status==='excluded'?'<span style="color:#8C8C8C">已排除</span>':t.status==='pending_review'?'<span style="color:#F57A00">待复核</span>':'<span style="color:#BFBFBF">—</span>';
+        html+='<tr><td>'+t.projectName+'</td><td>'+t.cameraName+'</td><td style="font-size:11px;color:#8C8C8C">'+t.time+'</td><td style="color:'+(t.dangerCount>0?'#E2091C':'#BFBFBF')+';font-weight:600">'+t.dangerCount+'</td><td>'+statusBadge(t.status)+'</td><td>'+reviewStatus+'</td><td>'+(t.status==='pending_review'?'<button class="btn btn-sm btn-primary" onclick="openReview('+t.id+')">复核</button>':t.status==='completed'?'<button class="btn btn-sm btn-outline" onclick="viewTaskImage('+t.id+')">查看</button>':'—')+'</td></tr>';
       });
-      if(paged.length===0) html+='<tr><td colspan="6" style="text-align:center;color:#BFBFBF;padding:20px">暂无匹配任务</td></tr>';
+      if(paged.length===0) html+='<tr><td colspan="7" style="text-align:center;color:#BFBFBF;padding:20px">暂无匹配任务</td></tr>';
       html+='</tbody></table>';
       if(dayTasks.length>pp){
         html+='<div class="pager"><select onchange="S._dbTaskPage=parseInt(this.value);S._dbTaskPg=0;renderPage(\'dashboard\')"><option value="10" '+(pp===10?'selected':'')+'>10条/页</option><option value="20" '+(pp===20?'selected':'')+'>20条/页</option></select>';
@@ -1967,6 +1968,38 @@ function renderDashboard() {
   }
 
   return html;
+}
+
+function viewTaskImage(taskId) {
+  let t = S.tasks.find(x=>x.id===taskId);
+  if(!t) return;
+  let html = '<h3>'+t.projectName+' — '+t.cameraName+'</h3>';
+  html += '<div style="font-size:11px;color:#8C8C8C;margin-bottom:12px">抓拍时间: '+t.time+' | Day '+t.roundDay+' '+t.roundAmpm+' | AI检测隐患: '+t.dangerCount+' 处</div>';
+  html += '<div style="text-align:center;background:#111;border-radius:8px;padding:20px;margin-bottom:12px">';
+  html += '<div style="width:100%;height:360px;background:linear-gradient(135deg,#2a2a3e 0%,#1a1a2e 50%,#0d1b2a 100%);border-radius:4px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden">';
+  html += '<div style="text-align:center;color:#8C8C8C">';
+  html += '<div style="font-size:48px;margin-bottom:8px">📷</div>';
+  html += '<div style="font-size:13px">抓拍照片预览</div>';
+  html += '<div style="font-size:10px;margin-top:4px">'+t.projectName+' · '+t.cameraName+'</div>';
+  if(t.detections.length>0){
+    html += '<div style="margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">';
+    t.detections.forEach(d=>{
+      let sc=SCENES.find(s=>s.id===d.sceneId)||{name:'未知',color:'#888'};
+      html += '<span style="background:'+sc.color+'20;color:'+sc.color+';border:1px solid '+sc.color+'40;padding:3px 10px;border-radius:12px;font-size:10px;font-weight:600">'+sc.name+' '+(d.confidence*100).toFixed(0)+'%</span>';
+    });
+    html += '</div>';
+  }
+  html += '</div></div></div>';
+  html += '<div style="font-size:11px;color:#8C8C8C;margin-bottom:8px">AI检测详情 ('+t.detections.length+' 处)</div>';
+  html += '<table><thead><tr><th>隐患类别</th><th>置信度</th><th>判定来源</th><th>状态</th></tr></thead><tbody>';
+  t.detections.forEach(d=>{
+    let sc=SCENES.find(s=>s.id===d.sceneId)||{name:'未知',color:'#888'};
+    html += '<tr><td><span class="cs-dot" style="background:'+sc.color+';display:inline-block;margin-right:4px"></span>'+sc.name+'</td><td style="font-weight:600">'+(d.confidence*100).toFixed(1)+'%</td><td>'+(d.source==='YOLO'?'<span class="badge badge-yolo">YOLO</span>':'<span class="badge badge-vlm">VLM</span>')+'</td><td>'+(d.confirmed?'<span style="color:#52C41A">已确认</span>':'<span style="color:#F57A00">待确认</span>')+'</td></tr>';
+  });
+  if(t.detections.length===0) html += '<tr><td colspan="4" style="text-align:center;color:#BFBFBF">无AI检测结果</td></tr>';
+  html += '</tbody></table>';
+  html += '<div style="margin-top:14px;text-align:right"><button class="btn btn-sm btn-outline" onclick="closeModal()">关闭</button></div>';
+  showModal(html);
 }
 
 function renderTasks() {
