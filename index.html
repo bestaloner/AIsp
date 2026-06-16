@@ -1944,7 +1944,7 @@ function renderDashboard() {
       html+='<table><thead><tr><th>项目</th><th>摄像头</th><th>拍摄时间</th><th>隐患数</th><th>状态</th><th>复核状态</th><th>操作</th></tr></thead><tbody>';
       paged.forEach(t=>{
         let reviewStatus=t.status==='completed'?'<span style="color:#52C41A;font-weight:600">已复核</span>':t.status==='excluded'?'<span style="color:#8C8C8C">已排除</span>':t.status==='pending_review'?'<span style="color:#F57A00">待复核</span>':'<span style="color:#BFBFBF">—</span>';
-        html+='<tr><td>'+t.projectName+'</td><td>'+t.cameraName+'</td><td style="font-size:11px;color:#8C8C8C">'+t.time+'</td><td style="color:'+(t.dangerCount>0?'#E2091C':'#BFBFBF')+';font-weight:600">'+t.dangerCount+'</td><td>'+statusBadge(t.status)+'</td><td>'+reviewStatus+'</td><td>'+(t.status==='pending_review'?'<button class="btn btn-sm btn-primary" onclick="openReview('+t.id+')">复核</button>':t.status==='completed'?'<button class="btn btn-sm btn-outline" onclick="viewTaskImage('+t.id+')">查看</button>':'—')+'</td></tr>';
+        html+='<tr><td>'+t.projectName+'</td><td>'+t.cameraName+'</td><td style="font-size:11px;color:#8C8C8C">'+t.time+'</td><td style="color:'+(t.dangerCount>0?'#E2091C':'#BFBFBF')+';font-weight:600">'+t.dangerCount+'</td><td>'+statusBadge(t.status)+'</td><td>'+reviewStatus+'</td><td>'<button class="btn btn-sm btn-outline" onclick="viewTaskImage('+t.id+')">查看</button></td></tr>';
       });
       if(paged.length===0) html+='<tr><td colspan="7" style="text-align:center;color:#BFBFBF;padding:20px">暂无匹配任务</td></tr>';
       html+='</tbody></table>';
