@@ -1551,11 +1551,12 @@ function initMockData() {
     let c = S.cameras.filter(c=>c.projectId===p.id)[0] || S.cameras[0];
     let hasDanger = Math.random()>0.4;
     let nDanger = hasDanger ? Math.floor(Math.random()*5)+1 : 0;
-    let status = Math.random()>0.5?'completed':(Math.random()>0.3?'pending_review':'inferring');
+    let status = Math.random()>0.5?'inferred':(Math.random()>0.3?'pending_infer':'inferring');
+    let reviewStatus = status==='inferred'?(Math.random()>0.3?(Math.random()>0.2?'excluded':'reviewed'):'pending'):null;
     let dp = taskDp[Math.floor(Math.random()*taskDp.length)]||taskDp[0];
     S.tasks.push({id:i+1, projectId:p.id, projectName:p.name, cameraId:c.id, cameraName:c.name, puid:c.puid,
       roundId:currentRound.id, roundDay:dp.day, roundAmpm:Math.random()>0.5?'AM':'PM',
-      status, dangerCount:nDanger, detections:[], reviewHistory:[],
+      status, reviewStatus, dangerCount:nDanger, detections:[], reviewHistory:[],
       time:dp.date+' '+(8+Math.floor(Math.random()*6))+':'+String(Math.floor(Math.random()*60)).padStart(2,'0')+':'+String(Math.floor(Math.random()*60)).padStart(2,'0')});
     if(hasDanger) {
       for(let d=0;d<nDanger;d++) {
@@ -1572,7 +1573,7 @@ function initMockData() {
   }
 
   S.reviewRound = currentRound.id;
-  S.reviewTasks = S.tasks.filter(t=>t.roundId===currentRound.id && (t.status==='pending_review'||t.status==='completed'||t.status==='excluded'));
+  S.reviewTasks = S.tasks.filter(t=>t.roundId===currentRound.id && t.status==='inferred');
   updateReviewStats();
 
   S.feedbackItems = [];
@@ -1699,9 +1700,9 @@ function batchConfirmAll() {
   S.rounds.forEach(r=>{S.tasks.filter(t=>t.roundId===r.id).forEach(t=>{allTasks.push({...t,roundName:r.name});});});
   let filtered=allTasks;
   if(S._rvRound&&S._rvRound!=='all') filtered=filtered.filter(t=>t.roundId===S._rvRound);
-  if(S._rvStatus) filtered=filtered.filter(t=>t.status===S._rvStatus);
+  if(S._rvStatus) filtered=filtered.filter(t=>t.status===S._rvStatus||t.reviewStatus===S._rvStatus);
   if(S._rvSearch){let q=S._rvSearch.toLowerCase();filtered=filtered.filter(t=>t.projectName.toLowerCase().includes(q));}
-  let pending=filtered.filter(t=>t.status==='pending_review');
+  let pending=filtered.filter(t=>t.reviewStatus==='pending');
   if(pending.length===0){toast('没有待复核任务','w');return;}
   let html='<h3>默认复核确认</h3>';
   html+='<div style="font-size:12px;color:#8C8C8C;margin-bottom:14px">将按照AI标记的隐患，一键确认当前筛选条件下的所有待复核任务</div>';
@@ -1723,7 +1724,7 @@ window._doBatchConfirm = function(count) {
   let pending=window._batchPending||[];
   // Mark all pending tasks as completed, detections as confirmed
   pending.forEach(t=>{
-    t.status='completed';
+    t.reviewStatus='reviewed';
     t.detections.forEach(d=>{d.confirmed=true;});
     // Update round stats
     let round=S.rounds.find(r=>r.id===t.roundId);
@@ -1755,7 +1756,7 @@ function renderReviewTasks() {
   // Apply filters
   let filtered=allTasks;
   if(S._rvRound!=='all') filtered=filtered.filter(t=>t.roundId===S._rvRound);
-  if(S._rvStatus) filtered=filtered.filter(t=>t.status===S._rvStatus);
+  if(S._rvStatus) filtered=filtered.filter(t=>t.status===S._rvStatus||t.reviewStatus===S._rvStatus);
   if(S._rvDateFrom) filtered=filtered.filter(t=>t.time>=S._rvDateFrom);
   if(S._rvDateTo) filtered=filtered.filter(t=>t.time<=S._rvDateTo+' 23:59:59');
   if(S._rvSearch){
@@ -1764,8 +1765,8 @@ function renderReviewTasks() {
   }
   // Stats
   let pending=filtered.filter(t=>t.status==='pending_review').length;
-  let completed=filtered.filter(t=>t.status==='completed').length;
-  let excluded=filtered.filter(t=>t.status==='excluded').length;
+  let completed=filtered.filter(t=>t.reviewStatus==='reviewed').length;
+  let excluded=filtered.filter(t=>t.reviewStatus==='excluded').length;
   // Pagination
   let pp=15, tp=Math.ceil(filtered.length/pp);
   if(S._rvPage>=tp&&tp>0) S._rvPage=0;
@@ -1796,14 +1797,14 @@ function renderReviewTasks() {
   html+='</div>';
 
   // Table
-  html+='<div style="margin-top:12px"><table><thead><tr><th>项目</th><th>摄像头</th><th>所属轮次</th><th>日期</th><th>隐患数</th><th>状态</th><th>操作</th></tr></thead><tbody>';
+  html+='<div style="margin-top:12px"><table><thead><tr><th>项目</th><th>摄像头</th><th>所属轮次</th><th>日期</th><th>隐患数</th><th>推理状态</th><th>复核状态</th><th>操作</th></tr></thead><tbody>';
   paged.forEach(t=>{
     let st;
-    if(t.status==='pending_review') st='<span class="badge badge-warning">待复核</span>';
-    else if(t.status==='completed') st='<span class="badge badge-success">已完成</span>';
-    else if(t.status==='excluded') st='<span class="badge" style="background:#F5F5F5;color:#8C8C8C">已排除</span>';
-    else st=statusBadge(t.status);
-    html+='<tr><td>'+t.projectName+'</td><td>'+t.cameraName+'</td><td style="font-size:11px;color:#8C8C8C">'+t.roundName+'</td><td style="font-size:11px;color:#8C8C8C">'+t.time+'</td><td style="color:'+(t.dangerCount>0?'#E2091C':'#BFBFBF')+';font-weight:600">'+t.dangerCount+'</td><td>'+st+'</td><td>'+(t.status==='pending_review'?'<button class="btn btn-sm btn-primary" onclick="openReview('+t.id+')">复核</button>':t.status==='completed'?'<button class="btn btn-sm btn-outline" onclick="openReview('+t.id+')">查看</button>':'<button class="btn btn-sm btn-outline" onclick="openReview('+t.id+')">查看</button>')+'</td></tr>';
+    if(t.reviewStatus==='reviewed') st='<span class="badge badge-success">已复核</span>';
+    else if(t.reviewStatus==='excluded') st='<span class="badge" style="background:#F5F5F5;color:#8C8C8C">已排除</span>';
+    else if(t.reviewStatus==='pending') st='<span class="badge badge-warning">待复核</span>';
+    else st='<span class="badge" style="background:#F5F5F5;color:#8C8C8C">—</span>';
+    html+='<tr><td>'+t.projectName+'</td><td>'+t.cameraName+'</td><td style="font-size:11px;color:#8C8C8C">'+t.roundName+'</td><td style="font-size:11px;color:#8C8C8C">'+t.time+'</td><td style="color:'+(t.dangerCount>0?'#E2091C':'#BFBFBF')+';font-weight:600">'+t.dangerCount+'</td><td>'+statusBadge(t.status)+'</td><td>'+st+'</td><td><button class="btn btn-sm btn-outline" onclick="openReview('+t.id+')">进入复核</button></td></tr>';
   });
   if(paged.length===0) html+='<tr><td colspan="7" style="text-align:center;color:#BFBFBF;padding:30px">暂无匹配的复核任务</td></tr>';
   html+='</tbody></table>';
@@ -1940,11 +1941,12 @@ function renderDashboard() {
       if(pg>=tp&&tp>0) pg=0; S._dbTaskPg=pg;
       let paged=dayTasks.slice(pg*pp,(pg+1)*pp);
       html+='<div class="panel" style="margin-top:14px"><div class="panel-header" style="justify-content:space-between"><div style="display:flex;align-items:center;gap:12px"><span>Day '+sd+' &middot; '+(dayData?dayData.date:'')+' — 任务明细</span></div><span style="font-size:11px;color:#BFBFBF">共 '+dayTasks.length+' 条任务</span></div><div class="panel-body">';
-      html+='<div class="filter-bar"><input placeholder="搜索项目..." value="'+sq+'" oninput="S._dbTaskSearch=this.value;S._dbTaskPg=0;renderPage(\'dashboard\')"><select onchange="S._dbTaskFilter=this.value;S._dbTaskPg=0;renderPage(\'dashboard\')"><option value="">全部状态</option><option value="pending_review"'+(sf==='pending_review'?' selected':'')+'>待复核</option><option value="completed"'+(sf==='completed'?' selected':'')+'>已完成</option><option value="failed"'+(sf==='failed'?' selected':'')+'>失败</option></select></div>';
-      html+='<table><thead><tr><th>项目</th><th>摄像头</th><th>拍摄时间</th><th>隐患数</th><th>状态</th><th>复核状态</th><th>操作</th></tr></thead><tbody>';
+      html+='<div class="filter-bar"><input placeholder="搜索项目..." value="'+sq+'" oninput="S._dbTaskSearch=this.value;S._dbTaskPg=0;renderPage(\'dashboard\')"><select onchange="S._dbTaskFilter=this.value;S._dbTaskPg=0;renderPage(\'dashboard\')"><option value="">全部推理状态</option><option value="inferred"'+(sf==='inferred'?' selected':'')+'>已推理</option><option value="inferring"'+(sf==='inferring'?' selected':'')+'>推理中</option><option value="pending_infer"'+(sf==='pending_infer'?' selected':'')+'>待推理</option></select></div>';
+      html+='<table><thead><tr><th>项目</th><th>摄像头</th><th>拍摄时间</th><th>隐患数</th><th>推理状态</th><th>复核状态</th><th>操作</th></tr></thead><tbody>';
       paged.forEach(t=>{
-        let reviewStatus=t.status==='completed'?'<span style="color:#52C41A;font-weight:600">已复核</span>':t.status==='excluded'?'<span style="color:#8C8C8C">已排除</span>':t.status==='pending_review'?'<span style="color:#F57A00">待复核</span>':'<span style="color:#BFBFBF">—</span>';
-        html+='<tr><td>'+t.projectName+'</td><td>'+t.cameraName+'</td><td style="font-size:11px;color:#8C8C8C">'+t.time+'</td><td style="color:'+(t.dangerCount>0?'#E2091C':'#BFBFBF')+';font-weight:600">'+t.dangerCount+'</td><td>'+statusBadge(t.status)+'</td><td>'+reviewStatus+'</td><td>'+'<button class="btn btn-sm btn-outline" onclick="viewTaskImage('+t.id+')">查看</button></td></tr>';
+        let inferStatus=t.status==='inferred'?'<span style="color:#52C41A;font-weight:600">已推理</span>':t.status==='inferring'?'<span style="color:#009CFF;font-weight:600">推理中</span>':t.status==='pending_infer'?'<span style="color:#BFBFBF">待推理</span>':'<span style="color:#BFBFBF">—</span>';
+        let reviewStatus=t.reviewStatus==='reviewed'?'<span style="color:#52C41A;font-weight:600">已复核</span>':t.reviewStatus==='excluded'?'<span style="color:#8C8C8C">已排除</span>':t.reviewStatus==='pending'?'<span style="color:#F57A00">待复核</span>':'<span style="color:#BFBFBF">—</span>';
+        html+='<tr><td>'+t.projectName+'</td><td>'+t.cameraName+'</td><td style="font-size:11px;color:#8C8C8C">'+t.time+'</td><td style="color:'+(t.dangerCount>0?'#E2091C':'#BFBFBF')+';font-weight:600">'+t.dangerCount+'</td><td>'+inferStatus+'</td><td>'+reviewStatus+'</td><td>'+'<button class="btn btn-sm btn-outline" onclick="viewTaskImage('+t.id+')">查看</button></td></tr>';
       });
       if(paged.length===0) html+='<tr><td colspan="7" style="text-align:center;color:#BFBFBF;padding:20px">暂无匹配任务</td></tr>';
       html+='</tbody></table>';
@@ -2070,11 +2072,11 @@ function renderTasks() {
     var tpStart = tpPage * tpPerPage;
     var tpTasks = dayTasks.slice(tpStart, tpStart + tpPerPage);
     var taskRowsHtml = tpTasks.map(function(t){
-      return '<tr><td>'+t.projectName+'</td><td>'+t.cameraName+'</td><td style="font-size:11px;color:#8C8C8C">'+t.time+'</td><td style="color:'+(t.dangerCount>0?'#E2091C':'#BFBFBF')+';font-weight:600">'+t.dangerCount+'</td><td>'+statusBadge(t.status)+'</td><td>'+(t.status==='pending_review'?'<button class="btn btn-sm btn-primary" onclick="openReview('+t.id+')">复核</button>':t.status==='completed'?'<button class="btn btn-sm btn-outline" onclick="openReview('+t.id+')">查看</button>':'—')+'</td></tr>';
+      return '<tr><td>'+t.projectName+'</td><td>'+t.cameraName+'</td><td style="font-size:11px;color:#8C8C8C">'+t.time+'</td><td style="color:'+(t.dangerCount>0?'#E2091C':'#BFBFBF')+';font-weight:600">'+t.dangerCount+'</td><td>'+statusBadge(t.status)+'</td><td>'+(t.reviewStatus==='reviewed'?'<span style="color:#52C41A;font-weight:600">已复核</span>':t.reviewStatus==='excluded'?'<span style="color:#8C8C8C">已排除</span>':t.reviewStatus==='pending'?'<span style="color:#F57A00">待复核</span>':'<span style="color:#BFBFBF">—</span>')+'</td><td><button class="btn btn-sm btn-outline" onclick="openReview('+t.id+')">查看</button></td></tr>';
     }).join('');
     if(!taskRowsHtml) taskRowsHtml='<tr><td colspan="6" style="text-align:center;color:#BFBFBF;padding:20px">当日暂无匹配任务</td></tr>';
     var tpControls = dayTasks.length <= tpPerPage ? '' : '<div class="pager"><select onchange="S._taskDayPerPage=parseInt(this.value);S._taskDayPage=0;renderPage(\'tasks\')"><option value="10"'+(tpPerPage===10?' selected':'')+'>10条/页</option><option value="20"'+(tpPerPage===20?' selected':'')+'>20条/页</option><option value="50"'+(tpPerPage===50?' selected':'')+'>50条/页</option></select><button onclick="S._taskDayPage=0;renderPage(\'tasks\')" '+(tpPage===0?'disabled':'')+'>|<</button><button onclick="S._taskDayPage=Math.max(0,S._taskDayPage-1);renderPage(\'tasks\')" '+(tpPage===0?'disabled':'')+'><</button><span class="pager-info">'+(tpStart+1)+'-'+Math.min(tpStart+tpPerPage,dayTasks.length)+' / '+dayTasks.length+' 条</span><button onclick="S._taskDayPage=Math.min(tpTotal-1,S._taskDayPage+1);renderPage(\'tasks\')" '+(tpPage>=tpTotal-1?'disabled':'')+'>></button><button onclick="S._taskDayPage=tpTotal-1;renderPage(\'tasks\')" '+(tpPage>=tpTotal-1?'disabled':'')+'>|></button></div>';
-    taskDetailSection = '<div class="panel" style="margin-top:16px"><div class="panel-header" style="justify-content:space-between"><div style="display:flex;align-items:center;gap:12px"><span class="btn btn-sm btn-outline" onclick="S._taskSelectedDay=null;S._taskDayPage=0;renderPage(\'tasks\')" style="cursor:pointer">← 返回批次列表</span><span>Day '+selDay+' · '+(dayData?dayData.date:'')+' — 任务明细</span></div><span style="font-size:11px;color:#BFBFBF;font-weight:400">共 '+dayTasks.length+' 条任务</span></div><div class="panel-body"><div class="filter-bar"><input placeholder="搜索项目..." value="'+sq+'" oninput="S._taskSearch=this.value;S._taskDayPage=0;renderPage(\'tasks\')"><select onchange="S._taskStatusFilter=this.value;S._taskDayPage=0;renderPage(\'tasks\')"><option value="">全部状态</option><option value="pending_review"'+(stFilter==='pending_review'?' selected':'')+'>待复核</option><option value="inferring"'+(stFilter==='inferring'?' selected':'')+'>推理中</option><option value="completed"'+(stFilter==='completed'?' selected':'')+'>已完成</option><option value="failed"'+(stFilter==='failed'?' selected':'')+'>失败</option></select></div><table><thead><tr><th>项目</th><th>摄像头</th><th>拍摄时间</th><th>隐患数</th><th>状态</th><th>操作</th></tr></thead><tbody>'+taskRowsHtml+'</tbody></table>'+tpControls+'</div></div>';
+    taskDetailSection = '<div class="panel" style="margin-top:16px"><div class="panel-header" style="justify-content:space-between"><div style="display:flex;align-items:center;gap:12px"><span class="btn btn-sm btn-outline" onclick="S._taskSelectedDay=null;S._taskDayPage=0;renderPage(\'tasks\')" style="cursor:pointer">← 返回批次列表</span><span>Day '+selDay+' · '+(dayData?dayData.date:'')+' — 任务明细</span></div><span style="font-size:11px;color:#BFBFBF;font-weight:400">共 '+dayTasks.length+' 条任务</span></div><div class="panel-body"><div class="filter-bar"><input placeholder="搜索项目..." value="'+sq+'" oninput="S._taskSearch=this.value;S._taskDayPage=0;renderPage(\'tasks\')"><select onchange="S._taskStatusFilter=this.value;S._taskDayPage=0;renderPage(\'tasks\')"><option value="">全部状态</option><option value="pending_review"'+(stFilter==='inferred'?' selected':'')+'>已推理</option><option value="inferring"'+(stFilter==='inferring'?' selected':'')+'>推理中</option><option value="pending_infer"'+(stFilter==='pending_infer'?' selected':'')+'>待推理</option></select></div><table><thead><tr><th>项目</th><th>摄像头</th><th>拍摄时间</th><th>隐患数</th><th>推理状态</th><th>复核状态</th><th>操作</th></tr></thead><tbody>'+taskRowsHtml+'</tbody></table>'+tpControls+'</div></div>';
   }
   return roundSelect + dayCardsSection + taskDetailSection;
 }
@@ -2104,7 +2106,7 @@ ${S.rounds.map(r=>`
   let detailHtml = '';
   if(selRound) {
     let rt = S.tasks.filter(t=>t.roundId===selRound.id);
-    let pendingT = rt.filter(t=>t.status==='pending_review');
+    let pendingT = rt.filter(t=>t.reviewStatus==='pending');
     let prCov = selRound.totalProjects>0?Math.round(selRound.stats.projectsCovered/selRound.totalProjects*100):0;
     let prCap = selRound.totalTarget>0?Math.round(selRound.stats.totalCaptures/selRound.totalTarget*100):0;
     let prRev = selRound.stats.inferred>0?Math.round(selRound.stats.completedReview/selRound.stats.inferred*100):0;
@@ -2143,7 +2145,7 @@ ${S.rounds.map(r=>`
 </div>
 
 <div style="display:flex;gap:8px">
-<button class="btn btn-sm btn-primary" onclick="S.reviewRound=\'${selRound.id}\';S.reviewTasks=S.tasks.filter(t=>t.roundId===\'${selRound.id}\'&&(t.status===\'pending_review\'||t.status===\'completed\'||t.status===\'excluded\'));S.reviewTaskIdx=0;navTo(\'review-entry\')">进入复核工作台</button>
+<button class="btn btn-sm btn-primary" onclick="S.reviewRound=\'${selRound.id}\';S.reviewTasks=S.tasks.filter(t=>t.roundId===\'${selRound.id}\'&&t.status===\'inferred\');S.reviewTaskIdx=0;navTo(\'review-entry\')">进入复核工作台</button>
 <button class="btn btn-sm btn-outline">${selRound.status==='completed'?'导出轮次报告':'导出当前进度'}</button>
 </div>
 
@@ -2174,7 +2176,7 @@ ${pendingT.slice(0,10).map(t=>`<tr><td>${t.projectName}</td><td>${t.cameraName}<
 }
 
 function statusBadge(s) {
-  const map = {pending_review:{c:'badge-warning',t:'待复核'},inferring:{c:'badge-info',t:'推理中'},completed:{c:'badge-success',t:'已完成'},excluded:{c:'badge-neutral',t:'已排除'},failed:{c:'badge-danger',t:'失败'}};
+  const map = {inferred:{c:'badge-success',t:'已推理'},inferring:{c:'badge-info',t:'推理中'},pending_infer:{c:'badge-neutral',t:'待推理'},pending_review:{c:'badge-warning',t:'待复核'},completed:{c:'badge-success',t:'已完成'},excluded:{c:'badge-neutral',t:'已排除'},failed:{c:'badge-danger',t:'失败'}};
   let m = map[s]||{c:'badge-neutral',t:s};
   return `<span class="tag ${m.c}">${m.t}</span>`;
 }
@@ -2957,9 +2959,9 @@ function openReviewFromEntry() {
   S.rounds.forEach(r=>{S.tasks.filter(t=>t.roundId===r.id).forEach(t=>{allTasks.push({...t,roundName:r.name});});});
   let filtered=allTasks;
   if(S._rvRound&&S._rvRound!=='all') filtered=filtered.filter(t=>t.roundId===S._rvRound);
-  if(S._rvStatus) filtered=filtered.filter(t=>t.status===S._rvStatus);
+  if(S._rvStatus) filtered=filtered.filter(t=>t.status===S._rvStatus||t.reviewStatus===S._rvStatus);
   if(S._rvSearch){let q=S._rvSearch.toLowerCase();filtered=filtered.filter(t=>t.projectName.toLowerCase().includes(q));}
-  let pending=filtered.filter(t=>t.status==='pending_review');
+  let pending=filtered.filter(t=>t.reviewStatus==='pending');
   if(pending.length===0){toast('没有待复核任务','w');return;}
   S.reviewTasks=pending; S.reviewTaskIdx=0;
   openReview(pending[0].id);
@@ -2971,7 +2973,7 @@ function openReview(taskId) {
     let round = S.rounds.find(r=>r.id===task.roundId);
     if(round) S.reviewRound = round.id;
   }
-  S.reviewTasks = S.tasks.filter(t=>t.roundId===S.reviewRound && (t.status==='pending_review'||t.status==='completed'||t.status==='excluded'));
+  S.reviewTasks = S.tasks.filter(t=>t.roundId===S.reviewRound && t.status==='inferred');
   let idx = S.reviewTasks.findIndex(t=>t.id===taskId);
   if(idx<0) idx=0;
   S.reviewTaskIdx = idx;
@@ -2989,7 +2991,7 @@ function openReview(taskId) {
 }
 
 function batchConfirmWorkbench() {
-  let pending = S.reviewTasks.filter(t=>t.status==='pending_review');
+  let pending = S.reviewTasks.filter(t=>t.reviewStatus==='pending');
   if(pending.length===0){toast('当前没有待复核任务','w');return;}
   let html='<h3>默认复核确认</h3>';
   html+='<div style="font-size:12px;color:#8C8C8C;margin-bottom:14px">将当前工作台中所有待复核任务按AI标记一键确认</div>';
@@ -3004,7 +3006,7 @@ function batchConfirmWorkbench() {
 window._doWbBatch = function(){
   let pending=window._wbPending||[];
   pending.forEach(t=>{
-    t.status='completed';
+    t.reviewStatus='reviewed';
     t.detections.forEach(d=>{d.confirmed=true;});
     let round=S.rounds.find(r=>r.id===t.roundId);
     if(round){round.stats.completedReview++;round.stats.pendingReview--;}
@@ -3060,7 +3062,7 @@ function updateReviewTaskList() {
   list.innerHTML = S.reviewTasks.map((t,i)=>`<div class="rl-item${i===S.reviewTaskIdx?' active':''}" onclick="navigateReview(${i})">
 <div class="rl-name">${t.projectName}</div><div class="rl-cam">${t.cameraName}</div>
 <div class="rl-meta"><span class="rl-count">${t.dangerCount}</span>
-<span class="tag ${t.status==='completed'?'badge-success':t.status==='excluded'?'badge-neutral':'badge-warning'}">${t.status==='completed'?'已完成':t.status==='excluded'?'已排除':'待复核'}</span></div></div>`).join('');
+<span class="tag ${t.reviewStatus==='reviewed'?'badge-success':t.reviewStatus==='excluded'?'badge-neutral':'badge-warning'}">${t.reviewStatus==='reviewed'?'已复核':t.reviewStatus==='excluded'?'已排除':'待复核'}</span></div></div>`).join('');
 }
 
 function navigateReview(idx) {
@@ -3076,8 +3078,8 @@ function navigateReview(idx) {
 }
 
 function updateReviewStats() {
-  let pending = S.reviewTasks.filter(t=>t.status==='pending_review').length;
-  let completed = S.reviewTasks.filter(t=>t.status==='completed').length;
+  let pending = S.reviewTasks.filter(t=>t.reviewStatus==='pending').length;
+  let completed = S.reviewTasks.filter(t=>t.reviewStatus==='reviewed').length;
   document.getElementById('rtPending').textContent = pending;
   let ft = document.getElementById('rlFooter');
   let round = S.rounds.find(r=>r.id===S.reviewRound);
@@ -3095,7 +3097,7 @@ function filterReviewTasks() {
     if(q && !t.projectName.toLowerCase().includes(q)) return false;
     if(sc && !t.detections.some(d=>d.sceneId==parseInt(sc))) return false;
     if(st && t.status!==st) return false;
-    return t.status==='pending_review'||t.status==='completed'||t.status==='excluded';
+    return t.status==='inferred';
   });
   S.reviewTasks = filtered;
   S.reviewTaskIdx = Math.min(S.reviewTaskIdx, S.reviewTasks.length-1);
