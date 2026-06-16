@@ -1779,7 +1779,7 @@ function renderReviewTasks() {
   html+='<div class="metric-card" style="text-align:center;padding:14px"><div class="mc-value" style="font-size:22px;color:#F57A00">'+filtered.length.toLocaleString()+'</div><div class="mc-label">筛选合计</div></div></div>';
 
   // Filter bar - single row
-  html+='<div class="panel"><div class="panel-header">复核任务列表 <button class="btn btn-sm btn-warning" onclick="batchConfirmAll()" style="margin-right:8px">一键复核</button><button class="btn btn-sm btn-primary" onclick="openReviewFromEntry()">进入复核工作台 &rarr;</button></div><div class="panel-body">';
+  html+='<div class="panel"><div class="panel-header">复核任务列表 <span style="margin-left:auto"><button class="btn btn-sm btn-warning" onclick="batchConfirmAll()">一键复核</button> <button class="btn btn-sm btn-primary" onclick="openReviewFromEntry()">进入复核工作台 &rarr;</button></span></div><div class="panel-body">';
   html+='<div class="filter-bar" style="flex-wrap:wrap;gap:6px">';
   html+='<input placeholder="搜索项目/摄像头..." value="'+S._rvSearch+'" oninput="S._rvSearch=this.value" style="width:160px">';
   html+='<input type="date" value="'+S._rvDateFrom+'" onchange="S._rvDateFrom=this.value" style="width:130px;padding:6px 8px;border:1px solid #D9D9D9;border-radius:4px;font-size:12px;font-family:inherit" title="开始日期">';
