@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI隐患识别模块模块 · 项目监管系统 · 一体化平台 V3.2</title>
 <style>
-/* ====== V3.1 Design System: Enterprise White Theme ====== */
+/* ====== V3.2 Design System: Enterprise White Theme ====== */
 /* Fonts: system stack, no external dependencies */
 
 :root {
@@ -1944,7 +1944,7 @@ function renderDashboard() {
       html+='<table><thead><tr><th>项目</th><th>摄像头</th><th>拍摄时间</th><th>隐患数</th><th>状态</th><th>复核状态</th><th>操作</th></tr></thead><tbody>';
       paged.forEach(t=>{
         let reviewStatus=t.status==='completed'?'<span style="color:#52C41A;font-weight:600">已复核</span>':t.status==='excluded'?'<span style="color:#8C8C8C">已排除</span>':t.status==='pending_review'?'<span style="color:#F57A00">待复核</span>':'<span style="color:#BFBFBF">—</span>';
-        html+='<tr><td>'+t.projectName+'</td><td>'+t.cameraName+'</td><td style="font-size:11px;color:#8C8C8C">'+t.time+'</td><td style="color:'+(t.dangerCount>0?'#E2091C':'#BFBFBF')+';font-weight:600">'+t.dangerCount+'</td><td>'+statusBadge(t.status)+'</td><td>'+reviewStatus+'</td><td>'<button class="btn btn-sm btn-outline" onclick="viewTaskImage('+t.id+')">查看</button></td></tr>';
+        html+='<tr><td>'+t.projectName+'</td><td>'+t.cameraName+'</td><td style="font-size:11px;color:#8C8C8C">'+t.time+'</td><td style="color:'+(t.dangerCount>0?'#E2091C':'#BFBFBF')+';font-weight:600">'+t.dangerCount+'</td><td>'+statusBadge(t.status)+'</td><td>'+reviewStatus+'</td><td>'+'<button class="btn btn-sm btn-outline" onclick="viewTaskImage('+t.id+')">查看</button></td></tr>';
       });
       if(paged.length===0) html+='<tr><td colspan="7" style="text-align:center;color:#BFBFBF;padding:20px">暂无匹配任务</td></tr>';
       html+='</tbody></table>';
@@ -3300,59 +3300,61 @@ function reviewFit() { S.reviewZoom=1; S.reviewOffX=0; S.reviewOffY=0; drawCanva
 function reviewRatio(r) { S.reviewZoom=r; S.reviewOffX=0; S.reviewOffY=0; drawCanvas(); }
 
 // ====== CANVAS EVENTS ======
-document.addEventListener('DOMContentLoaded',()=>{
-  initMockData();
-  document.getElementById('reviewCanvas').addEventListener('wheel',(e)=>{
-    if(!S.reviewOpen) return;
-    e.preventDefault();
-    let delta = e.deltaY>0?-0.08:0.08;
-    reviewZoom(delta);
-  });
-  document.getElementById('reviewCanvas').addEventListener('mousedown',(e)=>{
-    if(!S.reviewOpen) return;
-    if(e.button===2||(e.altKey&&e.button===0)){S.isPanning=true;S.panStart={x:e.clientX-S.reviewOffX,y:e.clientY-S.reviewOffY};return;}
-    if(!S.editMode) return;
-    let canvas = document.getElementById('reviewCanvas');
-    let rect = canvas.getBoundingClientRect();
-    S.isDrawing = true;
-    S.drawStart = {x:(e.clientX-rect.left)/canvas.width,y:(e.clientY-rect.top)/canvas.height};
-  });
-  document.getElementById('reviewCanvas').addEventListener('mousemove',(e)=>{
-    if(!S.reviewOpen) return;
-    if(S.isPanning){S.reviewOffX=e.clientX-S.panStart.x;S.reviewOffY=e.clientY-S.panStart.y;drawCanvas();return;}
-    if(!S.isDrawing) return;
-    let canvas = document.getElementById('reviewCanvas');
-    let rect = canvas.getBoundingClientRect();
-    let mx=(e.clientX-rect.left)/canvas.width,my=(e.clientY-rect.top)/canvas.height;
-    drawCanvas();
-    let ctx=canvas.getContext('2d');
-    ctx.strokeStyle='#f97316';ctx.lineWidth=2;ctx.setLineDash([6,3]);
-    ctx.strokeRect(S.drawStart.x*canvas.width,S.drawStart.y*canvas.height,(mx-S.drawStart.x)*canvas.width,(my-S.drawStart.y)*canvas.height);
-    ctx.setLineDash([]);
-  });
-  document.getElementById('reviewCanvas').addEventListener('mouseup',(e)=>{
-    if(S.isPanning){S.isPanning=false;return;}
-    if(!S.isDrawing) return;
-    S.isDrawing=false;
-    let canvas=document.getElementById('reviewCanvas');
-    let rect=canvas.getBoundingClientRect();
-    let mx=(e.clientX-rect.left)/canvas.width,my=(e.clientY-rect.top)/canvas.height;
-    let area=canvas.width*canvas.height;
-    let w=Math.abs((mx-S.drawStart.x)*canvas.width),h=Math.abs((my-S.drawStart.y)*canvas.height);
-    if(w*h<area*0.001) return;
-    let nx=Math.min(S.drawStart.x*canvas.width,(mx)*canvas.width)/canvas.width;
-    let ny=Math.min(S.drawStart.y*canvas.height,(my)*canvas.height)/canvas.height;
-    let nw=w/canvas.width,nh=h/canvas.height;
-    let sc=SCENES.find(s=>s.id===S.editScene)||SCENES[0];
-    let t=S.reviewTasks[S.reviewTaskIdx];
-    if(t){
-      t.detections.push({id:t.detections.length,sceneId:sc.id,sceneName:sc.name,color:sc.color,bbox:{x:nx,y:ny,w:nw,h:nh},confidence:1.0,source:'human',description:'人工新增标注',suggestion:'请填写整改建议',status:'human_new'});
-      S.selectedBox=t.detections.length-1;
-      updateReviewUI();drawCanvas();toast('已添加新标注框','s');
-    }
-  });
-  document.getElementById('reviewCanvas').addEventListener('contextmenu',(e)=>e.preventDefault());
-});
+	function bindCanvasEvents() {
+	  let cv = document.getElementById('reviewCanvas');
+	  if(!cv) return;
+	  cv.addEventListener('wheel',(e)=>{
+	    if(!S.reviewOpen) return;
+	    e.preventDefault();
+	    let delta = e.deltaY>0?-0.08:0.08;
+	    reviewZoom(delta);
+	  });
+	  cv.addEventListener('mousedown',(e)=>{
+	    if(!S.reviewOpen) return;
+	    if(e.button===2||(e.altKey&&e.button===0)){S.isPanning=true;S.panStart={x:e.clientX-S.reviewOffX,y:e.clientY-S.reviewOffY};return;}
+	    if(!S.editMode) return;
+	    let rect = cv.getBoundingClientRect();
+	    S.isDrawing = true;
+	    S.drawStart = {x:(e.clientX-rect.left)/cv.width,y:(e.clientY-rect.top)/cv.height};
+	  });
+	  cv.addEventListener('mousemove',(e)=>{
+	    if(!S.reviewOpen) return;
+	    if(S.isPanning){S.reviewOffX=e.clientX-S.panStart.x;S.reviewOffY=e.clientY-S.panStart.y;drawCanvas();return;}
+	    if(!S.isDrawing) return;
+	    let rect = cv.getBoundingClientRect();
+	    let mx=(e.clientX-rect.left)/cv.width,my=(e.clientY-rect.top)/cv.height;
+	    drawCanvas();
+	    let ctx=cv.getContext('2d');
+	    ctx.strokeStyle='#f97316';ctx.lineWidth=2;ctx.setLineDash([6,3]);
+	    ctx.strokeRect(S.drawStart.x*cv.width,S.drawStart.y*cv.height,(mx-S.drawStart.x)*cv.width,(my-S.drawStart.y)*cv.height);
+	    ctx.setLineDash([]);
+	  });
+	  cv.addEventListener('mouseup',(e)=>{
+	    if(S.isPanning){S.isPanning=false;return;}
+	    if(!S.isDrawing) return;
+	    S.isDrawing=false;
+	    let rect=cv.getBoundingClientRect();
+	    let mx=(e.clientX-rect.left)/cv.width,my=(e.clientY-rect.top)/cv.height;
+	    let area=cv.width*cv.height;
+	    let w=Math.abs((mx-S.drawStart.x)*cv.width),h=Math.abs((my-S.drawStart.y)*cv.height);
+	    if(w*h<area*0.001) return;
+	    let nx=Math.min(S.drawStart.x*cv.width,(mx)*cv.width)/cv.width;
+	    let ny=Math.min(S.drawStart.y*cv.height,(my)*cv.height)/cv.height;
+	    let nw=w/cv.width,nh=h/cv.height;
+	    let sc=SCENES.find(s=>s.id===S.editScene)||SCENES[0];
+	    let t=S.reviewTasks[S.reviewTaskIdx];
+	    if(t){
+	      t.detections.push({id:t.detections.length,sceneId:sc.id,sceneName:sc.name,color:sc.color,bbox:{x:nx,y:ny,w:nw,h:nh},confidence:1.0,source:'human',description:'人工新增标注',suggestion:'请填写整改建议',status:'human_new'});
+	      S.selectedBox=t.detections.length-1;
+	      updateReviewUI();drawCanvas();toast('已添加新标注框','s');
+	    }
+	  });
+	  cv.addEventListener('contextmenu',(e)=>e.preventDefault());
+	}
+	document.addEventListener('DOMContentLoaded',()=>{
+	  initMockData();
+	  bindCanvasEvents();
+	});
 
 // ====== KEYBOARD ======
 document.addEventListener('keydown',(e)=>{
