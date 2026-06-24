@@ -3,778 +3,553 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VisionGuard — AI Construction Safety Inspection Platform / AI建筑施工安全巡检平台</title>
+<title>VisionGuard — AI Construction Safety Inspection</title>
 <style>
-/* ====== VisionGuard Design System ====== */
+/* ====== A4 One-Pager ====== */
+@page { size: A4; margin: 0; }
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
 :root {
-  --primary: #2563EB;
-  --primary-dark: #1D4ED8;
-  --primary-light: #3B82F6;
-  --accent: #F57A00;
-  --accent-light: #FB923C;
-  --bg: #FFFFFF;
-  --bg-alt: #F8FAFC;
-  --bg-dark: #0F172A;
-  --text: #1E293B;
-  --text-secondary: #64748B;
-  --text-light: #94A3B8;
-  --text-white: #FFFFFF;
-  --border: #E2E8F0;
+  --blue: #2563EB;
+  --blue-dark: #1D4ED8;
+  --orange: #F57A00;
   --green: #10B981;
   --red: #EF4444;
-  --radius: 8px;
-  --radius-lg: 16px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.08);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
-  --max-w: 1200px;
+  --gray: #64748B;
+  --light: #F1F5F9;
+  --border: #E2E8F0;
+  --text: #1E293B;
 }
 
-* { margin:0; padding:0; box-sizing:border-box; }
-html { font-size:16px; scroll-behavior:smooth; }
 body {
   font-family: 'Inter', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
   color: var(--text);
-  background: var(--bg);
-  line-height: 1.7;
+  background: #E2E8F0;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
   -webkit-font-smoothing: antialiased;
 }
 
-/* ====== NAVIGATION ====== */
-.nav {
-  position: fixed; top:0; left:0; right:0; z-index:1000;
-  background: rgba(255,255,255,0.92);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
-  transition: all 0.2s;
-}
-.nav-inner {
-  max-width: var(--max-w); margin:0 auto;
-  display:flex; align-items:center; justify-content:space-between;
-  padding: 0 24px; height: 60px;
-}
-.nav-logo {
-  display:flex; align-items:center; gap:10px;
-  font-size: 20px; font-weight: 700; color: var(--primary);
-  text-decoration: none;
-}
-.nav-logo .icon {
-  width: 36px; height: 36px;
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  border-radius: 8px;
-  display: flex; align-items:center; justify-content:center;
-  color: #fff; font-size: 18px;
-}
-.nav-links { display:flex; gap: 28px; list-style: none; }
-.nav-links a {
-  text-decoration: none; color: var(--text-secondary);
-  font-size: 14px; font-weight: 500;
-  transition: color 0.2s;
-}
-.nav-links a:hover { color: var(--primary); }
-.nav-cta {
-  background: var(--primary); color: #fff !important;
-  padding: 8px 20px; border-radius: 6px;
-}
-.nav-cta:hover { background: var(--primary-dark); }
-
-/* ====== HERO ====== */
-.hero {
-  padding: 140px 24px 100px;
-  background: linear-gradient(180deg, #EFF6FF 0%, #F8FAFC 50%, #FFFFFF 100%);
-  text-align: center;
-  position: relative; overflow: hidden;
-}
-.hero::before {
-  content:'';
-  position:absolute; top:-200px; left:50%; transform:translateX(-50%);
-  width:800px; height:800px;
-  background: radial-gradient(circle, rgba(37,99,235,0.08) 0%, transparent 70%);
-  pointer-events: none;
-}
-.hero-badge {
-  display:inline-block;
-  background: rgba(37,99,235,0.08);
-  color: var(--primary);
-  font-size: 13px; font-weight: 600;
-  padding: 6px 16px; border-radius: 20px;
-  margin-bottom: 24px;
-}
-.hero h1 {
-  font-size: 52px; font-weight: 800;
-  line-height: 1.15; letter-spacing: -1px;
-  color: var(--bg-dark);
-  max-width: 800px; margin: 0 auto 16px;
-}
-.hero h1 span { color: var(--primary); }
-.hero .subtitle {
-  font-size: 18px; color: var(--text-secondary);
-  max-width: 640px; margin: 0 auto 12px;
-}
-.hero .subtitle-cn {
-  font-size: 15px; color: var(--text-light);
-  margin-bottom: 40px;
-}
-.hero-actions { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
-.btn {
-  display:inline-flex; align-items:center; gap:6px;
-  padding: 12px 28px; border-radius: 8px;
-  font-size: 15px; font-weight: 600;
-  text-decoration: none; cursor: pointer;
-  transition: all 0.2s; border: none;
-}
-.btn-primary {
-  background: var(--primary); color: #fff;
-  box-shadow: 0 2px 8px rgba(37,99,235,0.3);
-}
-.btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
-.btn-outline {
-  background: #fff; color: var(--primary);
-  border: 2px solid var(--primary);
-}
-.btn-outline:hover { background: #EFF6FF; }
-
-.hero-stats {
-  display:flex; gap:48px; justify-content:center;
-  margin-top: 64px; flex-wrap:wrap;
-}
-.hero-stat { text-align: center; }
-.hero-stat .num {
-  font-size: 36px; font-weight: 800; color: var(--primary);
-}
-.hero-stat .label { font-size: 13px; color: var(--text-light); margin-top: 4px; }
-
-/* ====== SECTIONS ====== */
-.section {
-  padding: 88px 24px;
-}
-.section-alt { background: var(--bg-alt); }
-.section-inner { max-width: var(--max-w); margin: 0 auto; }
-.section-label {
-  font-size: 13px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 1.5px; color: var(--primary);
-  margin-bottom: 8px;
-}
-.section-title {
-  font-size: 34px; font-weight: 800;
-  letter-spacing: -0.5px; margin-bottom: 12px;
-}
-.section-sub {
-  font-size: 16px; color: var(--text-secondary);
-  max-width: 600px; margin-bottom: 48px;
-}
-.section-sub-cn {
-  font-size: 14px; color: var(--text-light);
-  margin-top: -40px; margin-bottom: 48px;
+/* A4 page container */
+.page {
+  width: 210mm;
+  min-height: 297mm;
+  background: #fff;
+  padding: 12mm 14mm 10mm;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
-/* ====== PROBLEM CARDS ====== */
-.problem-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 20px;
+/* ====== HEADER ====== */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 6mm;
+  border-bottom: 2.5px solid var(--blue);
+  margin-bottom: 5mm;
 }
-.problem-card {
-  background: #fff; border: 1px solid var(--border);
-  border-radius: var(--radius-lg); padding: 28px;
-  transition: all 0.2s;
+.header-left { display: flex; align-items: center; gap: 3mm; }
+.header-logo {
+  width: 11mm; height: 11mm;
+  background: linear-gradient(135deg, var(--blue), #3B82F6);
+  border-radius: 2.5mm;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 16px; font-weight: 700;
 }
-.problem-card:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
-}
-.problem-card .emoji { font-size: 32px; margin-bottom: 12px; }
-.problem-card h4 { font-size: 17px; margin-bottom: 6px; }
-.problem-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
-
-/* ====== HAZARD GRID ====== */
-.hazard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px;
-}
-.hazard-card {
-  border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 18px 14px;
-  text-align: center; transition: all 0.2s;
-  cursor: default;
-}
-.hazard-card:hover {
-  box-shadow: var(--shadow-md);
-  border-color: var(--primary-light);
-  transform: translateY(-2px);
-}
-.hazard-card .dot {
-  width: 14px; height: 14px; border-radius: 4px;
-  display: inline-block; margin-bottom: 8px;
-}
-.hazard-card .hz-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
-.hazard-card .hz-name-cn { font-size: 12px; color: var(--text-light); }
-.hazard-tag {
+.header h1 { font-size: 22px; font-weight: 800; color: var(--blue); letter-spacing: -0.3px; }
+.header .tagline { font-size: 9px; color: var(--gray); margin-top: 1px; }
+.header-right { text-align: right; }
+.header-right .badge {
   display: inline-block;
-  font-size: 10px; padding: 2px 8px; border-radius: 10px;
-  margin-top: 8px;
+  background: var(--blue);
+  color: #fff;
+  font-size: 7px; font-weight: 700;
+  padding: 2px 8px; border-radius: 10px;
+  letter-spacing: 0.5px;
 }
-.tag-physical { background: #FEF3C7; color: #B45309; }
-.tag-behavior { background: #DBEAFE; color: #1E40AF; }
 
-/* ====== WORKFLOW ====== */
-.workflow {
-  display:flex; align-items:flex-start; justify-content:center;
-  gap: 0; flex-wrap: wrap;
+/* ====== HERO STRIP ====== */
+.hero-strip {
+  display: flex;
+  gap: 4mm;
+  margin-bottom: 5mm;
 }
-.wf-step {
-  text-align: center; flex: 0 0 160px;
-  padding: 20px 12px;
+.hero-left {
+  flex: 1;
+  background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+  border-radius: 2mm;
+  padding: 4mm 5mm;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.hero-left h2 { font-size: 13px; font-weight: 800; color: var(--blue-dark); margin-bottom: 2mm; line-height: 1.3; }
+.hero-left p { font-size: 8px; color: var(--gray); line-height: 1.5; }
+.hero-stats {
+  display: flex;
+  gap: 3mm;
+}
+.stat-box {
+  flex: 1;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 2mm;
+  padding: 3mm 4mm;
+  text-align: center;
+}
+.stat-box .num { font-size: 16px; font-weight: 800; color: var(--blue); }
+.stat-box .label { font-size: 6.5px; color: var(--gray); line-height: 1.3; }
+
+/* ====== SECTION TITLES ====== */
+.section-title {
+  font-size: 10px; font-weight: 800; color: var(--text);
+  padding-bottom: 1.5mm; border-bottom: 1.5px solid var(--border);
+  margin-bottom: 3mm;
+  display: flex; align-items: center; gap: 2mm;
+}
+.section-title .st-icon {
+  width: 5mm; height: 5mm;
+  border-radius: 1mm;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px;
+}
+
+/* ====== MAIN LAYOUT: 2 COLUMNS ====== */
+.main-content {
+  display: flex;
+  gap: 5mm;
+  flex: 1;
+}
+.col-left { flex: 1.15; display: flex; flex-direction: column; gap: 3.5mm; }
+.col-right { flex: 0.85; display: flex; flex-direction: column; gap: 3.5mm; }
+
+/* ====== HAZARD MINI GRID ====== */
+.hazard-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5mm;
+}
+.hz-mini {
+  display: flex;
+  align-items: center;
+  gap: 1.2mm;
+  padding: 1.5mm 2mm;
+  border-radius: 1mm;
+  font-size: 7px;
+  background: var(--light);
+  line-height: 1.3;
+}
+.hz-mini .dot {
+  width: 2.8mm; height: 2.8mm; min-width: 2.8mm;
+  border-radius: 0.6mm;
+}
+.hz-mini .tag {
+  font-size: 5.5px; padding: 0.3mm 1.5mm; border-radius: 6px;
+  margin-left: auto;
+}
+.tag-p { background: #FEF3C7; color: #92400E; }
+.tag-b { background: #DBEAFE; color: #1E40AF; }
+
+/* ====== WORKFLOW STRIP ====== */
+.wf-strip {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.wf-node {
+  flex: 1;
+  text-align: center;
+  padding: 2mm;
   position: relative;
 }
-.wf-step::after {
-  content:'→';
-  position:absolute; right:-12px; top:50%;
-  transform:translateY(-50%);
-  font-size: 20px; color: var(--text-light);
-  font-weight: 700;
+.wf-node::after {
+  content: '▸';
+  position: absolute; right: -2.5mm; top: 50%;
+  transform: translateY(-50%);
+  font-size: 7px; color: #CBD5E1;
 }
-.wf-step:last-child::after { display:none; }
-.wf-icon {
-  width: 56px; height: 56px;
-  border-radius: 14px;
-  display: flex; align-items:center; justify-content:center;
-  margin: 0 auto 10px;
-  font-size: 24px;
+.wf-node:last-child::after { display: none; }
+.wf-num {
+  width: 7mm; height: 7mm;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1mm;
+  font-size: 9px; font-weight: 800; color: #fff;
 }
-.wf-step h5 { font-size: 14px; margin-bottom: 2px; }
-.wf-step .cn { font-size: 11px; color: var(--text-light); }
+.wf-node .wf-label { font-size: 7px; font-weight: 700; }
+.wf-node .wf-cn { font-size: 5.5px; color: var(--gray); }
 
-/* ====== FEATURES ====== */
-.feature-grid {
+/* ====== FEATURE LIST ====== */
+.feat-list { display: flex; flex-direction: column; gap: 2mm; }
+.feat-row {
+  display: flex; align-items: flex-start; gap: 2mm;
+  padding: 2mm 3mm;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 1.5mm;
+}
+.feat-row .f-icon {
+  width: 6mm; height: 6mm; min-width: 6mm;
+  border-radius: 1.2mm;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+}
+.feat-row h5 { font-size: 8px; font-weight: 700; margin-bottom: 0.3mm; }
+.feat-row p { font-size: 6.5px; color: var(--gray); line-height: 1.4; }
+
+/* ====== ROLE MINI ====== */
+.role-mini-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5mm;
 }
-.feature-card {
-  background: #fff; border: 1px solid var(--border);
-  border-radius: var(--radius-lg); padding: 24px;
-  display: flex; gap: 16px; align-items:flex-start;
-  transition: all 0.2s;
+.role-mini {
+  padding: 2.5mm 3mm;
+  border: 1px solid var(--border);
+  border-radius: 1.5mm;
+  text-align: center;
 }
-.feature-card:hover { box-shadow: var(--shadow-md); }
-.feature-card .f-icon {
-  width: 44px; height: 44px; min-width: 44px;
-  border-radius: 10px;
-  display: flex; align-items:center; justify-content:center;
-  font-size: 20px;
-}
-.feature-card h5 { font-size: 15px; margin-bottom: 2px; }
-.feature-card .cn { font-size: 12px; color: var(--text-light); margin-bottom: 6px; }
-.feature-card p { font-size: 13px; color: var(--text-secondary); line-height:1.6; }
+.role-mini h6 { font-size: 7.5px; font-weight: 700; }
+.role-mini .cn { font-size: 6px; color: var(--gray); }
+.role-mini .caps { font-size: 6px; color: var(--gray); margin-top: 1mm; line-height: 1.5; }
 
-/* ====== RBAC ====== */
-.role-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 16px;
+/* ====== ADVANTAGE LIST ====== */
+.adv-list { display: flex; flex-direction: column; gap: 1.5mm; }
+.adv-item { display: flex; gap: 2mm; align-items: flex-start; }
+.adv-item .check {
+  width: 4mm; height: 4mm; min-width: 4mm;
+  background: #D1FAE5; color: var(--green);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 6px; margin-top: 0.5mm;
 }
-.role-card {
-  background: #fff; border: 2px solid var(--border);
-  border-radius: var(--radius-lg); padding: 28px;
-  text-align: center; transition: all 0.2s;
-}
-.role-card:hover { border-color: var(--primary-light); box-shadow: var(--shadow-md); }
-.role-card .r-icon {
-  width: 52px; height: 52px; border-radius: 50%;
-  display: flex; align-items:center; justify-content:center;
-  margin: 0 auto 12px; font-size: 22px;
-}
-.role-card h4 { font-size: 16px; margin-bottom: 2px; }
-.role-card .cn { font-size: 12px; color: var(--text-light); margin-bottom: 10px; }
-.role-card .caps {
-  font-size: 12px; color: var(--text-secondary);
-  line-height: 1.8;
-}
+.adv-item h6 { font-size: 7.5px; font-weight: 700; }
+.adv-item .cn-desc { font-size: 6px; color: var(--gray); line-height: 1.4; }
 
-/* ====== ADVANTAGES ====== */
-.adv-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
+/* ====== TECH ROW ====== */
+.tech-row {
+  display: flex; gap: 1.5mm;
 }
-.adv-card {
-  background: #fff; border: 1px solid var(--border);
-  border-radius: var(--radius-lg); padding: 28px;
+.tech-tag {
+  flex: 1;
+  text-align: center;
+  padding: 2mm;
+  background: var(--light);
+  border-radius: 1mm;
+  font-size: 7px; font-weight: 700;
 }
-.adv-card .check {
-  width: 28px; height: 28px; background: #D1FAE5;
-  color: var(--green); border-radius: 50%;
-  display: flex; align-items:center; justify-content:center;
-  font-size: 14px; margin-bottom: 12px;
-}
-.adv-card h4 { font-size: 16px; margin-bottom: 4px; }
-.adv-card .cn { font-size: 12px; color: var(--text-light); margin-bottom: 8px; }
-.adv-card p { font-size: 13px; color: var(--text-secondary); line-height:1.6; }
-
-/* ====== CTA ====== */
-.cta-section {
-  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-  color: #fff; text-align: center;
-  padding: 80px 24px;
-}
-.cta-section h2 { font-size: 36px; font-weight: 800; margin-bottom: 12px; }
-.cta-section .sub { font-size: 16px; opacity: 0.85; margin-bottom: 32px; max-width:560px; margin-left:auto; margin-right:auto; }
-.btn-white {
-  background: #fff; color: var(--primary);
-  font-weight: 700;
-}
-.btn-white:hover { background: #F1F5F9; }
+.tech-tag .tech-sub { font-size: 5.5px; color: var(--gray); font-weight: 400; }
 
 /* ====== FOOTER ====== */
-.footer {
-  background: var(--bg-dark); color: var(--text-light);
-  text-align: center; padding: 32px 24px; font-size: 13px;
+.footer-strip {
+  margin-top: 4mm;
+  padding-top: 3mm;
+  border-top: 1.5px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 7px; color: var(--gray);
 }
-.footer a { color: var(--primary-light); text-decoration:none; }
+.footer-strip .cta-link {
+  color: var(--blue); font-weight: 700; text-decoration: none;
+}
+.footer-strip .cta-link:hover { text-decoration: underline; }
 
-/* ====== RESPONSIVE ====== */
-@media (max-width: 768px) {
-  .hero h1 { font-size: 32px; }
-  .section-title { font-size: 26px; }
-  .workflow { flex-direction: column; align-items: center; }
-  .wf-step::after { content:'↓'; right:50%; top:auto; bottom:-8px; transform:translateX(50%); }
-  .nav-links { display:none; }
-  .hero-stats { gap: 24px; }
+/* ====== PRINT ====== */
+@media print {
+  body { background: #fff; padding: 0; }
+  .page { box-shadow: none; width: 100%; min-height: auto; padding: 10mm 12mm; }
+}
+
+/* ====== SCREEN ONLY: page nav ====== */
+@media screen and (max-width: 800px) {
+  .page { width: 100%; min-height: auto; padding: 4mm; }
+  .main-content { flex-direction: column; }
+  .hazard-mini-grid { grid-template-columns: repeat(3, 1fr); }
 }
 </style>
 </head>
 <body>
 
-<!-- ====== NAVIGATION ====== -->
-<nav class="nav">
-  <div class="nav-inner">
-    <a href="#" class="nav-logo">
-      <div class="icon">🛡️</div>
-      VisionGuard
-    </a>
-    <ul class="nav-links">
-      <li><a href="#problem">Challenge</a></li>
-      <li><a href="#hazards">Capabilities</a></li>
-      <li><a href="#workflow">Workflow</a></li>
-      <li><a href="#features">Platform</a></li>
-      <li><a href="#advantages">Why Us</a></li>
-      <li><a href="#cta" class="nav-cta">Request Demo</a></li>
-    </ul>
-  </div>
-</nav>
+<div class="page">
 
-<!-- ====== HERO ====== -->
-<section class="hero">
-  <div class="hero-badge">🚀 AI-Powered Construction Safety</div>
-  <h1><span>VisionGuard</span> — Intelligent Video Inspection for Safer Construction Sites</h1>
-  <p class="subtitle">Real-time AI hazard detection · Human-AI collaboration · Full closed-loop rectification management</p>
-  <p class="subtitle-cn">实时AI隐患检测 · 人机协同复核 · 工单派发→整改→验收→全闭环管理</p>
-  <div class="hero-actions">
-    <a href="https://bestaloner.github.io/AIsp/" class="btn btn-primary" target="_blank">▶ Live Demo / 在线演示</a>
-    <a href="#workflow" class="btn btn-outline">How It Works / 了解详情</a>
-  </div>
-  <div class="hero-stats">
-    <div class="hero-stat">
-      <div class="num">12</div>
-      <div class="label">Hazard Types<br>隐患类型</div>
-    </div>
-    <div class="hero-stat">
-      <div class="num">4</div>
-      <div class="label">User Roles (RBAC)<br>角色权限体系</div>
-    </div>
-    <div class="hero-stat">
-      <div class="num">6-Step</div>
-      <div class="label">Closed Loop<br>全流程闭环</div>
-    </div>
-    <div class="hero-stat">
-      <div class="num">24/7</div>
-      <div class="label">Real-time Monitoring<br>全天候实时监控</div>
-    </div>
-  </div>
-</section>
-
-<!-- ====== PROBLEM ====== -->
-<section class="section" id="problem">
-  <div class="section-inner">
-    <div class="section-label">The Challenge / 行业痛点</div>
-    <h2 class="section-title">Construction Safety Can't Rely on Human Eyes Alone</h2>
-    <p class="section-sub">Traditional safety inspection is labor-intensive, inconsistent, and reactive. Sites are too large, hazards change too fast, and inspectors can't be everywhere at once.</p>
-    <p class="section-sub-cn">传统安全巡检依赖人力巡查，覆盖面有限、标准不统一、响应滞后。工地面积大、隐患变化快，检查员无法同时覆盖所有点位。</p>
-
-    <div class="problem-grid">
-      <div class="problem-card">
-        <div class="emoji">🔍</div>
-        <h4>Limited Coverage / 覆盖盲区</h4>
-        <p>Manual patrols can only inspect a fraction of the site at any given moment. Critical hazards in blind spots go undetected for hours or days.</p>
-      </div>
-      <div class="problem-card">
-        <div class="emoji">⏰</div>
-        <h4>Delayed Response / 响应滞后</h4>
-        <p>Hours pass between hazard occurrence and human discovery. By the time an inspector arrives, the situation may have already escalated into an incident.</p>
-      </div>
-      <div class="problem-card">
-        <div class="emoji">📋</div>
-        <h4>Inconsistent Judgment / 标准不一</h4>
-        <p>Different inspectors have different standards. What one flags as dangerous, another may overlook — leading to unpredictable safety outcomes.</p>
-      </div>
-      <div class="problem-card">
-        <div class="emoji">🔄</div>
-        <h4>Broken Follow-Up / 整改断链</h4>
-        <p>Hazards are found but rectification isn't tracked. No closed-loop system means issues are reported but never verified as resolved. Accountability is lost.</p>
+  <!-- ====== HEADER ====== -->
+  <div class="header">
+    <div class="header-left">
+      <div class="header-logo">🛡</div>
+      <div>
+        <h1>VisionGuard</h1>
+        <div class="tagline">AI Construction Safety Inspection Platform · 建筑施工AI安全巡检平台</div>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- ====== SOLUTION ====== -->
-<section class="section section-alt">
-  <div class="section-inner">
-    <div class="section-label">Our Solution / 解决方案</div>
-    <h2 class="section-title">AI Eyes That Never Blink. Human Judgment That Never Falters.</h2>
-    <p class="section-sub">VisionGuard combines YOLO real-time object detection with VLM (Vision Language Model) secondary verification — AI flags every potential hazard, human reviewers confirm or dismiss, and the platform tracks every issue through to resolution.</p>
-    <p class="section-sub-cn">VisionGuard 融合YOLO实时目标检测与VLM视觉大模型二次复核——AI全量初筛，人工精准确认，平台全程追踪每一处隐患直到整改闭环。</p>
-  </div>
-</section>
-
-<!-- ====== 12 HAZARDS ====== -->
-<section class="section" id="hazards">
-  <div class="section-inner">
-    <div class="section-label">Detection Capabilities / 检测能力</div>
-    <h2 class="section-title">12 Hazard Types. Two AI Engines. One Unified View.</h2>
-    <p class="section-sub">VisionGuard detects 12 categories of construction hazards across physical infrastructure and worker behavior — trained on real-world construction site data for high accuracy.</p>
-    <p class="section-sub-cn">覆盖物理设施与人员行为两大类共12种隐患——基于真实工地数据训练，准确率高。</p>
-
-    <div class="hazard-grid">
-      <div class="hazard-card">
-        <span class="dot" style="background:#F87171"></span>
-        <div class="hz-name">No Hard Hat</div>
-        <div class="hz-name-cn">安全帽未佩戴</div>
-        <span class="hazard-tag tag-behavior">Behavior</span>
-      </div>
-      <div class="hazard-card">
-        <span class="dot" style="background:#FB923C"></span>
-        <div class="hz-name">No Safety Vest</div>
-        <div class="hz-name-cn">反光衣未穿</div>
-        <span class="hazard-tag tag-behavior">Behavior</span>
-      </div>
-      <div class="hazard-card">
-        <span class="dot" style="background:#FACC15"></span>
-        <div class="hz-name">Edge Protection Missing</div>
-        <div class="hz-name-cn">临边防护缺失</div>
-        <span class="hazard-tag tag-physical">Physical</span>
-      </div>
-      <div class="hazard-card">
-        <span class="dot" style="background:#4ADE80"></span>
-        <div class="hz-name">Smoking on Site</div>
-        <div class="hz-name-cn">吸烟检测</div>
-        <span class="hazard-tag tag-behavior">Behavior</span>
-      </div>
-      <div class="hazard-card">
-        <span class="dot" style="background:#60A5FA"></span>
-        <div class="hz-name">Personnel Intrusion</div>
-        <div class="hz-name-cn">人员越界</div>
-        <span class="hazard-tag tag-behavior">Behavior</span>
-      </div>
-      <div class="hazard-card">
-        <span class="dot" style="background:#A78BFA"></span>
-        <div class="hz-name">Pit-Side Overload</div>
-        <div class="hz-name-cn">坑边堆载</div>
-        <span class="hazard-tag tag-physical">Physical</span>
-      </div>
-      <div class="hazard-card">
-        <span class="dot" style="background:#FB923C"></span>
-        <div class="hz-name">Open Flame</div>
-        <div class="hz-name-cn">明火检测</div>
-        <span class="hazard-tag tag-behavior">Behavior</span>
-      </div>
-      <div class="hazard-card">
-        <span class="dot" style="background:#FBBF24"></span>
-        <div class="hz-name">Bulk Material Lifting</div>
-        <div class="hz-name-cn">散料吊装</div>
-        <span class="hazard-tag tag-physical">Physical</span>
-      </div>
-      <div class="hazard-card">
-        <span class="dot" style="background:#34D399"></span>
-        <div class="hz-name">Crowd Gathering</div>
-        <div class="hz-name-cn">人员聚集</div>
-        <span class="hazard-tag tag-behavior">Behavior</span>
-      </div>
-      <div class="hazard-card">
-        <span class="dot" style="background:#818CF8"></span>
-        <div class="hz-name">Vehicle Violation</div>
-        <div class="hz-name-cn">车辆违规</div>
-        <span class="hazard-tag tag-behavior">Behavior</span>
-      </div>
-      <div class="hazard-card">
-        <span class="dot" style="background:#9CA3AF"></span>
-        <div class="hz-name">Suspended Platform</div>
-        <div class="hz-name-cn">吊篮作业</div>
-        <span class="hazard-tag tag-physical">Physical</span>
-      </div>
-      <div class="hazard-card">
-        <span class="dot" style="background:#6B7280"></span>
-        <div class="hz-name">Site Enclosure Breach</div>
-        <div class="hz-name-cn">工地围挡封闭</div>
-        <span class="hazard-tag tag-physical">Physical</span>
-      </div>
+    <div class="header-right">
+      <div class="badge">AI-POWERED</div>
     </div>
   </div>
-</section>
 
-<!-- ====== WORKFLOW ====== -->
-<section class="section section-alt" id="workflow">
-  <div class="section-inner">
-    <div class="section-label">Closed-Loop Workflow / 全流程闭环</div>
-    <h2 class="section-title">6 Steps from Detection to Resolution</h2>
-    <p class="section-sub">Every hazard follows a traceable path — from AI detection through human review, work order dispatch, on-site rectification, and final verification. Nothing falls through the cracks.</p>
-    <p class="section-sub-cn">每一处隐患都有迹可循——从AI发现、人工复核、工单派发、现场整改到最终验收，全链路追踪，不漏一处。</p>
-
-    <div class="workflow">
-      <div class="wf-step">
-        <div class="wf-icon" style="background:#DBEAFE;color:#2563EB;">📸</div>
-        <h5>1. AI Detection</h5>
-        <div class="cn">AI智能检测</div>
-      </div>
-      <div class="wf-step">
-        <div class="wf-icon" style="background:#FEF3C7;color:#B45309;">👁️</div>
-        <h5>2. Human Review</h5>
-        <div class="cn">人工复核</div>
-      </div>
-      <div class="wf-step">
-        <div class="wf-icon" style="background:#FCE7F3;color:#BE185D;">📋</div>
-        <h5>3. WO Dispatch</h5>
-        <div class="cn">工单派发</div>
-      </div>
-      <div class="wf-step">
-        <div class="wf-icon" style="background:#D1FAE5;color:#065F46;">🔧</div>
-        <h5>4. Rectification</h5>
-        <div class="cn">现场整改</div>
-      </div>
-      <div class="wf-step">
-        <div class="wf-icon" style="background:#EDE9FE;color:#6D28D9;">✅</div>
-        <h5>5. Verification</h5>
-        <div class="cn">整改验收</div>
-      </div>
-      <div class="wf-step">
-        <div class="wf-icon" style="background:#E0E7FF;color:#3730A3;">🔒</div>
-        <h5>6. Closure</h5>
-        <div class="cn">闭环归档</div>
-      </div>
+  <!-- ====== HERO STRIP ====== -->
+  <div class="hero-strip">
+    <div class="hero-left" style="flex:1.2">
+      <h2>Real-Time AI Hazard Detection<br>with Human-in-the-Loop Closed-Loop Management</h2>
+      <p>24/7 intelligent video monitoring across all construction sites — YOLO real-time detection + VLM secondary verification, combined with human review for unmatched accuracy. From hazard discovery to rectification closure: every issue is tracked, every action is logged, nothing is missed.<br><span style="color:#2563EB;font-weight:600;">全天候AI视频智能巡检，YOLO+VLM双引擎驱动，人机协同精准判识，全链路闭环管理。</span></p>
     </div>
-  </div>
-</section>
-
-<!-- ====== FEATURES ====== -->
-<section class="section" id="features">
-  <div class="section-inner">
-    <div class="section-label">Platform Overview / 平台功能</div>
-    <h2 class="section-title">Everything You Need to Run Safe Sites</h2>
-    <p class="section-sub">One unified platform covering detection, review, dispatch, tracking, reporting, and administration — with role-based access for every stakeholder.</p>
-    <p class="section-sub-cn">一体化平台覆盖检测、复核、派发、追溯、报告、管理——基于角色的访问控制，每个角色各司其职。</p>
-
-    <div class="feature-grid">
-      <div class="feature-card">
-        <div class="f-icon" style="background:#DBEAFE;color:#2563EB;">📊</div>
-        <div>
-          <h5>Executive Dashboard</h5>
-          <div class="cn">工作台总览</div>
-          <p>At-a-glance KPI cards, hazard trends, project status, and real-time alert summaries — see everything that matters in one view.</p>
+    <div style="display:flex;flex-direction:column;gap:3mm;flex:0.8">
+      <div style="display:flex;gap:3mm;">
+        <div class="stat-box">
+          <div class="num">12</div>
+          <div class="label">Hazard Types<br>隐患类型</div>
+        </div>
+        <div class="stat-box">
+          <div class="num">4</div>
+          <div class="label">User Roles<br>角色体系(RBAC)</div>
         </div>
       </div>
-      <div class="feature-card">
-        <div class="f-icon" style="background:#FEF3C7;color:#B45309;">🖥️</div>
-        <div>
-          <h5>AI Review Workbench</h5>
-          <div class="cn">人工复核工作台</div>
-          <p>Side-by-side original image & AI-annotated view. Human reviewers confirm or dismiss each detection in seconds — the core of human-AI collaboration.</p>
+      <div style="display:flex;gap:3mm;">
+        <div class="stat-box">
+          <div class="num">6-Step</div>
+          <div class="label">Closed Loop<br>全流程闭环</div>
         </div>
-      </div>
-      <div class="feature-card">
-        <div class="f-icon" style="background:#FCE7F3;color:#BE185D;">📋</div>
-        <div>
-          <h5>Work Order Management</h5>
-          <div class="cn">工单管理</div>
-          <p>One-click batch dispatch confirmed hazards as work orders. Full lifecycle tracking: Pending → Dispatched → Rectifying → Submitted → Verified → Closed.</p>
-        </div>
-      </div>
-      <div class="feature-card">
-        <div class="f-icon" style="background:#D1FAE5;color:#065F46;">📄</div>
-        <div>
-          <h5>Inspection Reports</h5>
-          <div class="cn">巡检报告</div>
-          <p>Auto-generated inspection reports with hazard statistics, trend charts, and rectification completion rates. Export-ready for stakeholders.</p>
-        </div>
-      </div>
-      <div class="feature-card">
-        <div class="f-icon" style="background:#EDE9FE;color:#6D28D9;">📡</div>
-        <div>
-          <h5>Camera Configuration</h5>
-          <div class="cn">摄像头配置</div>
-          <p>Per-camera scene matrix — enable specific hazard types per camera. One site, multiple cameras, each configured for its unique vantage point.</p>
-        </div>
-      </div>
-      <div class="feature-card">
-        <div class="f-icon" style="background:#FFEDD5;color:#C2410C;">📤</div>
-        <div>
-          <h5>Result Feedback</h5>
-          <div class="cn">结果回传</div>
-          <p>Push confirmed results back to upstream platforms with exponential backoff retry and dead-letter queue — reliable data delivery guaranteed.</p>
-        </div>
-      </div>
-      <div class="feature-card">
-        <div class="f-icon" style="background:#E0E7FF;color:#3730A3;">👥</div>
-        <div>
-          <h5>User & Role Management</h5>
-          <div class="cn">用户与权限管理</div>
-          <p>4 built-in roles (Admin / Reviewer / Executor / Viewer) with fine-grained RBAC. Each role sees exactly what they need — nothing more, nothing less.</p>
-        </div>
-      </div>
-      <div class="feature-card">
-        <div class="f-icon" style="background:#F1F5F9;color:#475569;">📜</div>
-        <div>
-          <h5>Operation Audit Logs</h5>
-          <div class="cn">操作日志</div>
-          <p>Every action logged: who reviewed what, who dispatched which work order, when rectification was verified. Full traceability for compliance.</p>
+        <div class="stat-box">
+          <div class="num">24/7</div>
+          <div class="label">Real-Time<br>全天候监控</div>
         </div>
       </div>
     </div>
   </div>
-</section>
 
-<!-- ====== RBAC ====== -->
-<section class="section section-alt">
-  <div class="section-inner">
-    <div class="section-label">Role-Based Collaboration / 角色协作</div>
-    <h2 class="section-title">Four Roles. One Seamless Workflow.</h2>
-    <p class="section-sub">VisionGuard is designed for team collaboration. Each role has a dedicated interface optimized for their responsibilities — no clutter, no confusion.</p>
-    <p class="section-sub-cn">专为团队协作设计。每个角色拥有专属的工作界面，各司其职，互不干扰。</p>
+  <!-- ====== MAIN CONTENT: 2 COLUMNS ====== -->
+  <div class="main-content">
 
-    <div class="role-grid">
-      <div class="role-card">
-        <div class="r-icon" style="background:#DBEAFE;color:#2563EB;">👑</div>
-        <h4>Administrator</h4>
-        <div class="cn">系统管理员</div>
-        <div class="caps">Full platform access · Project & user management · Camera & scene configuration · Work order settings · All reports & logs</div>
+    <!-- ====== LEFT COLUMN ====== -->
+    <div class="col-left">
+
+      <!-- 12 Hazards -->
+      <div>
+        <div class="section-title">
+          <div class="st-icon" style="background:#DBEAFE;color:#2563EB;">🎯</div>
+          Detection Capabilities / 检测能力
+        </div>
+        <div class="hazard-mini-grid">
+          <div class="hz-mini"><span class="dot" style="background:#F87171"></span>No Hard Hat<span class="tag tag-b">行为</span></div>
+          <div class="hz-mini"><span class="dot" style="background:#FB923C"></span>No Safety Vest<span class="tag tag-b">行为</span></div>
+          <div class="hz-mini"><span class="dot" style="background:#FACC15"></span>Edge Protection<span class="tag tag-p">物</span></div>
+          <div class="hz-mini"><span class="dot" style="background:#4ADE80"></span>Smoking<span class="tag tag-b">行为</span></div>
+          <div class="hz-mini"><span class="dot" style="background:#60A5FA"></span>Intrusion<span class="tag tag-b">行为</span></div>
+          <div class="hz-mini"><span class="dot" style="background:#A78BFA"></span>Pit Overload<span class="tag tag-p">物</span></div>
+          <div class="hz-mini"><span class="dot" style="background:#FB923C"></span>Open Flame<span class="tag tag-b">行为</span></div>
+          <div class="hz-mini"><span class="dot" style="background:#FBBF24"></span>Bulk Lifting<span class="tag tag-p">物</span></div>
+          <div class="hz-mini"><span class="dot" style="background:#34D399"></span>Crowd Gather<span class="tag tag-b">行为</span></div>
+          <div class="hz-mini"><span class="dot" style="background:#818CF8"></span>Vehicle Violation<span class="tag tag-b">行为</span></div>
+          <div class="hz-mini"><span class="dot" style="background:#9CA3AF"></span>Suspended Platform<span class="tag tag-p">物</span></div>
+          <div class="hz-mini"><span class="dot" style="background:#6B7280"></span>Enclosure Breach<span class="tag tag-p">物</span></div>
+        </div>
       </div>
-      <div class="role-card">
-        <div class="r-icon" style="background:#FEF3C7;color:#B45309;">🔍</div>
-        <h4>Reviewer</h4>
-        <div class="cn">复核员</div>
-        <div class="caps">AI review workbench · Confirm or dismiss hazards · Dispatch work orders · View reports · The core human-in-the-loop operator</div>
+
+      <!-- 6-Step Closed Loop -->
+      <div>
+        <div class="section-title">
+          <div class="st-icon" style="background:#FEF3C7;color:#B45309;">🔄</div>
+          Closed-Loop Workflow / 全流程闭环
+        </div>
+        <div class="wf-strip">
+          <div class="wf-node">
+            <div class="wf-num" style="background:#2563EB;">1</div>
+            <div class="wf-label">AI Detect</div>
+            <div class="wf-cn">AI检测</div>
+          </div>
+          <div class="wf-node">
+            <div class="wf-num" style="background:#F57A00;">2</div>
+            <div class="wf-label">Review</div>
+            <div class="wf-cn">人工复核</div>
+          </div>
+          <div class="wf-node">
+            <div class="wf-num" style="background:#E11D48;">3</div>
+            <div class="wf-label">Dispatch</div>
+            <div class="wf-cn">工单派发</div>
+          </div>
+          <div class="wf-node">
+            <div class="wf-num" style="background:#10B981;">4</div>
+            <div class="wf-label">Rectify</div>
+            <div class="wf-cn">现场整改</div>
+          </div>
+          <div class="wf-node">
+            <div class="wf-num" style="background:#8B5CF6;">5</div>
+            <div class="wf-label">Verify</div>
+            <div class="wf-cn">整改验收</div>
+          </div>
+          <div class="wf-node">
+            <div class="wf-num" style="background:#3730A3;">6</div>
+            <div class="wf-label">Close</div>
+            <div class="wf-cn">闭环归档</div>
+          </div>
+        </div>
       </div>
-      <div class="role-card">
-        <div class="r-icon" style="background:#D1FAE5;color:#065F46;">🔧</div>
-        <h4>Executor</h4>
-        <div class="cn">执行人</div>
-        <div class="caps">Receives assigned work orders · On-site rectification · Submit before/after proof · Project-bound — sees only own tasks</div>
+
+      <!-- Platform Features -->
+      <div>
+        <div class="section-title">
+          <div class="st-icon" style="background:#D1FAE5;color:#065F46;">📦</div>
+          Platform Modules / 平台功能模块
+        </div>
+        <div class="feat-list">
+          <div class="feat-row">
+            <div class="f-icon" style="background:#DBEAFE;color:#2563EB;">📊</div>
+            <div>
+              <h5>Executive Dashboard / 工作台总览</h5>
+              <p>KPI cards, hazard trends, project status & real-time alerts in one unified view</p>
+            </div>
+          </div>
+          <div class="feat-row">
+            <div class="f-icon" style="background:#FEF3C7;color:#B45309;">🖥</div>
+            <div>
+              <h5>AI Review Workbench / 人工复核工作台</h5>
+              <p>Side-by-side original & AI-annotated view — confirm or dismiss hazards in seconds</p>
+            </div>
+          </div>
+          <div class="feat-row">
+            <div class="f-icon" style="background:#FCE7F3;color:#BE185D;">📋</div>
+            <div>
+              <h5>Work Order Management / 工单管理（派发+台账）</h5>
+              <p>One-click batch dispatch · Lifecycle: Pending → Rectifying → Verified → Closed</p>
+            </div>
+          </div>
+          <div class="feat-row">
+            <div class="f-icon" style="background:#EDE9FE;color:#6D28D9;">📡</div>
+            <div>
+              <h5>Camera Config + Reports + Audit Logs / 摄像头配置·报告·日志</h5>
+              <p>Per-camera scene matrix · Auto-generated reports · Full operation audit trail</p>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="role-card">
-        <div class="r-icon" style="background:#F1F5F9;color:#475569;">👀</div>
-        <h4>Viewer</h4>
-        <div class="cn">观察员</div>
-        <div class="caps">Read-only access · Dashboard & reports · Suitable for management, clients, regulators, and other stakeholders</div>
+    </div>
+
+    <!-- ====== RIGHT COLUMN ====== -->
+    <div class="col-right">
+
+      <!-- Roles -->
+      <div>
+        <div class="section-title">
+          <div class="st-icon" style="background:#E0E7FF;color:#3730A3;">👥</div>
+          Role-Based Access / 角色权限
+        </div>
+        <div class="role-mini-grid">
+          <div class="role-mini">
+            <h6>👑 Administrator</h6>
+            <div class="cn">系统管理员</div>
+            <div class="caps">Full access · Project/User/Camera mgmt · WO settings</div>
+          </div>
+          <div class="role-mini">
+            <h6>🔍 Reviewer</h6>
+            <div class="cn">复核员</div>
+            <div class="caps">AI review · Confirm/dismiss · Dispatch WOs</div>
+          </div>
+          <div class="role-mini">
+            <h6>🔧 Executor</h6>
+            <div class="cn">执行人</div>
+            <div class="caps">Receive WOs · On-site rectification · Submit proof</div>
+          </div>
+          <div class="role-mini">
+            <h6>👀 Viewer</h6>
+            <div class="cn">观察员</div>
+            <div class="caps">Read-only · Dashboard & reports · Stakeholder view</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Why VisionGuard -->
+      <div>
+        <div class="section-title">
+          <div class="st-icon" style="background:#FEF3C7;color:#B45309;">★</div>
+          Why VisionGuard / 核心优势
+        </div>
+        <div class="adv-list">
+          <div class="adv-item">
+            <div class="check">✓</div>
+            <div>
+              <h6>Dual AI Engine / 双AI引擎</h6>
+              <div class="cn-desc">YOLO real-time detection + VLM secondary verification — high recall, low false positives</div>
+            </div>
+          </div>
+          <div class="adv-item">
+            <div class="check">✓</div>
+            <div>
+              <h6>Human-in-the-Loop / 人机协同</h6>
+              <div class="cn-desc">AI flags, humans decide — combining machine speed with expert judgment</div>
+            </div>
+          </div>
+          <div class="adv-item">
+            <div class="check">✓</div>
+            <div>
+              <h6>Full Traceability / 全链路可追溯</h6>
+              <div class="cn-desc">Every hazard has a complete audit trail from detection to closure</div>
+            </div>
+          </div>
+          <div class="adv-item">
+            <div class="check">✓</div>
+            <div>
+              <h6>Multi-Site Scalable / 多项目弹性扩展</h6>
+              <div class="cn-desc">One platform manages all sites, cameras, and teams at enterprise scale</div>
+            </div>
+          </div>
+          <div class="adv-item">
+            <div class="check">✓</div>
+            <div>
+              <h6>Per-Camera Config / 逐点位场景配置</h6>
+              <div class="cn-desc">Customize which of 12 hazard types each camera monitors</div>
+            </div>
+          </div>
+          <div class="adv-item">
+            <div class="check">✓</div>
+            <div>
+              <h6>Reliable Data Pipeline / 可靠数据回传</h6>
+              <div class="cn-desc">Exponential backoff retry + dead-letter queue — zero data loss</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tech Stack -->
+      <div>
+        <div class="section-title">
+          <div class="st-icon" style="background:#F1F5F9;color:#475569;">⚙</div>
+          Technology Stack / 技术栈
+        </div>
+        <div class="tech-row">
+          <div class="tech-tag">🎯 YOLO<div class="tech-sub">Object Detection</div></div>
+          <div class="tech-tag">🧠 VLM<div class="tech-sub">Vision Language Model</div></div>
+          <div class="tech-tag">⚡ vLLM<div class="tech-sub">High-Throughput Inference</div></div>
+          <div class="tech-tag">🔗 REST API<div class="tech-sub">Platform Integration</div></div>
+        </div>
+      </div>
+
+      <!-- Problem / Solution summary -->
+      <div style="background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border-radius:2mm;padding:3mm 4mm;">
+        <div style="font-size:7.5px;font-weight:700;color:#1D4ED8;margin-bottom:1.5mm;">🎯 The Problem We Solve / 解决的痛点</div>
+        <div style="font-size:6.5px;color:#475569;line-height:1.6;">
+          <b>Manual patrols</b> miss hazards in blind spots · <b>Hours of delay</b> between occurrence and discovery · <b>Inconsistent judgment</b> across inspectors · <b>Broken follow-up</b> — hazards reported but never verified as resolved. VisionGuard closes the loop.
+        </div>
       </div>
     </div>
   </div>
-</section>
 
-<!-- ====== ADVANTAGES ====== -->
-<section class="section" id="advantages">
-  <div class="section-inner">
-    <div class="section-label">Why VisionGuard / 核心优势</div>
-    <h2 class="section-title">Built for Real Construction Sites. Designed for Real Safety Outcomes.</h2>
-    <p class="section-sub"></p>
-
-    <div class="adv-grid">
-      <div class="adv-card">
-        <div class="check">✓</div>
-        <h4>Dual AI Engine / 双AI引擎</h4>
-        <div class="cn">YOLO + VLM 双重校验</div>
-        <p>YOLO provides real-time object detection with low latency; VLM (Vision Language Model) acts as a second-pass verifier, dramatically reducing false positives while maintaining high recall.</p>
-      </div>
-      <div class="adv-card">
-        <div class="check">✓</div>
-        <h4>Human-in-the-Loop / 人机协同</h4>
-        <div class="cn">AI初筛 + 人工确认</div>
-        <p>We don't pretend AI is perfect. Every AI-flagged hazard goes through human review — combining machine speed with human judgment for the highest accuracy.</p>
-      </div>
-      <div class="adv-card">
-        <div class="check">✓</div>
-        <h4>Full Lifecycle Tracking / 全生命周期追溯</h4>
-        <div class="cn">从发现到闭环，全程留痕</div>
-        <p>Every hazard has a complete audit trail: when it was detected, who reviewed it, when the work order was dispatched, who performed rectification, and who verified it closed.</p>
-      </div>
-      <div class="adv-card">
-        <div class="check">✓</div>
-        <h4>Multi-Site Scalability / 多项目弹性扩展</h4>
-        <div class="cn">一套平台，管理所有工地</div>
-        <p>One VisionGuard instance manages multiple construction sites, each with its own cameras, projects, and teams. Scales from a single site to an enterprise portfolio.</p>
-      </div>
-      <div class="adv-card">
-        <div class="check">✓</div>
-        <h4>Configurable Per Camera / 逐摄像头场景配置</h4>
-        <div class="cn">每个点位独立配置隐患类型</div>
-        <p>Not every camera needs to detect every hazard. Configure which 12 hazard types are active per camera — optimize for each camera's field of view and purpose.</p>
-      </div>
-      <div class="adv-card">
-        <div class="check">✓</div>
-        <h4>Reliable Data Pipeline / 可靠数据回传</h4>
-        <div class="cn">指数退避重试 + 死信队列</div>
-        <p>Confirmed results are pushed upstream with exponential backoff retry logic and a dead-letter queue — ensuring zero data loss even during network outages.</p>
-      </div>
+  <!-- ====== FOOTER ====== -->
+  <div class="footer-strip">
+    <div>
+      <strong>VisionGuard</strong> · AI Construction Safety Inspection Platform · © 2026
+    </div>
+    <div style="display:flex;gap:4mm;">
+      <span>🌐 <a class="cta-link" href="https://bestaloner.github.io/AIsp/" target="_blank">Live Demo / 在线演示</a></span>
+      <span>📧 contact@visionguard.ai</span>
     </div>
   </div>
-</section>
 
-<!-- ====== TECH STACK ====== -->
-<section class="section section-alt">
-  <div class="section-inner" style="text-align:center;">
-    <div class="section-label">Technology Stack / 技术栈</div>
-    <h2 class="section-title">Powered by State-of-the-Art AI</h2>
-    <p class="section-sub" style="margin-left:auto; margin-right:auto;">Proven technologies deployed in real production environments.</p>
-
-    <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-top:32px;">
-      <div style="background:#fff; border:1px solid var(--border); border-radius:12px; padding:20px 28px; min-width:150px;">
-        <div style="font-size:28px; margin-bottom:6px;">🎯</div>
-        <div style="font-weight:700;">YOLO</div>
-        <div style="font-size:12px; color:var(--text-light);">Real-time Object Detection</div>
-      </div>
-      <div style="background:#fff; border:1px solid var(--border); border-radius:12px; padding:20px 28px; min-width:150px;">
-        <div style="font-size:28px; margin-bottom:6px;">🧠</div>
-        <div style="font-weight:700;">VLM</div>
-        <div style="font-size:12px; color:var(--text-light);">Vision Language Model</div>
-      </div>
-      <div style="background:#fff; border:1px solid var(--border); border-radius:12px; padding:20px 28px; min-width:150px;">
-        <div style="font-size:28px; margin-bottom:6px;">⚡</div>
-        <div style="font-weight:700;">vLLM</div>
-        <div style="font-size:12px; color:var(--text-light);">High-Throughput Inference</div>
-      </div>
-      <div style="background:#fff; border:1px solid var(--border); border-radius:12px; padding:20px 28px; min-width:150px;">
-        <div style="font-size:28px; margin-bottom:6px;">🔗</div>
-        <div style="font-weight:700;">REST API</div>
-        <div style="font-size:12px; color:var(--text-light);">Upstream Integration</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ====== CTA ====== -->
-<section class="cta-section" id="cta">
-  <h2>Ready to Make Your Sites Safer?</h2>
-  <div class="sub">See VisionGuard in action. Explore the interactive demo or reach out for a personalized walkthrough.</div>
-  <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-    <a href="https://bestaloner.github.io/AIsp/" class="btn btn-white" target="_blank">▶ Try Live Demo / 在线体验</a>
-    <a href="mailto:demo@visionguard.ai" class="btn" style="background:rgba(255,255,255,0.15); color:#fff; border:1px solid rgba(255,255,255,0.3);">✉ Contact Us / 联系我们</a>
-  </div>
-</section>
-
-<!-- ====== FOOTER ====== -->
-<footer class="footer">
-  <p>© 2026 VisionGuard · AI Construction Safety Inspection Platform · <a href="https://bestaloner.github.io/AIsp/" target="_blank">Live Demo</a></p>
-  <p style="margin-top:4px;">Powered by YOLO + VLM · Human-AI Collaboration · Full Closed-Loop Management</p>
-</footer>
+</div>
 
 </body>
 </html>
