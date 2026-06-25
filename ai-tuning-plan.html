@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI隐患识别模型调优方案 — VisionGuard 能力平台</title>
+<style>
+:root {
+  --blue: #2563EB; --blue-dark: #1D4ED8; --orange: #F57A00;
+  --green: #10B981; --red: #EF4444; --gray: #64748B;
+  --light: #F8FAFC; --border: #E2E8F0; --text: #1E293B;
+  --bg: #F1F5F9;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', -apple-system, sans-serif;
+  color: var(--text); background: var(--bg); line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ====== COVER ====== */
+.cover {
+  max-width: 900px; margin: 40px auto; background: #fff;
+  border-radius: 12px; box-shadow: 0 2px 16px rgba(0,0,0,0.1);
+  padding: 60px 64px; text-align: center;
+}
+.cover .badge {
+  display: inline-block; background: rgba(37,99,235,0.08); color: var(--blue);
+  font-size: 13px; font-weight: 700; padding: 4px 16px; border-radius: 16px;
+  letter-spacing: 1px; margin-bottom: 20px;
+}
+.cover h1 { font-size: 32px; font-weight: 800; color: var(--blue-dark); margin-bottom: 8px; letter-spacing: -0.5px; }
+.cover .subtitle { font-size: 16px; color: var(--gray); margin-bottom: 32px; }
+.cover .meta { font-size: 13px; color: var(--gray); line-height: 2; }
+.cover .meta td { padding: 2px 8px; }
+.cover .meta td:first-child { color: var(--text); font-weight: 600; text-align: right; }
+.cover .version-stamp {
+  display: inline-block; border: 2px solid var(--blue); color: var(--blue);
+  font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 20px;
+  margin-top: 24px; letter-spacing: 1px;
+}
+
+/* ====== CONTENT PAGES ====== */
+.page {
+  max-width: 900px; margin: 0 auto 32px; background: #fff;
+  border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  padding: 48px 56px;
+}
+.page h2 {
+  font-size: 22px; font-weight: 800; color: var(--blue-dark);
+  padding-bottom: 10px; border-bottom: 2px solid var(--blue);
+  margin-bottom: 24px;
+}
+.page h3 {
+  font-size: 16px; font-weight: 700; color: var(--text);
+  margin: 28px 0 12px; padding-left: 12px;
+  border-left: 3px solid var(--orange);
+}
+.page h4 { font-size: 14px; font-weight: 700; color: var(--text); margin: 20px 0 8px; }
+
+.page p { font-size: 14px; color: var(--text); margin-bottom: 10px; }
+.page ul, .page ol { margin: 8px 0 12px 20px; font-size: 14px; }
+.page li { margin-bottom: 4px; }
+
+/* Tables */
+table.data {
+  width: 100%; border-collapse: collapse; margin: 12px 0 20px;
+  font-size: 13px;
+}
+table.data th {
+  background: var(--blue); color: #fff; font-weight: 600;
+  padding: 8px 10px; text-align: left; font-size: 12px;
+}
+table.data td {
+  padding: 8px 10px; border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+table.data tr:nth-child(even) td { background: var(--light); }
+table.data tr:hover td { background: #EFF6FF; }
+
+/* Hazard color bar */
+.hz-bar {
+  display: inline-block; width: 10px; height: 10px; border-radius: 2px;
+  margin-right: 4px; vertical-align: middle;
+}
+
+/* Callout boxes */
+.callout {
+  border-left: 4px solid var(--blue); background: #EFF6FF;
+  padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0;
+  font-size: 13px;
+}
+.callout.warn { border-left-color: var(--orange); background: #FFF7ED; }
+.callout.green { border-left-color: var(--green); background: #ECFDF5; }
+
+/* Badge */
+.badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 8px; font-weight: 600; }
+.badge-blue { background: #DBEAFE; color: #1E40AF; }
+.badge-orange { background: #FEF3C7; color: #92400E; }
+.badge-green { background: #D1FAE5; color: #065F46; }
+.badge-red { background: #FEE2E2; color: #991B1B; }
+
+/* Process flow */
+.flow { display: flex; gap: 0; align-items: center; flex-wrap: wrap; margin: 16px 0; justify-content: center; }
+.flow-step {
+  background: var(--light); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 16px; text-align: center; min-width: 100px;
+}
+.flow-arrow { font-size: 20px; color: var(--gray); padding: 0 4px; font-weight: 700; }
+
+/* Print */
+@media print {
+  body { background: #fff; }
+  .page, .cover { box-shadow: none; border-radius: 0; margin: 0; max-width: 100%; page-break-after: always; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ COVER ═══════════════ -->
+<div class="cover">
+  <div class="badge">VisionGuard · AI 能力平台</div>
+  <h1>AI隐患识别模型调优方案</h1>
+  <div class="subtitle">12类施工安全隐患 · YOLO + VLM 双模型微调 · 数据集建设 · 判定标准 · 输出规范</div>
+  <table class="meta" style="margin:0 auto;">
+    <tr><td>文档版本：</td><td>V1.0</td></tr>
+    <tr><td>编制日期：</td><td>2026-06-25</td></tr>
+    <tr><td>适用项目：</td><td>建筑施工AI安全巡检 — 能力平台</td></tr>
+    <tr><td>关联系统：</td><td>VisionGuard 业务平台 / AI能力平台</td></tr>
+  </table>
+  <div class="version-stamp">DRAFT · 待评审</div>
+</div>
+
+<!-- ═══════════════ 1. BACKGROUND ═══════════════ -->
+<div class="page">
+  <h2>一、项目背景与目标</h2>
+
+  <h3>1.1 现状分析</h3>
+  <p>当前 AI 隐患识别系统采用 <strong>YOLO（YOLO26s-v2.1，mAP 87.3%）+ VLM（Qwen3.6-27B via vLLM）</strong> 双引擎架构，覆盖12类施工安全隐患的检测与分类。在实际运行中，系统<strong>大致能识别出隐患</strong>，但存在以下问题：</p>
+  <ul>
+    <li><strong>误报率偏高：</strong>将正常场景误判为隐患（如普通黄色衣物被判定为反光衣缺失）</li>
+    <li><strong>漏报风险：</strong>部分小目标、遮挡目标、逆光场景无法有效检出</li>
+    <li><strong>边界案例处理弱：</strong>对"部分佩戴安全帽""远处人员""重叠物体"等模糊场景判断不稳定</li>
+    <li><strong>场景泛化不足：</strong>当前模型在特定光照、角度、工地类型下的泛化能力有限</li>
+  </ul>
+
+  <h3>1.2 调优目标</h3>
+  <div class="callout">
+    <strong>核心目标：</strong>通过明确判定规则、建设高质量标注数据集、对 YOLO 和 VLM 进行针对性微调，将12类隐患的综合识别准确率从当前水平提升至<strong>可交付的生产级标准</strong>。
+  </div>
+  <table class="data">
+    <tr><th>指标</th><th>当前值（估算）</th><th>目标值</th><th>说明</th></tr>
+    <tr><td>YOLO mAP@0.5</td><td>~87%</td><td>≥ 92%</td><td>12类均值</td></tr>
+    <tr><td>YOLO Recall（召回率）</td><td>~85%</td><td>≥ 93%</td><td>减少漏报</td></tr>
+    <tr><td>YOLO Precision（精确率）</td><td>~78%</td><td>≥ 85%</td><td>减少误报</td></tr>
+    <tr><td>VLM 复核准确率</td><td>~82%</td><td>≥ 90%</td><td>二次确认</td></tr>
+    <tr><td>综合准确率（端到端）</td><td>~75%</td><td>≥ 88%</td><td>经人工复核后的最终指标</td></tr>
+  </table>
+
+  <h3>1.3 方案总览</h3>
+  <div class="flow">
+    <div class="flow-step"><strong>① 确定范围</strong><br><small>12类隐患清单</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><strong>② 制定判定标准</strong><br><small>每类的正/误/边界判据</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><strong>③ 定义输出形式</strong><br><small>检测结果 & 标注数据格式</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><strong>④ 数据集建设</strong><br><small>采集→初标→复核→入库</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><strong>⑤ 模型微调</strong><br><small>YOLO微调 + VLM微调</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><strong>⑥ 验证 & 部署</strong><br><small>测试集评估→灰度上线</small></div>
+  </div>
+</div>
+
+<!-- ═══════════════ 2. SCOPE ═══════════════ -->
+<div class="page">
+  <h2>二、调优范围</h2>
+
+  <h3>2.1 12类隐患清单</h3>
+  <p>本次调优覆盖全部12类施工安全隐患，按物理设施类（5项）与人员行为类（7项）分类管理。</p>
+
+  <table class="data">
+    <tr><th style="width:30px">#</th><th>隐患名称</th><th style="width:70px">类别</th><th>典型场景描述</th><th>当前主要问题</th></tr>
+    <tr>
+      <td>1</td><td><span class="hz-bar" style="background:#F87171"></span>安全帽未佩戴</td>
+      <td><span class="badge badge-blue">行为</span></td>
+      <td>施工区域人员头部未佩戴或未正确佩戴安全帽</td>
+      <td>帽子颜色与背景相近时误判；部分佩戴漏检</td>
+    </tr>
+    <tr>
+      <td>2</td><td><span class="hz-bar" style="background:#FB923C"></span>反光衣未穿</td>
+      <td><span class="badge badge-blue">行为</span></td>
+      <td>施工区域人员未穿着反光安全背心</td>
+      <td>黄色/橙色普通衣物误报；夜间反光条识别弱</td>
+    </tr>
+    <tr>
+      <td>3</td><td><span class="hz-bar" style="background:#FACC15"></span>临边防护缺失</td>
+      <td><span class="badge badge-orange">物</span></td>
+      <td>楼层边缘、洞口、阳台等临边位置缺少防护栏杆</td>
+      <td>复杂背景干扰；不同类型护栏识别不一致</td>
+    </tr>
+    <tr>
+      <td>4</td><td><span class="hz-bar" style="background:#4ADE80"></span>吸烟检测</td>
+      <td><span class="badge badge-blue">行为</span></td>
+      <td>施工区域内人员吸烟或出现明火烟头</td>
+      <td>小目标检测困难；与白色细长物体混淆</td>
+    </tr>
+    <tr>
+      <td>5</td><td><span class="hz-bar" style="background:#60A5FA"></span>人员越界</td>
+      <td><span class="badge badge-blue">行为</span></td>
+      <td>人员进入危险区域（塔吊回转半径、深基坑警戒区等）</td>
+      <td>区域边界定义不清晰；需结合场景上下文</td>
+    </tr>
+    <tr>
+      <td>6</td><td><span class="hz-bar" style="background:#A78BFA"></span>坑边堆载</td>
+      <td><span class="badge badge-orange">物</span></td>
+      <td>基坑边缘堆放土方、材料、机械等荷载</td>
+      <td>荷载类型多样，定义边界模糊</td>
+    </tr>
+    <tr>
+      <td>7</td><td><span class="hz-bar" style="background:#FB923C"></span>明火检测</td>
+      <td><span class="badge badge-blue">行为</span></td>
+      <td>施工现场出现明火、火焰或非受控火源</td>
+      <td>阳光反射、灯光与明火混淆</td>
+    </tr>
+    <tr>
+      <td>8</td><td><span class="hz-bar" style="background:#FBBF24"></span>散料吊装</td>
+      <td><span class="badge badge-orange">物</span></td>
+      <td>吊装散料（钢筋、管材等）未使用专用吊具或捆扎不规范</td>
+      <td>需要组合判断（吊具+物料+捆扎状态）</td>
+    </tr>
+    <tr>
+      <td>9</td><td><span class="hz-bar" style="background:#34D399"></span>人员聚集</td>
+      <td><span class="badge badge-blue">行为</span></td>
+      <td>危险区域（如脚手架下方、吊装区）多人聚集</td>
+      <td>需要结合区域定义和人数阈值</td>
+    </tr>
+    <tr>
+      <td>10</td><td><span class="hz-bar" style="background:#818CF8"></span>车辆违规</td>
+      <td><span class="badge badge-blue">行为</span></td>
+      <td>工程车辆超速、逆行、违规停放、未按规定路线行驶</td>
+      <td>需要时序信息辅助判断</td>
+    </tr>
+    <tr>
+      <td>11</td><td><span class="hz-bar" style="background:#9CA3AF"></span>吊篮作业</td>
+      <td><span class="badge badge-orange">物</span></td>
+      <td>高处作业吊篮未按要求设置安全绳或超员使用</td>
+      <td>高空小目标；安全绳细长难检测</td>
+    </tr>
+    <tr>
+      <td>12</td><td><span class="hz-bar" style="background:#6B7280"></span>工地围挡封闭</td>
+      <td><span class="badge badge-orange">物</span></td>
+      <td>工地外围围挡破损、缺失、未完全封闭</td>
+      <td>围挡形式多样（彩钢板/砖墙/临时围栏），标准不统一</td>
+    </tr>
+  </table>
+
+  <h3>2.2 不在本次调优范围的事项</h3>
+  <ul>
+    <li>新增隐患类型的模型训练（仅针对现有12类优化）</li>
+    <li>平台业务功能变更（不涉及 VisionGuard 业务平台代码修改）</li>
+    <li>模型架构级别的替换（不更换 YOLO 或 VLM 基础模型架构，仅微调）</li>
+    <li>实时推理性能优化（本次聚焦精度，推理速度优化另立专项）</li>
+  </ul>
+</div>
+
+<!-- ═══════════════ 3. JUDGMENT CRITERIA ═══════════════ -->
+<div class="page">
+  <h2>三、判定标准</h2>
+
+  <p>判定标准是数据标注和模型评估的<strong>唯一依据</strong>。每类隐患定义三种判定结论：<span class="badge badge-green">正例(Positive)</span> <span class="badge badge-red">负例(Negative)</span> <span class="badge badge-orange">边界(Borderline)</span></p>
+
+  <h3>3.1 通用判定规则</h3>
+  <table class="data">
+    <tr><th>判定结论</th><th>标签</th><th>通用规则</th></tr>
+    <tr>
+      <td><span class="badge badge-green">正例</span></td>
+      <td>1</td>
+      <td>图像/视频中<strong>明确存在</strong>该类隐患，且具备可辨识的视觉特征。标注人员90%以上把握可确认。</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-red">负例</span></td>
+      <td>0</td>
+      <td>图像/视频中<strong>明确不存在</strong>该类隐患。包括：正常施工场景、已有防护措施到位、与其他隐患类型无关的场景。</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-orange">边界</span></td>
+      <td>-1</td>
+      <td>无法明确判定是否存在隐患的场景，包括：图像模糊/遮挡严重/光线不足/距离过远/视角不佳。边界样本将<strong>单独记录</strong>，不直接参与训练，作为难例分析的依据。</td>
+    </tr>
+  </table>
+
+  <h3>3.2 逐类判定细则</h3>
+  <p>以下为每类隐患的具体判定标准。标注人员应在标注前完整阅读并理解。</p>
+
+  <h4>#1 安全帽未佩戴</h4>
+  <table class="data">
+    <tr><th>判定</th><th>标准</th></tr>
+    <tr><td><span class="badge badge-green">正例</span></td><td>施工区域内，人员头部区域<strong>未出现</strong>安全帽轮廓（无论颜色）。包括：完全未佩戴、手持安全帽未戴上、佩戴普通帽子/头巾代替。</td></tr>
+    <tr><td><span class="badge badge-red">负例</span></td><td>人员头部清晰可见安全帽（任一颜色）；非施工人员（如访客戴白色安全帽在参观通道）；安全帽放置在地面/工具台上（非佩戴状态，不判定为隐患）。</td></tr>
+    <tr><td><span class="badge badge-orange">边界</span></td><td>头部被遮挡无法判断；人员距离过远（<20px头部高度）；正在摘/戴安全帽的动作瞬间。</td></tr>
+  </table>
+
+  <h4>#2 反光衣未穿</h4>
+  <table class="data">
+    <tr><th>判定</th><th>标准</th></tr>
+    <tr><td><span class="badge badge-green">正例</span></td><td>施工区域内，人员躯干部位<strong>未出现</strong>反光安全背心。包括：穿普通外套/T恤/工装但无反光条特征。</td></tr>
+    <tr><td><span class="badge badge-red">负例</span></td><td>人员躯干可见反光背心（带明显反光条或荧光色背心）；非施工区人员（办公室/休息区）。</td></tr>
+    <tr><td><span class="badge badge-orange">边界</span></td><td>反光条被部分遮挡；光线过暗无法辨别反光特征；穿着与反光衣颜色相近的普通衣物但无法确认。</td></tr>
+  </table>
+
+  <h4>#3 临边防护缺失</h4>
+  <table class="data">
+    <tr><th>判定</th><th>标准</th></tr>
+    <tr><td><span class="badge badge-green">正例</span></td><td>楼层边缘、洞口、阳台、楼梯口等临边位置<strong>无防护栏杆或防护栏杆不完整</strong>（缺少横杆/立杆间距过大>2m/高度不足<1.2m）。</td></tr>
+    <tr><td><span class="badge badge-red">负例</span></td><td>临边位置可见完整防护栏杆（上下两道横杆+立杆+踢脚板）；主体结构施工中尚未形成临边（刚浇筑混凝土，尚未拆模）；已用密目网封闭。</td></tr>
+    <tr><td><span class="badge badge-orange">边界</span></td><td>防护栏杆被材料遮挡无法判断完整性；远距离拍摄无法看清栏杆细节；正在搭设/拆除防护栏杆过程中。</td></tr>
+  </table>
+
+  <h4>#4 吸烟检测</h4>
+  <table class="data">
+    <tr><th>判定</th><th>标准</th></tr>
+    <tr><td><span class="badge badge-green">正例</span></td><td>施工区域内，人员手部或嘴部出现<strong>点燃的香烟</strong>（可见烟头火光或烟雾特征）。</td></tr>
+    <tr><td><span class="badge badge-red">负例</span></td><td>未见香烟或烟头；手中持有其他细长物体（笔/工具/钢筋）；指定吸烟区内吸烟（非隐患）。</td></tr>
+    <tr><td><span class="badge badge-orange">边界</span></td><td>疑似香烟但无法分辨（距离远/像素低）；白色细长物体在手部附近但不能确认；电子烟（无明显火光）。</td></tr>
+  </table>
+
+  <h4>#5 人员越界</h4>
+  <table class="data">
+    <tr><th>判定</th><th>标准</th></tr>
+    <tr><td><span class="badge badge-green">正例</span></td><td>人员<strong>进入明确划定的危险/禁入区域</strong>。包括：塔吊回转半径内有人、深基坑底部有人但未登记、已围挡的临边外侧有人。</td></tr>
+    <tr><td><span class="badge badge-red">负例</span></td><td>人员在正常施工通道/作业面工作；已授权的巡检人员；危险区域内无人。</td></tr>
+    <tr><td><span class="badge badge-orange">边界</span></td><td>无法判断具体区域边界（摄像头角度不佳）；人员恰好在区域边界线上。</td></tr>
+  </table>
+
+  <h4>#6 坑边堆载</h4>
+  <table class="data">
+    <tr><th>判定</th><th>标准</th></tr>
+    <tr><td><span class="badge badge-green">正例</span></td><td>基坑边缘<strong>2m范围内</strong>堆放土方、建筑材料、工程机械等荷载。包括：堆土高度超过1.5m且在坑边、材料堆放在基坑支护结构上方。</td></tr>
+    <tr><td><span class="badge badge-red">负例</span></td><td>基坑边缘2m外堆放；基坑边缘有挡土墙/支护结构且荷载在安全距离外；临时施工机具（非长期堆放）。</td></tr>
+    <tr><td><span class="badge badge-orange">边界</span></td><td>无法准确判断距离（无参照物）；堆载数量/高度处于临界值附近。</td></tr>
+  </table>
+
+  <h4>#7 明火检测</h4>
+  <table class="data">
+    <tr><th>判定</th><th>标准</th></tr>
+    <tr><td><span class="badge badge-green">正例</span></td><td>施工现场出现<strong>非受控明火</strong>。包括：露天焚烧垃圾、违规动火作业无消防措施、可见明显火焰。</td></tr>
+    <tr><td><span class="badge badge-red">负例</span></td><td>受控动火作业（已审批+灭火器在场+看火人）；电焊弧光（非明火）；阳光/灯光反射；厨房/食堂正常用火。</td></tr>
+    <tr><td><span class="badge badge-orange">边界</span></td><td>疑似火焰但可能是强光反射；烟雾可见但火源不可见；夜间灯光与火焰难以区分。</td></tr>
+  </table>
+
+  <h4>#8~#12 判定标准</h4>
+  <p>#8 散料吊装、#9 人员聚集、#10 车辆违规、#11 吊篮作业、#12 工地围挡封闭 的详细判定标准，参照上述格式，在标注工作启动前由双方共同确认并编入《标注指导手册》。核心原则不变：</p>
+  <ul>
+    <li>有明确视觉特征 → <span class="badge badge-green">正例</span></li>
+    <li>明确不存在 → <span class="badge badge-red">负例</span></li>
+    <li>模糊/遮挡/无法判断 → <span class="badge badge-orange">边界</span></li>
+  </ul>
+
+  <div class="callout warn">
+    <strong>⚠ 重要：</strong>标注人员在标注时若把握低于90%，应直接标记为"边界"并备注原因，不得强行判定。边界样本的积累是后续难例挖掘和针对性优化的关键输入。
+  </div>
+</div>
+
+<!-- ═══════════════ 4. OUTPUT FORMAT ═══════════════ -->
+<div class="page">
+  <h2>四、输出形式定义</h2>
+
+  <h3>4.1 模型检测输出格式（推理结果）</h3>
+  <p>单次检测的输出采用 JSON 格式，每个检测到的隐患作为一个对象：</p>
+  <table class="data">
+    <tr><th>字段</th><th>类型</th><th>必填</th><th>说明</th><th>示例</th></tr>
+    <tr><td><code>detection_id</code></td><td>string</td><td>✓</td><td>检测唯一标识</td><td>"DET-20260625-001"</td></tr>
+    <tr><td><code>timestamp</code></td><td>string</td><td>✓</td><td>检测时间 ISO8601</td><td>"2026-06-25T14:32:00+08:00"</td></tr>
+    <tr><td><code>camera_id</code></td><td>string</td><td>✓</td><td>摄像头PUID</td><td>"CAM-FJ-001"</td></tr>
+    <tr><td><code>project_id</code></td><td>string</td><td>✓</td><td>所属项目ID</td><td>"PRJ-059"</td></tr>
+    <tr><td><code>hazard_type</code></td><td>int</td><td>✓</td><td>隐患类型编号 1-12</td><td>1</td></tr>
+    <tr><td><code>hazard_name</code></td><td>string</td><td>✓</td><td>隐患中文名称</td><td>"安全帽未佩戴"</td></tr>
+    <tr><td><code>bbox</code></td><td>array[4]</td><td></td><td>边界框 [x,y,w,h]，归一化0-1</td><td>[0.32, 0.15, 0.08, 0.12]</td></tr>
+    <tr><td><code>confidence</code></td><td>float</td><td>✓</td><td>YOLO置信度 0-1</td><td>0.923</td></tr>
+    <tr><td><code>vlm_result</code></td><td>object</td><td></td><td>VLM复核结果</td><td>见下方</td></tr>
+    <tr><td><code>severity</code></td><td>string</td><td>✓</td><td>严重级别</td><td>"major" / "moderate" / "minor"</td></tr>
+    <tr><td><code>snapshot_url</code></td><td>string</td><td></td><td>抓拍图片URL</td><td>"https://..."</td></tr>
+  </table>
+
+  <p><strong>VLM 复核结果子对象：</strong></p>
+  <table class="data">
+    <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+    <tr><td><code>vlm_result.confirmed</code></td><td>bool</td><td>VLM是否确认该隐患存在</td></tr>
+    <tr><td><code>vlm_result.confidence</code></td><td>float</td><td>VLM置信度</td></tr>
+    <tr><td><code>vlm_result.reasoning</code></td><td>string</td><td>VLM判断理由（简短描述）</td></tr>
+    <tr><td><code>vlm_result.model_version</code></td><td>string</td><td>VLM模型版本号</td></tr>
+  </table>
+
+  <h3>4.2 人工标注数据格式（训练集 & 验证集）</h3>
+  <p>标注数据采用 <strong>YOLO 标准格式 + 扩展字段</strong>，兼容主流训练框架（Ultralytics YOLO）。</p>
+
+  <h4>4.2.1 图像级标注文件（每张图片一个 .txt）</h4>
+  <div class="callout">
+    <code>class_id cx cy w h confidence_flag</code><br>
+    示例：<code>0 0.453 0.321 0.087 0.143 1</code><br>
+    <small>class_id: 0-11（对应12类），cx/cy/w/h: YOLO归一化坐标，confidence_flag: 1=确定正例 / 0=边界样本</small>
+  </div>
+
+  <h4>4.2.2 数据集目录结构</h4>
+  <div class="callout">
+    <pre style="font-size:12px; line-height:1.6;">
+dataset/
+├── images/
+│   ├── train/          # 训练集图片 (70%)
+│   ├── val/            # 验证集图片 (15%)
+│   └── test/           # 测试集图片 (15%)
+├── labels/
+│   ├── train/          # 训练集标注 (YOLO .txt)
+│   ├── val/            # 验证集标注
+│   └── test/           # 测试集标注
+├── metadata/
+│   ├── classes.yaml    # 类别定义
+│   ├── borderline.csv  # 边界样本记录
+│   └── annotation_log.csv  # 标注日志
+└── README.md           # 数据集说明
+    </pre>
+  </div>
+
+  <h4>4.2.3 classes.yaml</h4>
+  <div class="callout">
+    <pre style="font-size:12px; line-height:1.6;">
+names:
+  0: no_hard_hat          # 安全帽未佩戴
+  1: no_safety_vest       # 反光衣未穿
+  2: edge_protection      # 临边防护缺失
+  3: smoking              # 吸烟检测
+  4: intrusion            # 人员越界
+  5: pit_overload         # 坑边堆载
+  6: open_flame           # 明火检测
+  7: bulk_lifting         # 散料吊装
+  8: crowd_gather         # 人员聚集
+  9: vehicle_violation    # 车辆违规
+  10: suspended_platform  # 吊篮作业
+  11: enclosure_breach    # 工地围挡封闭
+nc: 12
+    </pre>
+  </div>
+
+  <h3>4.3 VLM 微调数据格式</h3>
+  <p>VLM 微调采用<strong>图像+问答对</strong>格式，每张图片配合结构化的 QA prompt：</p>
+  <div class="callout">
+    <pre style="font-size:12px; line-height:1.6;">
+{
+  "image": "train_0001.jpg",
+  "conversations": [
+    {
+      "from": "human",
+      "value": "请检测此施工场景图像中是否存在安全隐患。请列出所有发现的隐患类型、位置（边界框坐标）和置信度。"
+    },
+    {
+      "from": "assistant",
+      "value": "检测到以下隐患：\n1. 安全帽未佩戴 - 位置[0.32,0.15,0.08,0.12] - 置信度:0.95\n  - 判断理由：图像右下角人员头部区域未见安全帽轮廓，头发裸露。\n2. 未检测到其他隐患。"
+    }
+  ]
+}
+    </pre>
+  </div>
+</div>
+
+<!-- ═══════════════ 5. DATASET ═══════════════ -->
+<div class="page">
+  <h2>五、数据集建设方案</h2>
+
+  <h3>5.1 数据采集范围</h3>
+  <table class="data">
+    <tr><th>维度</th><th>要求</th></tr>
+    <tr><td>数据来源</td><td>现有项目已部署摄像头的历史抓拍 + 补充专项采集</td></tr>
+    <tr><td>场景覆盖</td><td>覆盖至少3个不同施工阶段（基础/主体/装修）的不同工地</td></tr>
+    <tr><td>光照条件</td><td>白天/阴天/黄昏/夜间（含补光）/逆光，每种 >= 10%</td></tr>
+    <tr><td>天气条件</td><td>晴天/阴天/雨天，每种 >= 10%</td></tr>
+    <tr><td>拍摄角度</td><td>俯视/平视/仰视，不同摄像头安装位置</td></tr>
+    <tr><td>图像格式</td><td>JPG/PNG，分辨率 >= 1280×720，建议1920×1080</td></tr>
+  </table>
+
+  <h3>5.2 数据集数量规划</h3>
+  <table class="data">
+    <tr><th>类别</th><th>训练集</th><th>验证集</th><th>测试集</th><th>小计（每类）</th></tr>
+    <tr><td>每类正例（有隐患）</td><td>≥ 350</td><td>≥ 75</td><td>≥ 75</td><td>≥ 500</td></tr>
+    <tr><td>每类负例（无该隐患）</td><td>≥ 150</td><td>≥ 30</td><td>≥ 30</td><td>≥ 210</td></tr>
+    <tr><td>每类边界样本</td><td>—</td><td>—</td><td>—</td><td>≥ 50（不入训练，备查）</td></tr>
+    <tr style="font-weight:700;background:#EFF6FF"><td>12类合计</td><td>≥ 6,000</td><td>≥ 1,260</td><td>≥ 1,260</td><td>≥ 8,520（+600边界）</td></tr>
+  </table>
+  <div class="callout green">
+    <strong>说明：</strong>单张图片可能同时包含多种隐患类型，每类隐患的计数独立。实际图片总数约为计划数量的 <strong>60-70%</strong>（因一张图含多个隐患），即约 5,000-6,000 张独立图片。
+  </div>
+
+  <h3>5.3 标注流程</h3>
+  <div class="flow">
+    <div class="flow-step"><strong>Step 1</strong><br>原始数据采集<br><small>已部署摄像头抓拍<br>+ 专项补充拍摄</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><strong>Step 2</strong><br>数据清洗<br><small>去重/去模糊/格式统一<br>我方处理</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><strong>Step 3</strong><br>客户方初标<br><small>使用标注工具<br>按判定标准标注</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><strong>Step 4</strong><br>我方复核<br><small>抽查 + 争议仲裁<br>修正 + 一致性检查</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><strong>Step 5</strong><br>数据集入库<br><small>划分train/val/test<br>生成统计报告</small></div>
+  </div>
+
+  <h3>5.4 标注工具与规范</h3>
+  <ul>
+    <li><strong>推荐工具：</strong>LabelImg / Label Studio / CVAT（支持 YOLO 格式导出）</li>
+    <li><strong>标注类型：</strong>矩形边界框（Bounding Box）+ 类别标签</li>
+    <li><strong>标注粒度：</strong>每个隐患实例单独标注一个框，<strong>不合并</strong>相邻的同类别实例</li>
+    <li><strong>标注原则：</strong>框紧密包围目标物体，外扩不超过5px；遮挡超过50%的目标标注为边界样本</li>
+    <li><strong>一致性检查：</strong>每批次标注完成后，随机抽取20%由第二人交叉验证，不一致率 >10% 则整批返工</li>
+  </ul>
+
+  <h3>5.5 质量控制机制</h3>
+  <table class="data">
+    <tr><th>环节</th><th>检查内容</th><th>标准</th><th>不达标处理</th></tr>
+    <tr><td>数据清洗</td><td>图像质量（模糊/过曝/纯黑）</td><td>可用率 ≥ 95%</td><td>重新采集或剔除</td></tr>
+    <tr><td>标注质量</td><td>框准确性、标签正确性</td><td>标注准确率 ≥ 90%</td><td>退回修正</td></tr>
+    <tr><td>交叉验证</td><td>两人标注一致性</td><td>IoU ≥ 0.85, 标签一致率 ≥ 95%</td><td>争议样本仲裁</td></tr>
+    <tr><td>类别平衡</td><td>每类样本数量是否达标</td><td>每类正例 ≥ 500</td><td>针对性补充采集</td></tr>
+    <tr><td>分布检查</td><td>场景/光照/角度分布</td><td>各维度覆盖率 ≥ 10%</td><td>定向补充</td></tr>
+  </table>
+</div>
+
+<!-- ═══════════════ 6. FINE-TUNING ═══════════════ -->
+<div class="page">
+  <h2>六、模型微调技术方案</h2>
+
+  <h3>6.1 YOLO 微调方案</h3>
+  <table class="data">
+    <tr><th>参数</th><th>配置</th><th>说明</th></tr>
+    <tr><td>基础模型</td><td>YOLO26s-v2.1 (当前生产版本)</td><td>在现有权重基础上微调，而非从头训练</td></tr>
+    <tr><td>训练框架</td><td>Ultralytics YOLO</td><td>标准 YOLO 训练流程</td></tr>
+    <tr><td>Epochs</td><td>100-150</td><td>根据验证集 loss 早停</td></tr>
+    <tr><td>Batch Size</td><td>16-32</td><td>根据 GPU 显存调整</td></tr>
+    <tr><td>Image Size</td><td>640×640</td><td>保持与当前版本一致</td></tr>
+    <tr><td>Learning Rate</td><td>0.001 (初始) → Cosine调度</td><td>微调降低初始学习率，避免灾难性遗忘</td></tr>
+    <tr><td>数据增强</td><td>Mosaic + MixUp + HSV抖动 + 随机翻转</td><td>提升泛化能力</td></tr>
+    <tr><td>损失函数</td><td>CIoU Loss (分类+定位+置信度)</td><td>标准 YOLO 损失</td></tr>
+    <tr><td>验证频率</td><td>每 5 epoch 验证一次</td><td>监控过拟合</td></tr>
+    <tr><td>早停策略</td><td>val/mAP 连续15 epoch无提升</td><td>防止过拟合</td></tr>
+    <tr><td>输出</td><td>微调后的权重文件 (.pt)</td><td>新版本号命名：YOLO26s-v2.2-ft</td></tr>
+  </table>
+
+  <h3>6.2 VLM 微调方案</h3>
+  <table class="data">
+    <tr><th>参数</th><th>配置</th><th>说明</th></tr>
+    <tr><td>基础模型</td><td>Qwen3.6-27B (当前版本)</td><td>视觉语言大模型</td></tr>
+    <tr><td>微调方法</td><td>LoRA (Low-Rank Adaptation)</td><td>低秩适配，高效微调，不修改原模型权重</td></tr>
+    <tr><td>LoRA Rank</td><td>r=16, alpha=32</td><td>平衡微调效果与效率</td></tr>
+    <tr><td>训练数据</td><td>图像+QA对（见 4.3 节）</td><td>每类 ≥ 200 对，共 ≥ 2,400 对</td></tr>
+    <tr><td>Epochs</td><td>3-5</td><td>LoRA 微调收敛较快</td></tr>
+    <tr><td>Batch Size</td><td>2-4</td><td>27B 模型显存受限</td></tr>
+    <tr><td>Learning Rate</td><td>2e-5</td><td>VLM 微调常用学习率范围</td></tr>
+    <tr><td>优化器</td><td>AdamW</td><td></td></tr>
+    <tr><td>推理引擎</td><td>vLLM</td><td>保持与当前生产一致</td></tr>
+    <tr><td>输出</td><td>LoRA 适配器权重</td><td>不改变基础模型，可动态加载/卸载</td></tr>
+  </table>
+
+  <div class="callout warn">
+    <strong>⚠ 注意：</strong>VLM 微调的核心目标是提升其对施工场景隐患的<strong>判断准确性</strong>，而非修改其视觉识别能力（视觉编码器冻结）。LoRA 适配器主要作用于模型的注意力层和 FFN 层，引导模型在安全巡检场景下的推理逻辑。
+  </div>
+
+  <h3>6.3 评估与对比</h3>
+  <table class="data">
+    <tr><th>评估阶段</th><th>内容</th><th>通过标准</th></tr>
+    <tr><td>离线评估</td><td>在测试集上计算 mAP/Recall/Precision/F1</td><td>所有指标达到第 1.2 节目标值</td></tr>
+    <tr><td>对比基线</td><td>与 V2.1 版本对比，确保所有类别指标不退化</td><td>无类别退化 ≥ 2%</td></tr>
+    <tr><td>难例专项</td><td>对边界样本集进行专项评估</td><td>误判率降低 ≥ 20%</td></tr>
+    <tr><td>A/B 灰度</td><td>选取2-3个摄像头，新旧模型并行运行1周</td><td>人工复核确认准确率提升 ≥ 10%</td></tr>
+    <tr><td>全量上线</td><td>所有摄像头切换新模型</td><td>灰度期无重大回归</td></tr>
+  </table>
+</div>
+
+<!-- ═══════════════ 7. ROLES & WORKFLOW ═══════════════ -->
+<div class="page">
+  <h2>七、角色分工与协作流程</h2>
+
+  <h3>7.1 角色分工</h3>
+  <table class="data">
+    <tr><th>角色</th><th>责任方</th><th>主要职责</th></tr>
+    <tr><td><strong>项目负责人</strong></td><td>双方各1人</td><td>整体协调、进度把控、争议仲裁</td></tr>
+    <tr><td><strong>数据采集员</strong></td><td>客户方</td><td>从现有系统导出历史抓拍，组织补充拍摄，按场景/光照/天气分类整理</td></tr>
+    <tr><td><strong>标注人员</strong></td><td>客户方（主要）</td><td>使用标注工具按判定标准进行图像标注，每张图标注边界框+类别标签</td></tr>
+    <tr><td><strong>标注复核员</strong></td><td>我方</td><td>抽查标注质量、交叉验证一致性、修正错误标注、判定边界争议样本</td></tr>
+    <tr><td><strong>AI 工程师</strong></td><td>我方</td><td>数据预处理、模型微调训练、评估报告、模型交付</td></tr>
+    <tr><td><strong>业务验收人</strong></td><td>客户方</td><td>最终验收：在业务平台上验证新模型的实际表现</td></tr>
+  </table>
+
+  <h3>7.2 协作流程</h3>
+  <div class="flow">
+    <div class="flow-step"><strong>Phase 1</strong><br>方案确认<br><small>双方确认范围+标准<br>（1周）</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><strong>Phase 2</strong><br>数据采集<br><small>客户提供原始数据<br>（2周）</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><strong>Phase 3</strong><br>标注+复核<br><small>客户初标→我方复核<br>（3周）</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><strong>Phase 4</strong><br>模型微调<br><small>我方执行训练<br>（2周）</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><strong>Phase 5</strong><br>验证上线<br><small>A/B灰度→评估→全量<br>（2周）</small></div>
+  </div>
+
+  <h3>7.3 沟通机制</h3>
+  <ul>
+    <li><strong>周例会：</strong>每周一次进度同步，双方项目负责人参加</li>
+    <li><strong>标注答疑群：</strong>即时通讯群，标注人员遇到判定疑问可随时提问，我方 24h 内回复</li>
+    <li><strong>阶段性交付物：</strong>每个 Phase 结束输出阶段性成果文档</li>
+  </ul>
+</div>
+
+<!-- ═══════════════ 8. TIMELINE ═══════════════ -->
+<div class="page">
+  <h2>八、时间计划</h2>
+
+  <table class="data">
+    <tr><th>阶段</th><th>工作内容</th><th>责任方</th><th>周期</th><th>里程碑交付物</th></tr>
+    <tr>
+      <td>P1</td>
+      <td>方案评审与确认<br>· 评审判定标准<br>· 确认输出格式<br>· 选定标注工具</td>
+      <td>双方</td>
+      <td>第1周</td>
+      <td>✅ 《调优方案》签字确认<br>✅ 《标注指导手册》（含12类完整判定细则）<br>✅ 标注工具环境就绪</td>
+    </tr>
+    <tr>
+      <td>P2</td>
+      <td>数据采集与清洗<br>· 历史数据导出<br>· 补充拍摄（如需）<br>· 数据清洗去重</td>
+      <td>客户方采集<br>我方清洗</td>
+      <td>第2-3周</td>
+      <td>✅ 原始数据集交付<br>✅ 数据清洗报告<br>✅ 类别分布统计</td>
+    </tr>
+    <tr>
+      <td>P3</td>
+      <td>数据标注与复核<br>· 客户方初标<br>· 我方交叉验证<br>· 争议仲裁</td>
+      <td>客户方标注<br>我方复核</td>
+      <td>第4-6周</td>
+      <td>✅ 标注完成的数据集<br>✅ 标注质量报告<br>✅ 边界样本清单</td>
+    </tr>
+    <tr>
+      <td>P4</td>
+      <td>模型微调训练<br>· YOLO 微调<br>· VLM LoRA 微调<br>· 离线评估</td>
+      <td>我方</td>
+      <td>第7-8周</td>
+      <td>✅ 微调后模型权重<br>✅ 评估报告（mAP/Recall/Precision）<br>✅ 新 vs 旧模型对比报告</td>
+    </tr>
+    <tr>
+      <td>P5</td>
+      <td>验证与上线<br>· A/B 灰度测试<br>· 人工复核验证<br>· 全量切换</td>
+      <td>双方</td>
+      <td>第9-10周</td>
+      <td>✅ 灰度测试报告<br>✅ 上线确认单<br>✅ 项目总结报告</td>
+    </tr>
+  </table>
+
+  <div class="callout">
+    <strong>总周期预估：10周（约2.5个月）</strong><br>
+    其中标注阶段（P3）为关键路径，实际耗时取决于标注人力和每日标注量。若客户方可投入 ≥3人专职标注（每人日均50张），可按计划完成。
+  </div>
+
+  <h3>8.1 标注人力估算</h3>
+  <table class="data">
+    <tr><th>参数</th><th>估算值</th></tr>
+    <tr><td>需标注图片总数</td><td>约 5,500 张（独立图片）</td></tr>
+    <tr><td>每张图平均标注耗时</td><td>2-5 分钟（含边界框+分类+备注）</td></tr>
+    <tr><td>人均日标注量（8h）</td><td>约 50-80 张（含休息和工具操作时间）</td></tr>
+    <tr><td>3人 × 15工作日</td><td>约 2,250-3,600 张 → <strong>建议 ≥4人标注</strong></td></tr>
+    <tr><td>推荐配置</td><td><strong>4名标注人员 + 1名标注组长</strong>，3周完成</td></tr>
+  </table>
+</div>
+
+<!-- ═══════════════ 9. ACCEPTANCE ═══════════════ -->
+<div class="page">
+  <h2>九、验收标准</h2>
+
+  <h3>9.1 数据集验收</h3>
+  <table class="data">
+    <tr><th>验收项</th><th>标准</th><th>检查方式</th></tr>
+    <tr><td>数量达标</td><td>每类正例 ≥ 500，总计 ≥ 8,520 标注样本</td><td>统计脚本</td></tr>
+    <tr><td>标注准确率</td><td>随机抽样200张，人工判定标注准确率 ≥ 90%</td><td>人工抽查</td></tr>
+    <tr><td>一致性</td><td>交叉验证 IoU ≥ 0.85，标签一致率 ≥ 95%</td><td>脚本自动化</td></tr>
+    <tr><td>格式正确</td><td>YOLO .txt 格式无误，class_id 在 0-11 范围内，坐标归一化 0-1</td><td>脚本自动化</td></tr>
+    <tr><td>分布合理</td><td>场景/光照/天气/角度各维度覆盖率 ≥ 10%</td><td>统计报告</td></tr>
+  </table>
+
+  <h3>9.2 模型验收</h3>
+  <table class="data">
+    <tr><th>指标</th><th>目标值</th><th>测量方式</th></tr>
+    <tr><td>YOLO mAP@0.5</td><td>≥ 92%（12类均值）</td><td>测试集离线评估</td></tr>
+    <tr><td>YOLO Recall</td><td>≥ 93%</td><td>测试集离线评估</td></tr>
+    <tr><td>YOLO Precision</td><td>≥ 85%</td><td>测试集离线评估</td></tr>
+    <tr><td>VLM 复核准确率</td><td>≥ 90%</td><td>VLM 测试集评估</td></tr>
+    <tr><td>无类别退化</td><td>任一类指标退化 ≤ 2%</td><td>与 V2.1 逐类对比</td></tr>
+    <tr><td>灰度期综合准确率</td><td>人工复核确认准确率 ≥ 85%</td><td>灰度期人工复核统计</td></tr>
+  </table>
+
+  <h3>9.3 交付物清单</h3>
+  <table class="data">
+    <tr><th>交付物</th><th>格式</th><th>阶段</th></tr>
+    <tr><td>《AI模型调优方案》（本文档）</td><td>PDF + 可编辑版</td><td>P1</td></tr>
+    <tr><td>《标注指导手册》（含12类完整判定标准）</td><td>PDF</td><td>P1</td></tr>
+    <tr><td>清洗后的原始数据集</td><td>JPG 图片集</td><td>P2</td></tr>
+    <tr><td>标注完成的数据集（含 train/val/test 划分）</td><td>JPG + YOLO .txt</td><td>P3</td></tr>
+    <tr><td>微调后 YOLO 权重文件</td><td>.pt</td><td>P4</td></tr>
+    <tr><td>微调后 VLM LoRA 适配器</td><td>.safetensors / .bin</td><td>P4</td></tr>
+    <tr><td>模型评估报告（含新旧对比）</td><td>PDF</td><td>P4</td></tr>
+    <tr><td>灰度测试报告</td><td>PDF</td><td>P5</td></tr>
+    <tr><td>项目总结报告</td><td>PDF</td><td>P5</td></tr>
+  </table>
+</div>
+
+<!-- ═══════════════ 10. APPENDIX ═══════════════ -->
+<div class="page">
+  <h2>附录</h2>
+
+  <h3>附录A：12类隐患 ID 对照表</h3>
+  <table class="data">
+    <tr><th>class_id</th><th>中文名称</th><th>英文名称</th><th>类别</th><th>颜色</th></tr>
+    <tr><td>0</td><td>安全帽未佩戴</td><td>no_hard_hat</td><td>行为</td><td><span class="hz-bar" style="background:#F87171"></span>#F87171</td></tr>
+    <tr><td>1</td><td>反光衣未穿</td><td>no_safety_vest</td><td>行为</td><td><span class="hz-bar" style="background:#FB923C"></span>#FB923C</td></tr>
+    <tr><td>2</td><td>临边防护缺失</td><td>edge_protection</td><td>物理设施</td><td><span class="hz-bar" style="background:#FACC15"></span>#FACC15</td></tr>
+    <tr><td>3</td><td>吸烟检测</td><td>smoking</td><td>行为</td><td><span class="hz-bar" style="background:#4ADE80"></span>#4ADE80</td></tr>
+    <tr><td>4</td><td>人员越界</td><td>intrusion</td><td>行为</td><td><span class="hz-bar" style="background:#60A5FA"></span>#60A5FA</td></tr>
+    <tr><td>5</td><td>坑边堆载</td><td>pit_overload</td><td>物理设施</td><td><span class="hz-bar" style="background:#A78BFA"></span>#A78BFA</td></tr>
+    <tr><td>6</td><td>明火检测</td><td>open_flame</td><td>行为</td><td><span class="hz-bar" style="background:#FB923C"></span>#FB923C</td></tr>
+    <tr><td>7</td><td>散料吊装</td><td>bulk_lifting</td><td>物理设施</td><td><span class="hz-bar" style="background:#FBBF24"></span>#FBBF24</td></tr>
+    <tr><td>8</td><td>人员聚集</td><td>crowd_gather</td><td>行为</td><td><span class="hz-bar" style="background:#34D399"></span>#34D399</td></tr>
+    <tr><td>9</td><td>车辆违规</td><td>vehicle_violation</td><td>行为</td><td><span class="hz-bar" style="background:#818CF8"></span>#818CF8</td></tr>
+    <tr><td>10</td><td>吊篮作业</td><td>suspended_platform</td><td>物理设施</td><td><span class="hz-bar" style="background:#9CA3AF"></span>#9CA3AF</td></tr>
+    <tr><td>11</td><td>工地围挡封闭</td><td>enclosure_breach</td><td>物理设施</td><td><span class="hz-bar" style="background:#6B7280"></span>#6B7280</td></tr>
+  </table>
+
+  <h3>附录B：术语表</h3>
+  <table class="data">
+    <tr><th>术语</th><th>说明</th></tr>
+    <tr><td>YOLO</td><td>You Only Look Once，实时目标检测算法，用于第一级隐患检测</td></tr>
+    <tr><td>VLM</td><td>Vision Language Model，视觉语言大模型，用于第二级复核确认</td></tr>
+    <tr><td>vLLM</td><td>高性能大模型推理引擎</td></tr>
+    <tr><td>LoRA</td><td>Low-Rank Adaptation，低秩适配微调方法，不修改原模型权重</td></tr>
+    <tr><td>mAP</td><td>mean Average Precision，平均精度均值，目标检测核心评估指标</td></tr>
+    <tr><td>IoU</td><td>Intersection over Union，交并比，衡量两个边界框重叠程度的指标</td></tr>
+    <tr><td>边界样本</td><td>无法明确判定是否存在隐患的模糊样本，标注为 -1</td></tr>
+    <tr><td>灰度测试</td><td>新模型在小范围（部分摄像头）先上线运行，验证效果后再全量切换</td></tr>
+  </table>
+</div>
+
+</body>
+</html>
