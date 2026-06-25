@@ -1,0 +1,22 @@
+Add-Type : 未能加载文件或程序集“C:\\WINDOWS\\System32\\WinMetadata\\Windows.Foundation.winmd”或它的某一个依赖项。给定程
+序集名称或基本代码无效。 (异常来自 HRESULT:0x80131047)
+所在位置 F:\0.AI设计库\ai视频识别\gh-pages-deploy\ocr_windows.ps1:43 字符: 1
++ Add-Type -TypeDefinition $csharp `
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [Add-Type], FileLoadException
+    + FullyQualifiedErrorId : System.IO.FileLoadException,Microsoft.PowerShell.Commands.AddTypeCommand
+ 
+找不到类型 [OcrHelper]。
+所在位置 F:\0.AI设计库\ai视频识别\gh-pages-deploy\ocr_windows.ps1:51 字符: 9
++ $task = [OcrHelper]::RecognizeAsync($imagePath)
++         ~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (OcrHelper:TypeName) []，RuntimeException
+    + FullyQualifiedErrorId : TypeNotFound
+ 
+不能对 Null 值表达式调用方法。
+所在位置 F:\0.AI设计库\ai视频识别\gh-pages-deploy\ocr_windows.ps1:52 字符: 1
++ $task.Wait()
++ ~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
