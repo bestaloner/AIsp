@@ -475,43 +475,156 @@ table.data tr:hover td { background: #EFF6FF; }
 <div class="page">
   <h2>四、输出形式定义</h2>
 
-  <h3>4.1 模型检测输出格式（推理结果）</h3>
-  <p>单次检测的输出采用 JSON 格式，每个检测到的隐患作为一个对象：</p>
+  <div class="callout">
+    <strong>🔑 核心设计原则：</strong>AI 检测到一个隐患，不能只输出"是什么"，还必须回答<strong>"凭什么说它是隐患"</strong>。这个"凭什么"有两个来源——<strong>① 隐患库（知识定义）</strong> + <strong>② 规范条款（法规依据）</strong>。两者共同构成检测结论的证据链。
+  </div>
+
+  <h3>4.1 输出的"双重依据"架构</h3>
+
+  <div style="display:flex;gap:12px;margin:16px 0;flex-wrap:wrap;">
+    <div style="flex:1;min-width:280px;background:#EFF6FF;border-radius:8px;padding:16px;">
+      <div style="font-size:14px;font-weight:700;color:#1D4ED8;margin-bottom:8px;">📚 依据一：隐患库（知识库）</div>
+      <p style="font-size:12px;color:#475569;line-height:1.7;">
+        每类隐患在"隐患库"中有一条结构化记录，包含：<br>
+        • <strong>定义</strong>：这个隐患是什么<br>
+        • <strong>视觉特征</strong>：AI 看什么来判断<br>
+        • <strong>严重级别</strong>：重大/较大/一般<br>
+        • <strong>典型正例/负例</strong>：什么样算、什么样不算<br>
+        • <strong>关联规范</strong>：违反了哪条法规
+      </p>
+    </div>
+    <div style="flex:1;min-width:280px;background:#FFF7ED;border-radius:8px;padding:16px;">
+      <div style="font-size:14px;font-weight:700;color:#B45309;margin-bottom:8px;">📜 依据二：规范条款（法规原文）</div>
+      <p style="font-size:12px;color:#475569;line-height:1.7;">
+        引用客户《远程视频监控常见隐患场景+定义》PDF 中的条款：<br>
+        • <strong>违规事实描述</strong>：实际看到的什么情况<br>
+        • <strong>规定条款</strong>：GB/JGJ 编号<br>
+        • <strong>规定原文</strong>：法规条文原文
+      </p>
+    </div>
+  </div>
+  <p style="font-size:12px;color:var(--gray);text-align:center;">↓ 两者在输出中合并，形成完整证据链 ↓</p>
+
+  <h3>4.2 模型检测输出格式（完整版）</h3>
+  <p>单次检测输出 JSON，每个隐患对象包含 <strong>AI检测结果 + 隐患库匹配 + 规范引用</strong> 三个部分：</p>
+
   <table class="data">
-    <tr><th>字段</th><th>类型</th><th>必填</th><th>说明</th><th>示例</th></tr>
-    <tr><td><code>detection_id</code></td><td>string</td><td>✓</td><td>检测唯一标识</td><td>"DET-20260625-001"</td></tr>
-    <tr><td><code>timestamp</code></td><td>string</td><td>✓</td><td>检测时间 ISO8601</td><td>"2026-06-25T14:32:00+08:00"</td></tr>
-    <tr><td><code>camera_id</code></td><td>string</td><td>✓</td><td>摄像头PUID</td><td>"CAM-FJ-001"</td></tr>
-    <tr><td><code>project_id</code></td><td>string</td><td>✓</td><td>所属项目ID</td><td>"PRJ-059"</td></tr>
-    <tr><td><code>hazard_type</code></td><td>int</td><td>✓</td><td>隐患类型编号 1-12</td><td>1</td></tr>
-    <tr><td><code>hazard_name</code></td><td>string</td><td>✓</td><td>隐患中文名称</td><td>"安全帽未佩戴"</td></tr>
-    <tr><td><code>bbox</code></td><td>array[4]</td><td></td><td>边界框 [x,y,w,h]，归一化0-1</td><td>[0.32, 0.15, 0.08, 0.12]</td></tr>
-    <tr><td><code>confidence</code></td><td>float</td><td>✓</td><td>YOLO置信度 0-1</td><td>0.923</td></tr>
-    <tr><td><code>vlm_result</code></td><td>object</td><td></td><td>VLM复核结果</td><td>见下方</td></tr>
-    <tr><td><code>severity</code></td><td>string</td><td>✓</td><td>严重级别</td><td>"major" / "moderate" / "minor"</td></tr>
-    <tr><td><code>snapshot_url</code></td><td>string</td><td></td><td>抓拍图片URL</td><td>"https://..."</td></tr>
+    <tr><th>字段</th><th>类型</th><th>来源</th><th>说明</th><th>示例</th></tr>
+    <tr style="background:#F8FAFC"><td colspan="5"><strong>▸ 基础检测信息（YOLO + VLM）</strong></td></tr>
+    <tr><td><code>detection_id</code></td><td>string</td><td>系统</td><td>检测唯一标识</td><td>"DET-20260625-001"</td></tr>
+    <tr><td><code>timestamp</code></td><td>string</td><td>系统</td><td>检测时间 ISO8601</td><td>"2026-06-25T14:32:00+08:00"</td></tr>
+    <tr><td><code>camera_id</code></td><td>string</td><td>系统</td><td>摄像头PUID</td><td>"CAM-FJ-001"</td></tr>
+    <tr><td><code>project_id</code></td><td>string</td><td>系统</td><td>所属项目ID</td><td>"PRJ-059"</td></tr>
+    <tr><td><code>hazard_type</code></td><td>int</td><td>AI</td><td>隐患类型编号 0-11</td><td>0</td></tr>
+    <tr><td><code>bbox</code></td><td>array[4]</td><td>YOLO</td><td>边界框 [x,y,w,h]，归一化0-1</td><td>[0.32, 0.15, 0.08, 0.12]</td></tr>
+    <tr><td><code>confidence</code></td><td>float</td><td>YOLO</td><td>置信度 0-1</td><td>0.923</td></tr>
+    <tr><td><code>vlm_result</code></td><td>object</td><td>VLM</td><td>VLM复核结果（含 confirmed/confidence/reasoning）</td><td>见4.2.1</td></tr>
+    <tr><td><code>snapshot_url</code></td><td>string</td><td>系统</td><td>抓拍图片URL</td><td>"https://..."</td></tr>
+
+    <tr style="background:#F8FAFC"><td colspan="5"><strong>▸ 隐患库匹配（Knowledge Base Match）</strong></td></tr>
+    <tr><td><code>kb_entry_id</code></td><td>string</td><td>KB</td><td>隐患库中的条目ID</td><td>"KB-HZ-001"</td></tr>
+    <tr><td><code>kb_hazard_name</code></td><td>string</td><td>KB</td><td>隐患库中的标准名称</td><td>"安全帽未佩戴"</td></tr>
+    <tr><td><code>kb_definition</code></td><td>string</td><td>KB</td><td>隐患库中的定义</td><td>"施工区域人员头部未出现安全帽轮廓"</td></tr>
+    <tr><td><code>kb_visual_features</code></td><td>array</td><td>KB</td><td>AI判断依据的视觉特征描述</td><td>["头部区域无帽状物体","头发裸露可见"]</td></tr>
+    <tr><td><code>kb_severity</code></td><td>string</td><td>KB</td><td>严重级别</td><td>"major" / "moderate" / "minor"</td></tr>
+    <tr><td><code>kb_match_confidence</code></td><td>float</td><td>KB</td><td>与隐患库条目的匹配置信度</td><td>0.95</td></tr>
+
+    <tr style="background:#F8FAFC"><td colspan="5"><strong>▸ 规范引用（Regulation Reference）</strong></td></tr>
+    <tr><td><code>reg_clause_id</code></td><td>string</td><td>规范库</td><td>条款编号</td><td>"JGJ-184-2009-2.0.4"</td></tr>
+    <tr><td><code>reg_title</code></td><td>string</td><td>规范库</td><td>法规名称</td><td>"JGJ 184-2009 建筑施工作业劳动防护用品配备及使用标准"</td></tr>
+    <tr><td><code>reg_clause</code></td><td>string</td><td>规范库</td><td>条款号</td><td>"§2.0.4"</td></tr>
+    <tr><td><code>reg_text</code></td><td>string</td><td>规范库</td><td>条款原文</td><td>"进入施工现场人员必须佩戴安全帽。作业人员必须戴安全帽、穿工作鞋和工作服..."</td></tr>
+    <tr><td><code>reg_violation_desc</code></td><td>string</td><td>规范库</td><td>违规事实描述</td><td>"施工区域内人员头部区域未出现安全帽轮廓"</td></tr>
+    <tr><td style="background:#FEF3C7;font-weight:700" colspan="5">📋 完整证据链：AI检测[安全帽未佩戴,置信度0.923] → 隐患库匹配[KB-HZ-001, 安全帽未佩戴] → 违反[JGJ 184-2009 §2.0.4: "进入施工现场人员必须佩戴安全帽"]</td></tr>
   </table>
 
-  <p><strong>VLM 复核结果子对象：</strong></p>
+  <h4>4.2.1 VLM 复核结果子对象</h4>
   <table class="data">
     <tr><th>字段</th><th>类型</th><th>说明</th></tr>
     <tr><td><code>vlm_result.confirmed</code></td><td>bool</td><td>VLM是否确认该隐患存在</td></tr>
     <tr><td><code>vlm_result.confidence</code></td><td>float</td><td>VLM置信度</td></tr>
-    <tr><td><code>vlm_result.reasoning</code></td><td>string</td><td>VLM判断理由（简短描述）</td></tr>
+    <tr><td><code>vlm_result.reasoning</code></td><td>string</td><td>VLM判断理由（具体描述图中看到的视觉证据）</td></tr>
+    <tr><td><code>vlm_result.kb_consistent</code></td><td>bool</td><td>VLM判断是否与隐患库定义一致</td></tr>
     <tr><td><code>vlm_result.model_version</code></td><td>string</td><td>VLM模型版本号</td></tr>
   </table>
 
-  <h3>4.2 人工标注数据格式（训练集 & 验证集）</h3>
+  <div class="callout green">
+    <strong>💡 输出示例（完整一条检测结果）：</strong><br>
+    <pre style="font-size:11px;line-height:1.6;margin-top:8px;">
+{
+  "detection_id": "DET-20260625-001",
+  "hazard_type": 0,
+  "confidence": 0.923,
+  "bbox": [0.32, 0.15, 0.08, 0.12],
+
+  "kb_entry_id": "KB-HZ-001",
+  "kb_hazard_name": "安全帽未佩戴",
+  "kb_definition": "施工区域内，人员头部区域未出现安全帽轮廓（无论颜色）",
+  "kb_severity": "major",
+
+  "reg_clause_id": "JGJ-184-2009-2.0.4",
+  "reg_title": "JGJ 184-2009 建筑施工作业劳动防护用品配备及使用标准",
+  "reg_clause": "§2.0.4",
+  "reg_text": "进入施工现场人员必须佩戴安全帽。作业人员必须戴安全帽、穿工作鞋和工作服...",
+  "reg_violation_desc": "施工区域内人员头部区域未出现安全帽轮廓",
+
+  "vlm_result": {
+    "confirmed": true,
+    "confidence": 0.96,
+    "reasoning": "图像右下角人员（bbox区域）头部裸露，无安全帽遮挡，头发清晰可见"
+  }
+}
+    </pre>
+  </div>
+
+  <h3>4.3 隐患库（Hazard Knowledge Base）结构设计</h3>
+  <p>隐患库是 AI 输出"证据链"的数据底座，<strong>每类隐患一条结构化记录</strong>。标注和微调时，隐患库的定义是判定标准的唯一来源。</p>
+
+  <table class="data">
+    <tr><th>字段</th><th>说明</th><th>示例（安全帽未佩戴）</th></tr>
+    <tr><td><code>kb_id</code></td><td>唯一编号</td><td>KB-HZ-001</td></tr>
+    <tr><td><code>class_id</code></td><td>对应 YOLO class_id</td><td>0</td></tr>
+    <tr><td><code>name_cn</code></td><td>中文名称</td><td>安全帽未佩戴</td></tr>
+    <tr><td><code>name_en</code></td><td>英文名称</td><td>no_hard_hat</td></tr>
+    <tr><td><code>category</code></td><td>分类</td><td>人员行为（行为）/ 物理设施（物）</td></tr>
+    <tr><td><code>definition</code></td><td>隐患定义（一句话）</td><td>施工区域内，人员头部区域未出现安全帽轮廓</td></tr>
+    <tr><td><code>visual_features</code></td><td>AI检测的视觉特征描述</td><td>["人员头部区域","无安全帽轮廓","头发裸露","无帽檐特征"]</td></tr>
+    <tr><td><code>positive_examples</code></td><td>正例描述</td><td>"人员完全未戴安全帽；手持安全帽但未戴上；佩戴普通帽子替代"</td></tr>
+    <tr><td><code>negative_examples</code></td><td>负例描述（容易误判的情况）</td><td>"已佩戴安全帽（任何颜色）；安全帽放在地面/工具台（非佩戴状态）；非施工人员"</td></tr>
+    <tr><td><code>boundary_cases</code></td><td>边界/难例描述</td><td>"头部被遮挡无法判断；人员距离过远（<20px）；摘/戴安全帽动作瞬间"</td></tr>
+    <tr><td><code>severity</code></td><td>默认严重级别</td><td>major（重大）/ moderate（较大）/ minor（一般）</td></tr>
+    <tr><td style="background:#FEF3C7;font-weight:700"><code>regulations</code></td><td style="background:#FEF3C7"><strong>关联法规列表</strong></td><td style="background:#FEF3C7">见下方</td></tr>
+  </table>
+
+  <p><strong>regulations 子结构（每条隐患可关联多条法规）：</strong></p>
+  <table class="data">
+    <tr><th>字段</th><th>说明</th><th>示例</th></tr>
+    <tr><td><code>reg_id</code></td><td>法规条款唯一ID</td><td>"JGJ-184-2009-2.0.4"</td></tr>
+    <tr><td><code>standard_name</code></td><td>标准全称</td><td>"JGJ 184-2009 建筑施工作业劳动防护用品配备及使用标准"</td></tr>
+    <tr><td><code>clause</code></td><td>条款号</td><td>"§2.0.4"</td></tr>
+    <tr><td><code>text</code></td><td>条款原文</td><td>"进入施工现场人员必须佩戴安全帽..."</td></tr>
+    <tr><td><code>violation_desc</code></td><td>对应违规事实描述</td><td>"施工区域内人员头部区域未出现安全帽轮廓"</td></tr>
+    <tr><td><code>source_doc</code></td><td>来源文档</td><td>"远程视频监控常见隐患场景+定义.pdf / Page 4"</td></tr>
+  </table>
+
+  <div class="callout">
+    <strong>📊 当前隐患库建设状态：</strong><br>
+    • <strong>已有法规条目（来自PDF）：</strong>10 项（参见 §3.3 法规规范对照表）<br>
+    • <strong>覆盖 VisionGuard 12 类：</strong>7 类有明确法规定义，5 类待补充<br>
+    • <strong>建议：</strong>将隐患库以 JSON 文件形式维护（如 <code>hazard_knowledge_base.json</code>），随标注和微调迭代更新，作为 AI 模型训练和推理的标准参考数据源。
+  </div>
+
+  <h3>4.4 人工标注数据格式（训练集 & 验证集）</h3>
   <p>标注数据采用 <strong>YOLO 标准格式 + 扩展字段</strong>，兼容主流训练框架（Ultralytics YOLO）。</p>
 
-  <h4>4.2.1 图像级标注文件（每张图片一个 .txt）</h4>
+  <h4>4.4.1 图像级标注文件（每张图片一个 .txt）</h4>
   <div class="callout">
     <code>class_id cx cy w h confidence_flag</code><br>
     示例：<code>0 0.453 0.321 0.087 0.143 1</code><br>
     <small>class_id: 0-11（对应12类），cx/cy/w/h: YOLO归一化坐标，confidence_flag: 1=确定正例 / 0=边界样本</small>
   </div>
 
-  <h4>4.2.2 数据集目录结构</h4>
+  <h4>4.4.2 数据集目录结构</h4>
   <div class="callout">
     <pre style="font-size:12px; line-height:1.6;">
 dataset/
@@ -524,14 +637,15 @@ dataset/
 │   ├── val/            # 验证集标注
 │   └── test/           # 测试集标注
 ├── metadata/
-│   ├── classes.yaml    # 类别定义
-│   ├── borderline.csv  # 边界样本记录
-│   └── annotation_log.csv  # 标注日志
+│   ├── classes.yaml                # 类别定义
+│   ├── hazard_knowledge_base.json  # 隐患库（含定义+法规引用）
+│   ├── borderline.csv              # 边界样本记录
+│   └── annotation_log.csv          # 标注日志
 └── README.md           # 数据集说明
     </pre>
   </div>
 
-  <h4>4.2.3 classes.yaml</h4>
+  <h4>4.4.3 classes.yaml</h4>
   <div class="callout">
     <pre style="font-size:12px; line-height:1.6;">
 names:
@@ -551,7 +665,7 @@ nc: 12
     </pre>
   </div>
 
-  <h3>4.3 VLM 微调数据格式</h3>
+  <h3>4.5 VLM 微调数据格式</h3>
   <p>VLM 微调采用<strong>图像+问答对</strong>格式，每张图片配合结构化的 QA prompt：</p>
   <div class="callout">
     <pre style="font-size:12px; line-height:1.6;">
@@ -658,7 +772,7 @@ nc: 12
     <tr><td>基础模型</td><td>Qwen3.6-27B (当前版本)</td><td>视觉语言大模型</td></tr>
     <tr><td>微调方法</td><td>LoRA (Low-Rank Adaptation)</td><td>低秩适配，高效微调，不修改原模型权重</td></tr>
     <tr><td>LoRA Rank</td><td>r=16, alpha=32</td><td>平衡微调效果与效率</td></tr>
-    <tr><td>训练数据</td><td>图像+QA对（见 4.3 节）</td><td>每类 ≥ 200 对，共 ≥ 2,400 对</td></tr>
+    <tr><td>训练数据</td><td>图像+QA对（见 4.5 节）</td><td>每类 ≥ 200 对，共 ≥ 2,400 对</td></tr>
     <tr><td>Epochs</td><td>3-5</td><td>LoRA 微调收敛较快</td></tr>
     <tr><td>Batch Size</td><td>2-4</td><td>27B 模型显存受限</td></tr>
     <tr><td>Learning Rate</td><td>2e-5</td><td>VLM 微调常用学习率范围</td></tr>
