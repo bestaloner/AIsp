@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>方案A：两级标注 · 隐患标注系统</title>
+<style>
+:root {
+  --color-header-bg: #2E41CD; --color-content-bg: #F0F2F5; --color-card-bg: #FFFFFF;
+  --text-primary: #262626; --text-secondary: #8C8C8C; --text-white: #FFFFFF;
+  --border-color: #D9D9D9; --border-light: #E8E8E8;
+  --radius-sm: 4px; --radius-md: 8px; --radius-lg: 10px;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.08);
+  --blue-primary: #2E41CD; --blue-light: #009CFF; --orange: #F57A00;
+  --green: #52C41A; --red: #E2091C;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1); --transition-fast: 150ms var(--ease);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 14px; }
+body {
+  font-family: 'Microsoft YaHei','PingFang SC',-apple-system,sans-serif;
+  color: var(--text-primary); background: var(--color-content-bg);
+  line-height: 1.6; height: 100vh; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.platform-header {
+  height: 48px; min-height: 48px; background: var(--color-header-bg); color: var(--text-white);
+  display: flex; align-items: center; justify-content: space-between; padding: 0 16px; flex-shrink: 0;
+  font-size: 14px; font-weight: 500;
+}
+.platform-header-left { display: flex; align-items: center; gap: 16px; }
+.platform-logo { font-size: 16px; font-weight: 700; letter-spacing: 1.5px; }
+.platform-logo .lg-accent { color: var(--blue-light); }
+.platform-breadcrumb { font-size: 12px; opacity: 0.8; }
+.platform-breadcrumb span { opacity: 0.5; }
+.platform-header-right { display: flex; align-items: center; gap: 14px; font-size: 12px; }
+.platform-avatar { width: 30px; height: 30px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+.toolbar {
+  height: 42px; min-height: 42px; background: var(--color-card-bg);
+  border-bottom: 1px solid var(--border-color); display: flex; align-items: center;
+  justify-content: space-between; padding: 0 16px; flex-shrink: 0;
+}
+.toolbar-left { display: flex; align-items: center; gap: 12px; }
+.toolbar-title { font-weight: 600; font-size: 14px; }
+.toolbar-right { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); }
+.badge {
+  display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px;
+  font-size: 11px; font-weight: 500; gap: 3px;
+}
+.badge-success { background: #F6FFED; color: #389E0D; border: 1px solid #B7EB8F; }
+.badge-danger { background: #FFF2F0; color: #CF1322; border: 1px solid #FFCCC7; }
+.badge-warning { background: #FFF7E6; color: #D46B08; border: 1px solid #FFD591; }
+.badge-info { background: #E6F7FF; color: #096DD9; border: 1px solid #91D5FF; }
+.badge-neutral { background: #FAFAFA; color: #8C8C8C; border: 1px solid #D9D9D9; }
+.badge-purple { background: #F9F0FF; color: #531DAB; border: 1px solid #D3ADF7; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+  padding: 7px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500;
+  cursor: pointer; border: 1px solid transparent; transition: all var(--transition-fast);
+  font-family: inherit; white-space: nowrap;
+}
+.btn-primary { background: var(--blue-primary); color: #fff; }
+.btn-primary:hover { background: #2539B5; }
+.btn-outline { background: transparent; color: var(--text-primary); border: 1px solid var(--border-color); }
+.btn-outline:hover { border-color: var(--blue-primary); color: var(--blue-primary); }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.main { flex: 1; display: flex; overflow: hidden; }
+.image-panel {
+  flex: 1; display: flex; flex-direction: column; background: #F5F5F5;
+  border-right: 1px solid var(--border-color); overflow: hidden; position: relative;
+}
+.image-topbar { padding: 6px 14px; display: flex; align-items: center; justify-content: space-between; background: #FAFAFA; border-bottom: 1px solid var(--border-light); flex-shrink: 0; font-size: 12px; color: var(--text-secondary); }
+.image-container { flex: 1; position: relative; overflow: auto; display: flex; align-items: center; justify-content: center; padding: 12px; }
+.image-canvas-wrap { position: relative; display: inline-block; box-shadow: 0 2px 16px rgba(0,0,0,0.1); border-radius: var(--radius-sm); overflow: hidden; line-height: 0; }
+.image-canvas-wrap img { display: block; max-width: 100%; max-height: calc(100vh - 210px); user-select: none; }
+.bbox-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: crosshair; }
+.bbox-rect { position: absolute; border: 2.5px solid; border-radius: 2px; pointer-events: auto; cursor: pointer; z-index: 2; box-shadow: 0 0 0 3px rgba(0,0,0,0.06); }
+.bbox-rect:hover { box-shadow: 0 0 0 5px rgba(0,0,0,0.12); }
+.bbox-number { position: absolute; top: -24px; left: -1px; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px 3px 0 0; pointer-events: none; }
+.bbox-drawing { position: absolute; border: 2px dashed var(--blue-primary); background: rgba(46,65,205,0.08); pointer-events: none; z-index: 20; display: none; }
+.check-panel {
+  width: 480px; min-width: 480px; flex-shrink: 0; display: flex; flex-direction: column;
+  overflow: hidden; background: var(--color-content-bg);
+}
+.check-panel-header {
+  padding: 10px 14px; background: var(--color-card-bg); border-bottom: 1px solid var(--border-color);
+  display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+}
+.check-panel-title { font-weight: 600; font-size: 14px; }
+.check-list { flex: 1; overflow-y: auto; padding: 8px; }
+.check-list::-webkit-scrollbar { width: 5px; }
+.check-list::-webkit-scrollbar-track { background: transparent; }
+.check-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+.check-item {
+  background: var(--color-card-bg); border: 1px solid var(--border-color);
+  border-radius: var(--radius-md); margin-bottom: 8px; overflow: hidden;
+  box-shadow: var(--shadow-card); transition: border-color 0.2s;
+}
+.check-item.status-issue { border-left: 3px solid var(--red); }
+.check-item.status-safe { border-left: 3px solid var(--green); }
+.check-item.status-na { border-left: 3px solid var(--border-color); opacity: 0.7; }
+.check-item-header {
+  padding: 10px 12px; display: flex; align-items: center; gap: 8px;
+  cursor: pointer; user-select: none; transition: background 0.15s;
+}
+.check-item-header:hover { background: #FAFBFC; }
+.check-item.expanded .check-item-header { border-bottom: 1px solid var(--border-light); }
+.check-item-name { font-weight: 600; font-size: 13px; flex: 1; }
+.check-item-status-group { display: flex; gap: 4px; }
+.status-btn {
+  padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 500;
+  cursor: pointer; border: 1px solid var(--border-color); background: #fff;
+  transition: all var(--transition-fast); user-select: none;
+}
+.status-btn:hover { border-color: var(--blue-primary); }
+.status-btn.sel-issue { background: #FFF2F0; color: #CF1322; border-color: #FFCCC7; }
+.status-btn.sel-safe { background: #F6FFED; color: #389E0D; border-color: #B7EB8F; }
+.status-btn.sel-na { background: #FAFAFA; color: #8C8C8C; border-color: #D9D9D9; }
+.check-item-toggle { font-size: 10px; color: var(--text-secondary); transition: transform 0.2s; }
+.check-item.expanded .check-item-toggle { transform: rotate(180deg); }
+.check-item-body { display: none; padding: 12px; }
+.check-item.expanded .check-item-body { display: block; }
+.check-item.summary-safe .check-item-body,
+.check-item.summary-na .check-item-body { padding: 10px 12px; }
+.safe-message { font-size: 12px; color: var(--green); display: flex; align-items: center; gap: 6px; }
+.na-message { font-size: 12px; color: var(--text-secondary); }
+.fg { margin-bottom: 10px; }
+.fg:last-child { margin-bottom: 0; }
+.fg label { display: block; font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
+.fg label .required { color: var(--red); }
+.fg select, .fg textarea {
+  width: 100%; background: #FFFFFF; border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm); font-size: 12px; color: var(--text-primary);
+  outline: none; transition: all var(--transition-fast); font-family: inherit;
+}
+.fg select { height: 36px; padding: 0 28px 0 10px; cursor: pointer; -webkit-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238C8C8C' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 8px center;
+}
+.fg select:focus, .fg textarea:focus { border-color: var(--blue-primary); box-shadow: 0 0 0 2px rgba(46,65,205,0.1); }
+.fg select:disabled { background: #F5F5F5; color: #BFBFBF; cursor: not-allowed; }
+.fg textarea { padding: 8px 10px; resize: vertical; min-height: 50px; }
+.fg textarea::placeholder { color: #BFBFBF; }
+.draw-hint {
+  display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px;
+  background: #E6F0FF; color: var(--blue-primary); border-radius: var(--radius-sm);
+  font-size: 11px; font-weight: 500; cursor: pointer;
+}
+.cascade-arrow { text-align: center; font-size: 10px; color: var(--text-secondary); margin: -2px 0; }
+.check-panel-footer {
+  padding: 12px 14px; border-top: 1px solid var(--border-color);
+  background: var(--color-card-bg); flex-shrink: 0; display: flex; gap: 8px;
+}
+.check-panel-footer .btn { flex: 1; }
+/* Summary bar */
+.summary-bar {
+  padding: 8px 12px; background: var(--color-card-bg); border-bottom: 1px solid var(--border-light);
+  display: flex; gap: 12px; font-size: 11px; color: var(--text-secondary); flex-shrink: 0;
+}
+.summary-bar span { display: flex; align-items: center; gap: 3px; }
+.toast {
+  position: fixed; top: 58px; right: 16px; padding: 10px 18px; border-radius: var(--radius-sm);
+  font-size: 13px; z-index: 999; font-weight: 500; display: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15); animation: slideIn 0.3s var(--ease);
+}
+.toast.show { display: block; }
+.toast-success { background: var(--green); color: #fff; }
+.toast-error { background: var(--red); color: #fff; }
+.toast-info { background: var(--blue-primary); color: #fff; }
+@keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.ils-sidebar {
+  width: 200px; min-width: 200px; flex-shrink: 0;
+  background: var(--color-card-bg); border-right: 1px solid var(--border-color);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.ils-header { padding: 10px 12px; border-bottom: 1px solid var(--border-light); font-weight: 600; font-size: 12px; flex-shrink: 0; background: #FAFAFA; }
+.ils-list { flex: 1; overflow-y: auto; }
+.ils-list::-webkit-scrollbar { width: 4px; }
+.ils-list::-webkit-scrollbar-track { background: transparent; }
+.ils-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+.ils-item { display: flex; align-items: center; gap: 6px; padding: 8px 10px; cursor: pointer; border-bottom: 1px solid var(--border-light); font-size: 11px; }
+.ils-item:hover { background: #F5F7FA; }
+.ils-item.active { background: #E6F0FF; border-left: 3px solid var(--blue-primary); }
+.ils-item .ils-seq { width: 20px; height: 20px; border-radius: 50%; background: #F0F2F5; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; }
+.ils-item.active .ils-seq { background: var(--blue-primary); color: #fff; }
+.ils-item .ils-info { flex: 1; min-width: 0; }
+.ils-item .ils-fname { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ils-item .ils-meta { font-size: 9px; color: var(--text-secondary); }
+.ils-status { font-size: 14px; flex-shrink: 0; }
+.ils-filters { display: flex; padding: 6px 8px; gap: 3px; border-bottom: 1px solid var(--border-light); flex-shrink: 0; }
+.ils-filter { flex: 1; text-align: center; padding: 3px 0; border-radius: var(--radius-sm); font-size: 10px; cursor: pointer; border: 1px solid var(--border-color); background: #fff; color: var(--text-secondary); transition: all var(--transition-fast); }
+.ils-filter:hover { border-color: var(--blue-primary); color: var(--blue-primary); }
+.ils-filter.active { background: var(--blue-primary); color: #fff; border-color: var(--blue-primary); }
+</style>
+</head>
+<body>
+
+<div class="platform-header">
+  <div class="platform-header-left">
+    <div class="platform-logo">Vision<span class="lg-accent">Guard</span></div>
+    <div class="platform-breadcrumb"><span>│</span> AI 能力平台 <span>›</span> <strong>隐患标注 · 方案A</strong></div>
+  </div>
+  <div class="platform-header-right"><span>CAM-03</span><span>2025-07-01</span><div class="platform-avatar">张</div></div>
+</div>
+
+<div class="toolbar">
+  <div class="toolbar-left">
+    <span class="toolbar-title">📝 方案A：两级标注</span>
+    <span class="badge badge-purple">检查项目优先</span>
+  </div>
+  <div class="toolbar-right">
+    💡 逐项确认：有隐患/无隐患/不适用 → 有隐患时填写证据链
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- Image List -->
+  <div class="ils-sidebar">
+    <div class="ils-header">🖼️ 图像序列</div>
+    <div class="ils-filters">
+      <div class="ils-filter active" data-filter="all" onclick="filterImg(this,'all')">全部</div>
+      <div class="ils-filter" data-filter="done" onclick="filterImg(this,'done')">已完成</div>
+      <div class="ils-filter" data-filter="todo" onclick="filterImg(this,'todo')">待标注</div>
+    </div>
+    <div class="ils-list" id="ilsList"></div>
+  </div>
+
+  <!-- Image Panel -->
+  <div class="image-panel">
+    <div class="image-topbar"><span>📷 抓拍图像预览</span><span id="bboxCount" style="color:var(--blue-primary);font-weight:600">已标记：0 处</span></div>
+    <div class="image-container" id="imageContainer">
+      <div class="image-canvas-wrap" id="imageCanvasWrap">
+        <img id="mainImage" src="" alt="标注图像" />
+        <div class="bbox-layer" id="bboxLayer"></div>
+        <div class="bbox-drawing" id="bboxDrawing"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Check Panel -->
+  <div class="check-panel" id="checkPanel">
+    <div class="check-panel-header">
+      <span class="check-panel-title">📋 检查项目覆盖 <span id="itemCount" style="font-weight:400;font-size:12px;color:var(--text-secondary)">（共6项）</span></span>
+    </div>
+    <div class="summary-bar" id="summaryBar">
+      <span style="color:var(--red)">⚠ <span id="countIssue">0</span> 有隐患</span>
+      <span style="color:var(--green)">✓ <span id="countSafe">0</span> 无隐患</span>
+      <span style="color:var(--text-secondary)">— <span id="countNA">6</span> 待确认</span>
+    </div>
+    <div class="check-list" id="checkList"></div>
+    <div class="check-panel-footer">
+      <button class="btn btn-outline" onclick="exitPage()">退出</button>
+      <button class="btn btn-primary" onclick="submitAll()" style="flex:2">✓ 提交标注</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// Data
+var CASCADE_DATA = {"高处作业":{"施工现场存在坠落高度基准面2m及以上的作业面临边未设置安全防护设施":{"GB 55023-2022第4.4.4条":["脚手架作业层应采取安全防护措施，并应符合下列规定:1 当作业层边缘与结构外表面的距离大于150mm时，应采取防护措施。"],"JGJ 80-2016第4.1.1条":["坠落高度基准面2m及以上进行临边作业时，应在临空一侧设置防护栏杆，并应采用密目式安全立网或工具式栏板封闭。"]},"现场作业人员未按规定配备安全帽就上岗作业 。":{"JGJ 184-2009 第2.0.4条":["进入施工现场人员必须佩戴安全帽。作业人员必须戴安全帽、穿工作鞋和工作服。"]},"现场2m以上的悬空作业人员，未按规定佩戴安全带。":{"JGJ 184-2009 第2.0.4条":["在2m及以上的无可靠安全防护设施的高处作业时，必须系挂安全带。"]}},"基坑工程":{"坑边存在施工机械作业或堆载，荷载可能超过设计允许要求":{"JGJ 120-2012第8.1.5条":["基坑周边施工材料、设施或车辆荷载严禁超过设计要求的地面荷载限值"],"JGJ 311-2013第11.2.2条":["基坑周边1.5m范围内不宜堆载，3m以内限制堆载，坑边严禁重型车辆通行。"]},"未按要求在基坑顶采取有效截水措施":{"JGJ 120-2012 第8.1.6条":["雨期施工时，应在坑顶、坑底采取有效的截排水措施。"]}},"施工升降机":{"工人违规无证操作施工升降机":{"JGJ 33-2012第2.0.7条":["操作人员不得擅自离开工作岗位或将机械交给其他无证人员操作。"]},"施工升降机承载人数超过9人。":{"韶建电[2017]68号":["原则上承载人数不得超过9人（含司机）。"]}},"消防安全":{"施工现场工人随地吸烟":{"GB 50720-2011第6.4.5条":["施工现场严禁吸烟。"]}},"起重吊装及施工机具":{"施工现场使用承插型盘扣式钢管等材料简易搭设非标料斗进行吊装作业。":{"闽建办建函〔2024〕60号第二条第（三）款":["严禁使用承插型盘扣式钢管等材料简易搭设非标料斗进行吊装作业。"]},"吊篮内操作人员的数量不符合使用要求。":{"JGJ/T429-2018第5.5.8条":["吊篮内的作业人员不应超过2个。"]}},"场容场貌":{"施工现场围墙(或围挡)未连续封闭设置。":{"JGJ 59-2011第3.2.3条":["市区主要路段的工地应设置高度不小于2.5m的封闭围挡。"]}}};
+
+var ALL_ITEMS = Object.keys(CASCADE_DATA).sort();
+var bboxColors = ['#E2091C','#F57A00','#F59E0B','#52C41A','#009CFF','#2E41CD'];
+
+// State
+var checkItems = {};  // itemName -> {status:'issue'|'safe'|'na', hazards:{}, hazardCounter:0}
+var currentDrawingItem = null;
+var isDrawing = false, drawStartX, drawStartY;
+
+// Init
+(function init() {
+  ALL_ITEMS.forEach(function(name) {
+    checkItems[name] = { status: 'na', hazards: {}, hazardCounter: 0 };
+  });
+  renderCheckList();
+  loadImage();
+  initImageList();
+})();
+
+// Render
+function renderCheckList() {
+  var html = '';
+  ALL_ITEMS.forEach(function(name) {
+    var ci = checkItems[name];
+    var cls = 'status-' + ci.status;
+    var expanded = ci.status === 'issue';
+    html += '<div class="check-item ' + cls + (expanded?' expanded':'') + '" id="ci-' + name.replace(/[^a-zA-Z一-鿿]/g,'') + '">';
+    html += '<div class="check-item-header" onclick="toggleCheckItem(\'' + name + '\')">';
+    html += '<span class="check-item-name">' + name + '</span>';
+    html += '<span class="check-item-status-group">';
+    html += '<span class="status-btn' + (ci.status==='issue'?' sel-issue':'') + '" onclick="event.stopPropagation();setStatus(\''+name+'\',\'issue\')">⚠ 有隐患</span>';
+    html += '<span class="status-btn' + (ci.status==='safe'?' sel-safe':'') + '" onclick="event.stopPropagation();setStatus(\''+name+'\',\'safe\')">✓ 无隐患</span>';
+    html += '<span class="status-btn' + (ci.status==='na'?' sel-na':'') + '" onclick="event.stopPropagation();setStatus(\''+name+'\',\'na\')">— 不适用</span>';
+    html += '</span>';
+    html += '<span class="check-item-toggle">▾</span></div>';
+    html += '<div class="check-item-body">';
+    if (ci.status === 'safe') {
+      html += '<div class="safe-message">✅ 本项确认无隐患 <input style="margin-left:8px;border:1px solid var(--border-color);border-radius:4px;padding:3px 8px;font-size:11px;width:200px" placeholder="可选备注，如「安全帽佩戴规范」"></div>';
+    } else if (ci.status === 'na') {
+      html += '<div class="na-message">此项不适用于当前图像场景，不参与训练</div>';
+    } else {
+      html += '<div style="margin-bottom:10px"><span class="draw-hint" onclick="startDrawForItem(\''+name+'\')">🖱 在图像上画框标记隐患</span></div>';
+      html += '<div id="hzList-' + name.replace(/[^a-zA-Z一-鿿]/g,'') + '"></div>';
+      html += '<div class="fg" style="margin-top:8px"><label>违规描述</label><textarea id="note-' + name.replace(/[^a-zA-Z一-鿿]/g,'') + '" placeholder="补充说明…" style="min-height:40px"></textarea></div>';
+    }
+    html += '</div></div>';
+  });
+  document.getElementById('checkList').innerHTML = html;
+  updateSummary();
+}
+
+function updateSummary() {
+  var issue=0, safe=0, na=0;
+  ALL_ITEMS.forEach(function(n) {
+    var s = checkItems[n].status;
+    if (s==='issue') issue++; else if (s==='safe') safe++; else na++;
+  });
+  document.getElementById('countIssue').textContent = issue;
+  document.getElementById('countSafe').textContent = safe;
+  document.getElementById('countNA').textContent = na;
+}
+
+function toggleCheckItem(name) { document.getElementById('ci-'+name.replace(/[^a-zA-Z一-鿿]/g,'')).classList.toggle('expanded'); }
+function setStatus(name, status) {
+  var ci = checkItems[name];
+  ci.status = status;
+  if (status === 'issue') { /* keep hazards */ }
+  else if (status === 'safe' || status === 'na') {
+    // Remove bboxes for this item
+    Object.keys(ci.hazards).forEach(function(hid) {
+      var el = document.getElementById('bbox-'+hid);
+      if (el) el.remove();
+    });
+    ci.hazards = {}; ci.hazardCounter = 0;
+  }
+  renderCheckList();
+  updateBboxCount();
+}
+
+// BBox drawing
+function startDrawForItem(itemName) { currentDrawingItem = itemName; showToast('请在图像上拖拽绘制「'+itemName+'」的隐患标记框', 'info'); }
+var bboxLayer = document.getElementById('bboxLayer');
+bboxLayer.addEventListener('mousedown', function(e) {
+  if (!currentDrawingItem || e.button !== 0) return;
+  var r = document.getElementById('imageCanvasWrap').getBoundingClientRect();
+  var img = document.getElementById('mainImage');
+  drawStartX = (e.clientX - r.left) * img.naturalWidth / r.width;
+  drawStartY = (e.clientY - r.top) * img.naturalHeight / r.height;
+  isDrawing = true;
+  var db = document.getElementById('bboxDrawing');
+  db.style.display = 'block'; db.style.left = (e.clientX-r.left)+'px'; db.style.top = (e.clientY-r.top)+'px';
+  db.style.width = '0px'; db.style.height = '0px';
+  e.preventDefault();
+});
+bboxLayer.addEventListener('mousemove', function(e) {
+  if (!isDrawing) return;
+  var r = document.getElementById('imageCanvasWrap').getBoundingClientRect();
+  var curX = e.clientX - r.left, curY = e.clientY - r.top;
+  var startPX = drawStartX / (document.getElementById('mainImage').naturalWidth/r.width);
+  var startPY = drawStartY / (document.getElementById('mainImage').naturalHeight/r.height);
+  var db = document.getElementById('bboxDrawing');
+  db.style.left = Math.min(startPX,curX)+'px'; db.style.top = Math.min(startPY,curY)+'px';
+  db.style.width = Math.abs(curX-startPX)+'px'; db.style.height = Math.abs(curY-startPY)+'px';
+});
+bboxLayer.addEventListener('mouseup', function(e) {
+  if (!isDrawing) return;
+  isDrawing = false;
+  document.getElementById('bboxDrawing').style.display = 'none';
+  var r = document.getElementById('imageCanvasWrap').getBoundingClientRect();
+  var img = document.getElementById('mainImage');
+  var endX = (e.clientX - r.left) * img.naturalWidth / r.width;
+  var endY = (e.clientY - r.top) * img.naturalHeight / r.height;
+  var x = Math.min(drawStartX, endX), y = Math.min(drawStartY, endY);
+  var w = Math.abs(endX-drawStartX), h = Math.abs(endY-drawStartY);
+  if (w < 15 || h < 15) return;
+  addBBoxForItem(currentDrawingItem, {x:x,y:y,w:w,h:h}, img.naturalWidth, img.naturalHeight);
+});
+
+function addBBoxForItem(itemName, bbox, imgW, imgH) {
+  var ci = checkItems[itemName];
+  ci.hazardCounter++;
+  var hid = 'hz-'+itemName.replace(/[^a-zA-Z一-鿿]/g,'')+'-'+ci.hazardCounter;
+  var color = bboxColors[(ci.hazardCounter-1) % bboxColors.length];
+  ci.hazards[hid] = { bbox:bbox, imgW:imgW, imgH:imgH, color:color, index:ci.hazardCounter, formValues:{} };
+  drawBBoxOnImage(hid, bbox, imgW, imgH, color, ci.hazardCounter);
+  renderHazardForms(itemName);
+  updateBboxCount();
+  ci.status = 'issue'; renderCheckList();
+}
+
+function drawBBoxOnImage(hid, bbox, imgW, imgH, color, idx) {
+  var wrap = document.getElementById('imageCanvasWrap');
+  var r = wrap.getBoundingClientRect();
+  var sx = r.width/imgW, sy = r.height/imgH;
+  var el = document.createElement('div');
+  el.id = 'bbox-'+hid; el.className = 'bbox-rect';
+  el.style.left=(bbox.x*sx)+'px'; el.style.top=(bbox.y*sy)+'px';
+  el.style.width=(bbox.w*sx)+'px'; el.style.height=(bbox.h*sy)+'px';
+  el.style.borderColor=color;
+  var num=document.createElement('div'); num.className='bbox-number'; num.style.backgroundColor=color;
+  num.textContent=itemNameAbbr(currentDrawingItem)+idx; el.appendChild(num);
+  document.getElementById('bboxLayer').appendChild(el);
+}
+
+function itemNameAbbr(n) { var m={'高处作业':'高','基坑工程':'坑','施工升降机':'梯','消防安全':'消','起重吊装及施工机具':'吊','场容场貌':'场'}; return m[n]||n[0]; }
+
+function renderHazardForms(itemName) {
+  var ci = checkItems[itemName];
+  var container = document.getElementById('hzList-'+itemName.replace(/[^a-zA-Z一-鿿]/g,''));
+  var html = '';
+  Object.keys(ci.hazards).forEach(function(hid) {
+    var h = ci.hazards[hid];
+    html += '<div style="border:1px solid '+h.color+';border-radius:6px;padding:8px;margin-bottom:8px;background:#FFFBEB">';
+    html += '<div style="font-weight:600;font-size:11px;color:'+h.color+';margin-bottom:6px">🔴 隐患'+toCN(h.index)+' <span style="float:right;cursor:pointer;color:var(--red)" onclick="removeHazard(\''+itemName+'\',\''+hid+'\')">✕</span></div>';
+    html += buildCascadeHTML(itemName, hid);
+    html += '</div>';
+  });
+  container.innerHTML = html;
+  // Init cascade for each
+  Object.keys(ci.hazards).forEach(function(hid) {
+    var fv = ci.hazards[hid].formValues;
+    if (fv.selItem) {
+      document.getElementById('selItem-'+hid).value = fv.selItem;
+      onCascade(hid, 1, itemName);
+    }
+  });
+}
+
+function buildCascadeHTML(itemName, hid) {
+  var ci = checkItems[itemName];
+  var fv = ci.hazards[hid].formValues || {};
+  var h = '';
+  h += '<div class="fg"><label>事实描述 <span class="required">*</span></label>';
+  h += '<select id="selItem-'+hid+'" onchange="onCascade(\''+hid+'\',1,\''+itemName+'\')"><option value="">— 请选择 —</option>';
+  Object.keys(CASCADE_DATA[itemName]||{}).sort().forEach(function(d) {
+    h += '<option value="'+esc(d)+'"'+(fv.selItem===d?' selected':'')+'>'+d.substring(0,50)+'</option>';
+  });
+  h += '</select></div><div class="cascade-arrow">⬇</div>';
+  h += '<div class="fg"><label>规定条款 <span class="required">*</span></label>';
+  h += '<select id="selClause-'+hid+'" onchange="onCascade(\''+hid+'\',2,\''+itemName+'\')" disabled><option value="">— 请先选择事实描述 —</option></select></div>';
+  h += '<div class="cascade-arrow">⬇</div>';
+  h += '<div class="fg"><label>规定原文 <span class="required">*</span></label>';
+  h += '<select id="selText-'+hid+'" disabled><option value="">— 请先选择规定条款 —</option></select></div>';
+  return h;
+}
+
+function onCascade(hid, level, itemName) {
+  var itemSel = document.getElementById('selItem-'+hid);
+  var clauseSel = document.getElementById('selClause-'+hid);
+  var textSel = document.getElementById('selText-'+hid);
+  var descVal = itemSel ? itemSel.value : '';
+  if (level <= 1) {
+    clauseSel.innerHTML = '<option value="">— 请选择规定条款 —</option>'; clauseSel.disabled = true;
+    textSel.innerHTML = '<option value="">— 请先选择规定条款 —</option>'; textSel.disabled = true;
+    if (descVal && CASCADE_DATA[itemName] && CASCADE_DATA[itemName][descVal]) {
+      var clauses = Object.keys(CASCADE_DATA[itemName][descVal]).sort();
+      clauseSel.disabled = false;
+      clauses.forEach(function(c) { var o=document.createElement('option'); o.value=c; o.textContent=c; clauseSel.appendChild(o); });
+    }
+  }
+  if (level <= 2) {
+    textSel.innerHTML = '<option value="">— 请先选择规定条款 —</option>'; textSel.disabled = true;
+    var clauseVal = clauseSel ? clauseSel.value : '';
+    if (descVal && clauseVal && CASCADE_DATA[itemName]&&CASCADE_DATA[itemName][descVal]&&CASCADE_DATA[itemName][descVal][clauseVal]) {
+      var texts = CASCADE_DATA[itemName][descVal][clauseVal];
+      textSel.disabled = false;
+      texts.forEach(function(t) { var o=document.createElement('option'); o.value=t; o.textContent=t.substring(0,60); textSel.appendChild(o); });
+    }
+  }
+  saveFormValues(itemName, hid);
+}
+
+function saveFormValues(itemName, hid) {
+  checkItems[itemName].hazards[hid].formValues = {
+    selItem: (document.getElementById('selItem-'+hid)||{}).value||'',
+    selClause: (document.getElementById('selClause-'+hid)||{}).value||'',
+    selText: (document.getElementById('selText-'+hid)||{}).value||''
+  };
+}
+
+function removeHazard(itemName, hid) {
+  var el = document.getElementById('bbox-'+hid); if (el) el.remove();
+  delete checkItems[itemName].hazards[hid];
+  renderHazardForms(itemName);
+  if (Object.keys(checkItems[itemName].hazards).length === 0) {
+    checkItems[itemName].status = 'na'; renderCheckList();
+  }
+  updateBboxCount();
+}
+
+function updateBboxCount() {
+  var total = 0;
+  ALL_ITEMS.forEach(function(n) { total += Object.keys(checkItems[n].hazards).length; });
+  document.getElementById('bboxCount').textContent = '已标记：'+total+' 处';
+}
+
+function submitAll() {
+  var data = {};
+  ALL_ITEMS.forEach(function(n) {
+    var ci = checkItems[n];
+    data[n] = { status: ci.status, hazards: {} };
+    Object.keys(ci.hazards).forEach(function(hid) {
+      saveFormValues(n, hid);
+      data[n].hazards[hid] = ci.hazards[hid];
+    });
+  });
+  var confirmed = ALL_ITEMS.filter(function(n){return checkItems[n].status!=='na'}).length;
+  if (confirmed === 0) { showToast('请至少确认一项检查项目（有隐患或无隐患）','error'); return; }
+  console.log('方案A提交:', JSON.stringify(data, null, 2));
+  showToast('提交成功！已确认 '+confirmed+' 项（有隐患/无隐患），不适用 '+(6-confirmed)+' 项','success');
+}
+
+// Image list
+var IMAGE_LIST=[], currentImg=0, imgStore={};
+(function initIL(){
+  for(var i=0;i<12;i++){ var t='0'+Math.floor(8+Math.random()*9)+':'+(Math.random()>0.5?'0':'')+Math.floor(Math.random()*60); IMAGE_LIST.push({id:'img-'+i,seq:i+1,filename:'CAM-03_20250701_'+t.replace(':','')+'00.jpg',time:t.replace(/^0/,'')}); }
+  renderImgList();
+})();
+function renderImgList(f){ f=f||'all'; var h='',vis=IMAGE_LIST.filter(function(im){var d=imgStore[im.id]&&imgStore[im.id].done; if(f==='done')return d; if(f==='todo')return !d; return true;}); vis.forEach(function(im){var d=imgStore[im.id]&&imgStore[im.id].done; h+='<div class="ils-item'+(im.id===IMAGE_LIST[currentImg].id?' active':'')+'" onclick="switchImg(\''+im.id+'\')"><span class="ils-seq">'+im.seq+'</span><span class="ils-info"><span class="ils-fname">'+im.filename+'</span><span class="ils-meta">'+im.time+'</span></span><span class="ils-status">'+(d?'✅':'⬜')+'</span></div>'}); document.getElementById('ilsList').innerHTML=h||'<div style="text-align:center;padding:20px;color:var(--text-secondary);font-size:12px">无匹配</div>'; }
+function filterImg(el,f){ document.querySelectorAll('.ils-filter').forEach(function(x){x.classList.remove('active')}); el.classList.add('active'); renderImgList(f); }
+function switchImg(id){
+  saveState();
+  for(var i=0;i<IMAGE_LIST.length;i++){if(IMAGE_LIST[i].id===id){currentImg=i;break;}}
+  restoreState(); loadImage(); renderImgList(document.querySelector('.ils-filter.active').dataset.filter);
+}
+function saveState(){
+  var s={checkItems:{}}; ALL_ITEMS.forEach(function(n){s.checkItems[n]=JSON.parse(JSON.stringify(checkItems[n]));}); s.currentDrawingItem=currentDrawingItem; imgStore[IMAGE_LIST[currentImg].id]=s;
+  var done=ALL_ITEMS.some(function(n){return checkItems[n].status!=='na';}); imgStore[IMAGE_LIST[currentImg].id].done=done;
+}
+function restoreState(){
+  var s=imgStore[IMAGE_LIST[currentImg].id];
+  if(s&&s.checkItems){checkItems=s.checkItems; currentDrawingItem=s.currentDrawingItem||null;}
+  else{ALL_ITEMS.forEach(function(n){checkItems[n]={status:'na',hazards:{},hazardCounter:0};}); currentDrawingItem=null;}
+  // Clear bboxes
+  document.getElementById('bboxLayer').innerHTML='';
+  // Redraw bboxes
+  ALL_ITEMS.forEach(function(n){
+    Object.keys(checkItems[n].hazards).forEach(function(hid){
+      var h=checkItems[n].hazards[hid];
+      drawBBoxOnImage(hid,h.bbox,h.imgW,h.imgH,h.color,h.index);
+    });
+  });
+  renderCheckList();
+  // Re-render hazard forms for issue items
+  ALL_ITEMS.forEach(function(n){ if(checkItems[n].status==='issue') renderHazardForms(n); });
+  updateBboxCount();
+}
+
+function loadImage(){
+  var svg='<svg xmlns="http://www.w3.org/2000/svg" width="860" height="540" viewBox="0 0 860 540"><defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#87CEEB"/><stop offset="100%" stop-color="#C8D6E5"/></linearGradient></defs><rect width="860" height="540" fill="url(#s)"/><rect x="180" y="90" width="360" height="410" fill="#A0A0A0" rx="3"/><rect x="180" y="90" width="360" height="16" fill="#B0B0B0"/><line x1="180" y1="160" x2="540" y2="160" stroke="#D0D0D0" stroke-width="1.5"/><line x1="180" y1="250" x2="540" y2="250" stroke="#D0D0D0" stroke-width="1.5"/><circle cx="300" cy="230" r="13" fill="#FFD700"/><circle cx="410" cy="340" r="12" fill="#FF6347"/><line x1="650" y1="500" x2="650" y2="40" stroke="#666" stroke-width="3"/><rect x="0" y="500" width="860" height="40" fill="#8B7355"/><rect x="0" y="500" width="860" height="5" fill="#6B8E23"/><text x="430" y="525" font-size="14" fill="#595959" font-family="Microsoft YaHei,sans-serif" text-anchor="middle">建筑施工场景 — 在图上拖拽绘制隐患标记框</text></svg>';
+  document.getElementById('mainImage').src='data:image/svg+xml,'+encodeURIComponent(svg);
+}
+
+function toCN(n){var m=['零','一','二','三','四','五','六'];return m[n]||String(n);}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+function showToast(m,t){var el=document.getElementById('toast'); el.textContent=m; el.className='toast toast-'+t+' show'; setTimeout(function(){el.classList.remove('show')},2200);}
+function exitPage(){ if(confirm('确定退出吗？')) showToast('已退出','info'); }
+function initImageList(){ renderImgList(); }
+</script>
+</body>
+</html>

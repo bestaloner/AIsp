@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>方案B：标签式 · 隐患标注系统</title>
+<style>
+:root {
+  --color-header-bg: #2E41CD; --color-content-bg: #F0F2F5; --color-card-bg: #FFFFFF;
+  --text-primary: #262626; --text-secondary: #8C8C8C; --text-white: #FFFFFF;
+  --border-color: #D9D9D9; --border-light: #E8E8E8;
+  --radius-sm: 4px; --radius-md: 8px; --radius-lg: 10px;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.08);
+  --blue-primary: #2E41CD; --blue-light: #009CFF; --orange: #F57A00;
+  --green: #52C41A; --red: #E2091C;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1); --transition-fast: 150ms var(--ease);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 14px; }
+body { font-family: 'Microsoft YaHei','PingFang SC',-apple-system,sans-serif; color: var(--text-primary); background: var(--color-content-bg); line-height: 1.6; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+.platform-header { height: 48px; min-height: 48px; background: var(--color-header-bg); color: var(--text-white); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; flex-shrink: 0; font-size: 14px; font-weight: 500; }
+.platform-header-left { display: flex; align-items: center; gap: 16px; }
+.platform-logo { font-size: 16px; font-weight: 700; letter-spacing: 1.5px; }
+.platform-logo .lg-accent { color: var(--blue-light); }
+.platform-breadcrumb { font-size: 12px; opacity: 0.8; }
+.platform-header-right { display: flex; align-items: center; gap: 14px; font-size: 12px; }
+.platform-avatar { width: 30px; height: 30px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+.toolbar { height: 42px; min-height: 42px; background: var(--color-card-bg); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; flex-shrink: 0; }
+.toolbar-title { font-weight: 600; font-size: 14px; }
+.toolbar-hint { font-size: 12px; color: var(--text-secondary); }
+.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; gap: 3px; }
+.badge-success { background: #F6FFED; color: #389E0D; border: 1px solid #B7EB8F; }
+.badge-danger { background: #FFF2F0; color: #CF1322; border: 1px solid #FFCCC7; }
+.badge-warning { background: #FFF7E6; color: #D46B08; border: 1px solid #FFD591; }
+.badge-info { background: #E6F7FF; color: #096DD9; border: 1px solid #91D5FF; }
+.badge-neutral { background: #FAFAFA; color: #8C8C8C; border: 1px solid #D9D9D9; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 7px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid transparent; transition: all var(--transition-fast); font-family: inherit; }
+.btn-primary { background: var(--blue-primary); color: #fff; }
+.btn-primary:hover { background: #2539B5; }
+.btn-outline { background: transparent; color: var(--text-primary); border: 1px solid var(--border-color); }
+.btn-outline:hover { border-color: var(--blue-primary); color: var(--blue-primary); }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.main { flex: 1; display: flex; overflow: hidden; }
+.image-panel { flex: 1; display: flex; flex-direction: column; background: #F5F5F5; border-right: 1px solid var(--border-color); overflow: hidden; position: relative; }
+.image-topbar { padding: 6px 14px; display: flex; align-items: center; justify-content: space-between; background: #FAFAFA; border-bottom: 1px solid var(--border-light); flex-shrink: 0; font-size: 12px; color: var(--text-secondary); }
+.image-container { flex: 1; position: relative; overflow: auto; display: flex; align-items: center; justify-content: center; padding: 12px; }
+.image-canvas-wrap { position: relative; display: inline-block; box-shadow: 0 2px 16px rgba(0,0,0,0.1); border-radius: var(--radius-sm); overflow: hidden; line-height: 0; }
+.image-canvas-wrap img { display: block; max-width: 100%; max-height: calc(100vh - 210px); user-select: none; }
+.bbox-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: crosshair; }
+.bbox-rect { position: absolute; border: 2.5px solid; border-radius: 2px; pointer-events: auto; cursor: pointer; z-index: 2; }
+.bbox-number { position: absolute; top: -24px; left: -1px; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px 3px 0 0; }
+.bbox-drawing { position: absolute; border: 2px dashed var(--blue-primary); background: rgba(46,65,205,0.08); pointer-events: none; z-index: 20; display: none; }
+.tag-panel { width: 480px; min-width: 480px; flex-shrink: 0; display: flex; flex-direction: column; overflow: hidden; background: var(--color-content-bg); }
+.tag-section { padding: 12px 14px; background: var(--color-card-bg); border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
+.tag-section-title { font-weight: 600; font-size: 13px; margin-bottom: 8px; }
+.tag-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag-chip {
+  padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer;
+  border: 1px solid var(--border-color); background: #fff; color: var(--text-secondary);
+  transition: all var(--transition-fast); user-select: none; font-weight: 500;
+}
+.tag-chip:hover { border-color: var(--blue-primary); color: var(--blue-primary); }
+.tag-chip.selected { background: var(--blue-primary); color: #fff; border-color: var(--blue-primary); }
+.tag-chip.selected::after { content: ' ✓'; }
+.entry-list { flex: 1; overflow-y: auto; padding: 8px; }
+.entry-list::-webkit-scrollbar { width: 5px; }
+.entry-list::-webkit-scrollbar-track { background: transparent; }
+.entry-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+.entry-empty { text-align: center; padding: 40px 16px; color: var(--text-secondary); font-size: 13px; line-height: 2; }
+.entry-card { background: var(--color-card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); margin-bottom: 8px; box-shadow: var(--shadow-card); overflow: hidden; }
+.entry-card.has-issue { border-left: 3px solid var(--red); }
+.entry-card.no-issue { border-left: 3px solid var(--green); }
+.entry-header { padding: 10px 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; background: #FAFAFA; transition: background 0.15s; }
+.entry-header:hover { background: #F0F4FF; }
+.entry-card.expanded .entry-header { border-bottom: 1px solid var(--border-light); }
+.entry-color { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.entry-name { font-weight: 600; font-size: 13px; flex: 1; }
+.entry-toggle-btn {
+  padding: 2px 8px; border-radius: 10px; font-size: 10px; cursor: pointer;
+  border: 1px solid var(--border-color); background: #fff; transition: all var(--transition-fast);
+}
+.entry-toggle-btn.tgl-issue { color: var(--red); }
+.entry-toggle-btn.tgl-safe { color: var(--green); }
+.entry-toggle-btn.active-issue { background: #FFF2F0; border-color: #FFCCC7; }
+.entry-toggle-btn.active-safe { background: #F6FFED; border-color: #B7EB8F; }
+.entry-toggle { font-size: 10px; color: var(--text-secondary); transition: transform 0.2s; }
+.entry-card.expanded .entry-toggle { transform: rotate(180deg); }
+.entry-delete { color: var(--text-secondary); cursor: pointer; padding: 2px 6px; border-radius: var(--radius-sm); font-size: 12px; }
+.entry-delete:hover { color: var(--red); background: #FFF2F0; }
+.entry-body { display: none; padding: 12px; }
+.entry-card.expanded .entry-body { display: block; }
+.fg { margin-bottom: 10px; }
+.fg:last-child { margin-bottom: 0; }
+.fg label { display: block; font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
+.fg label .required { color: var(--red); }
+.fg select, .fg textarea { width: 100%; background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 12px; color: var(--text-primary); outline: none; transition: all var(--transition-fast); font-family: inherit; }
+.fg select { height: 36px; padding: 0 28px 0 10px; cursor: pointer; -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238C8C8C' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; }
+.fg select:focus, .fg textarea:focus { border-color: var(--blue-primary); box-shadow: 0 0 0 2px rgba(46,65,205,0.1); }
+.fg select:disabled { background: #F5F5F5; color: #BFBFBF; cursor: not-allowed; }
+.fg textarea { padding: 8px 10px; resize: vertical; min-height: 50px; }
+.cascade-arrow { text-align: center; font-size: 10px; color: var(--text-secondary); margin: -2px 0; }
+.draw-hint { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; background: #E6F0FF; color: var(--blue-primary); border-radius: var(--radius-sm); font-size: 11px; font-weight: 500; cursor: pointer; margin-bottom: 8px; }
+.safe-note { font-size: 12px; color: var(--green); }
+.tag-panel-footer { padding: 12px 14px; border-top: 1px solid var(--border-color); background: var(--color-card-bg); flex-shrink: 0; display: flex; gap: 8px; }
+.tag-panel-footer .btn { flex: 1; }
+.toast { position: fixed; top: 58px; right: 16px; padding: 10px 18px; border-radius: var(--radius-sm); font-size: 13px; z-index: 999; font-weight: 500; display: none; box-shadow: 0 4px 16px rgba(0,0,0,0.15); animation: slideIn 0.3s var(--ease); }
+.toast.show { display: block; }
+.toast-success { background: var(--green); color: #fff; }
+.toast-error { background: var(--red); color: #fff; }
+.toast-info { background: var(--blue-primary); color: #fff; }
+@keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.ils-sidebar { width: 200px; min-width: 200px; flex-shrink: 0; background: var(--color-card-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; overflow: hidden; }
+.ils-header { padding: 10px 12px; border-bottom: 1px solid var(--border-light); font-weight: 600; font-size: 12px; flex-shrink: 0; background: #FAFAFA; }
+.ils-filters { display: flex; padding: 6px 8px; gap: 3px; border-bottom: 1px solid var(--border-light); flex-shrink: 0; }
+.ils-filter { flex: 1; text-align: center; padding: 3px 0; border-radius: var(--radius-sm); font-size: 10px; cursor: pointer; border: 1px solid var(--border-color); background: #fff; color: var(--text-secondary); transition: all var(--transition-fast); }
+.ils-filter:hover { border-color: var(--blue-primary); color: var(--blue-primary); }
+.ils-filter.active { background: var(--blue-primary); color: #fff; border-color: var(--blue-primary); }
+.ils-list { flex: 1; overflow-y: auto; }
+.ils-list::-webkit-scrollbar { width: 4px; }
+.ils-list::-webkit-scrollbar-track { background: transparent; }
+.ils-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+.ils-item { display: flex; align-items: center; gap: 6px; padding: 8px 10px; cursor: pointer; border-bottom: 1px solid var(--border-light); font-size: 11px; }
+.ils-item:hover { background: #F5F7FA; }
+.ils-item.active { background: #E6F0FF; border-left: 3px solid var(--blue-primary); }
+.ils-item .ils-seq { width: 20px; height: 20px; border-radius: 50%; background: #F0F2F5; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; }
+.ils-item.active .ils-seq { background: var(--blue-primary); color: #fff; }
+.ils-item .ils-info { flex: 1; min-width: 0; }
+.ils-item .ils-fname { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ils-item .ils-meta { font-size: 9px; color: var(--text-secondary); }
+.ils-status { font-size: 14px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="platform-header">
+  <div class="platform-header-left"><div class="platform-logo">Vision<span class="lg-accent">Guard</span></div><div class="platform-breadcrumb"><span>│</span> AI 能力平台 <span>›</span> <strong>隐患标注 · 方案B</strong></div></div>
+  <div class="platform-header-right"><span>CAM-03</span><span>2025-07-01</span><div class="platform-avatar">张</div></div>
+</div>
+<div class="toolbar">
+  <span class="toolbar-title">📝 方案B：标签式</span>
+  <span class="badge badge-purple">勾选覆盖项 → 逐项判定</span>
+  <span class="toolbar-hint" style="flex:1;text-align:right">💡 先勾选图片覆盖的检查项目，再逐项标记有无隐患</span>
+</div>
+
+<div class="main">
+  <!-- Image List -->
+  <div class="ils-sidebar">
+    <div class="ils-header">🖼️ 图像序列</div>
+    <div class="ils-filters">
+      <div class="ils-filter active" data-filter="all" onclick="filterImg(this,'all')">全部</div>
+      <div class="ils-filter" data-filter="done" onclick="filterImg(this,'done')">已完成</div>
+      <div class="ils-filter" data-filter="todo" onclick="filterImg(this,'todo')">待标注</div>
+    </div>
+    <div class="ils-list" id="ilsList"></div>
+  </div>
+
+  <!-- Image Panel -->
+  <div class="image-panel">
+    <div class="image-topbar"><span>📷 抓拍图像预览</span><span id="bboxCount" style="color:var(--blue-primary);font-weight:600">已标记：0 处</span></div>
+    <div class="image-container" id="imageContainer">
+      <div class="image-canvas-wrap" id="imageCanvasWrap">
+        <img id="mainImage" src="" alt="标注图像" />
+        <div class="bbox-layer" id="bboxLayer"></div>
+        <div class="bbox-drawing" id="bboxDrawing"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tag Panel -->
+  <div class="tag-panel" id="tagPanel">
+    <div class="tag-section">
+      <div class="tag-section-title">🏷️ 覆盖检查项目（勾选图片涉及的项）</div>
+      <div class="tag-grid" id="tagGrid"></div>
+    </div>
+    <div class="entry-list" id="entryList">
+      <div class="entry-empty">👆 请先在上方勾选覆盖的检查项目</div>
+    </div>
+    <div class="tag-panel-footer">
+      <button class="btn btn-outline" onclick="exitPage()">退出</button>
+      <button class="btn btn-primary" onclick="submitAll()" style="flex:2">✓ 提交标注</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var CASCADE_DATA = {"高处作业":{"施工现场存在坠落高度基准面2m及以上的作业面临边未设置安全防护设施":{"GB 55023-2022第4.4.4条":["脚手架作业层应采取安全防护措施，并应符合下列规定:1 当作业层边缘与结构外表面的距离大于150mm时，应采取防护措施。"],"JGJ 80-2016第4.1.1条":["坠落高度基准面2m及以上进行临边作业时，应在临空一侧设置防护栏杆，并应采用密目式安全立网或工具式栏板封闭。"]},"现场作业人员未按规定配备安全帽就上岗作业 。":{"JGJ 184-2009 第2.0.4条":["进入施工现场人员必须佩戴安全帽。"]},"现场2m以上的悬空作业人员，未按规定佩戴安全带。":{"JGJ 184-2009 第2.0.4条":["在2m及以上的无可靠安全防护设施的高处作业时，必须系挂安全带。"]}},"基坑工程":{"坑边存在施工机械作业或堆载，荷载可能超过设计允许要求":{"JGJ 120-2012第8.1.5条":["基坑周边施工材料、设施或车辆荷载严禁超过设计要求的地面荷载限值"],"JGJ 311-2013第11.2.2条":["基坑周边1.5m范围内不宜堆载，3m以内限制堆载，坑边严禁重型车辆通行。"]},"未按要求在基坑顶采取有效截水措施":{"JGJ 120-2012 第8.1.6条":["雨期施工时，应在坑顶、坑底采取有效的截排水措施。"]}},"施工升降机":{"工人违规无证操作施工升降机":{"JGJ 33-2012第2.0.7条":["操作人员不得擅自离开工作岗位或将机械交给其他无证人员操作。"]},"施工升降机承载人数超过9人。":{"韶建电[2017]68号":["原则上承载人数不得超过9人（含司机）。"]}},"消防安全":{"施工现场工人随地吸烟":{"GB 50720-2011第6.4.5条":["施工现场严禁吸烟。"]}},"起重吊装及施工机具":{"施工现场使用承插型盘扣式钢管等材料简易搭设非标料斗进行吊装作业。":{"闽建办建函〔2024〕60号第二条第（三）款":["严禁使用承插型盘扣式钢管等材料简易搭设非标料斗进行吊装作业。"]}},"场容场貌":{"施工现场围墙(或围挡)未连续封闭设置。":{"JGJ 59-2011第3.2.3条":["市区主要路段的工地应设置高度不小于2.5m的封闭围挡。"]}}};
+var ALL_ITEMS = Object.keys(CASCADE_DATA).sort();
+var bboxColors = ['#E2091C','#F57A00','#F59E0B','#52C41A','#009CFF','#2E41CD'];
+
+// State
+var coveredItems = {}; // itemName -> true/false
+var itemHazards = {};  // itemName -> { hasIssue:bool, hazards:{}, hazardCounter:0 }
+var currentDrawingItem = null;
+var isDrawing=false, drawStartX, drawStartY;
+
+// Init
+(function init(){
+  ALL_ITEMS.forEach(function(n){ coveredItems[n]=false; itemHazards[n]={hasIssue:false,hazards:{},hazardCounter:0}; });
+  renderTagGrid(); renderEntryList(); loadImage(); initImageList();
+})();
+
+function renderTagGrid(){
+  var h='';
+  ALL_ITEMS.forEach(function(n){
+    h+='<div class="tag-chip'+(coveredItems[n]?' selected':'')+'" onclick="toggleCoverage(\''+n+'\')">'+n+'</div>';
+  });
+  document.getElementById('tagGrid').innerHTML=h;
+}
+function toggleCoverage(name){
+  coveredItems[name]=!coveredItems[name];
+  if(!coveredItems[name]){ itemHazards[name]={hasIssue:false,hazards:{},hazardCounter:0}; removeBBoxes(name); }
+  renderTagGrid(); renderEntryList(); updateBboxCount();
+}
+function removeBBoxes(name){
+  Object.keys(itemHazards[name].hazards).forEach(function(hid){ var el=document.getElementById('bbox-'+hid); if(el)el.remove(); });
+}
+function renderEntryList(){
+  var h=''; var any=false;
+  ALL_ITEMS.forEach(function(n){
+    if(!coveredItems[n]) return; any=true;
+    var ih=itemHazards[n];
+    var cls=ih.hasIssue?' has-issue':' no-issue';
+    var expanded=ih.hasIssue;
+    h+='<div class="entry-card'+cls+(expanded?' expanded':'')+'" id="ec-'+n.replace(/[^a-zA-Z一-鿿]/g,'')+'">';
+    h+='<div class="entry-header" onclick="toggleEntry(\''+n+'\')">';
+    h+='<span class="entry-color" style="background:'+(ih.hasIssue?var(--red):var(--green))+';background:'+(ih.hasIssue?'#E2091C':'#52C41A')+'"></span>';
+    h+='<span class="entry-name">'+n+'</span>';
+    h+='<span class="entry-toggle-btn tgl-safe'+(ih.hasIssue?'':' active-safe')+'" onclick="event.stopPropagation();toggleIssue(\''+n+'\',false)">✓ 无隐患</span>';
+    h+='<span class="entry-toggle-btn tgl-issue'+(ih.hasIssue?' active-issue':'')+'" onclick="event.stopPropagation();toggleIssue(\''+n+'\',true)">⚠ 有隐患</span>';
+    h+='<span class="entry-toggle">▾</span>';
+    h+='<span class="entry-delete" onclick="event.stopPropagation();toggleCoverage(\''+n+'\')" title="移除">✕</span></div>';
+    h+='<div class="entry-body">';
+    if(!ih.hasIssue){
+      h+='<div class="safe-note">✅ 本检查项确认无隐患</div>';
+    } else {
+      h+='<span class="draw-hint" onclick="startDraw(\''+n+'\')">🖱 在图像上画框标记隐患</span>';
+      h+='<div id="hzList-'+n.replace(/[^a-zA-Z一-鿿]/g,'')+'"></div>';
+      h+='<div class="fg" style="margin-top:8px"><label>违规描述</label><textarea id="note-'+n.replace(/[^a-zA-Z一-鿿]/g,'')+'" placeholder="补充说明…" style="min-height:40px"></textarea></div>';
+    }
+    h+='</div></div>';
+  });
+  document.getElementById('entryList').innerHTML=h||'<div class="entry-empty">👆 请先在上方勾选覆盖的检查项目</div>';
+  // Render hazard forms for issue items
+  ALL_ITEMS.forEach(function(n){ if(coveredItems[n]&&itemHazards[n].hasIssue) renderHazardForms(n); });
+}
+function toggleEntry(n){ document.getElementById('ec-'+n.replace(/[^a-zA-Z一-鿿]/g,'')).classList.toggle('expanded'); }
+function toggleIssue(name, hasIssue){
+  if(!hasIssue){ removeBBoxes(name); }
+  itemHazards[name].hasIssue=hasIssue;
+  if(!hasIssue){ itemHazards[name].hazards={}; itemHazards[name].hazardCounter=0; }
+  renderEntryList(); updateBboxCount();
+}
+function startDraw(name){ currentDrawingItem=name; showToast('请在图像上拖拽绘制「'+name+'」的隐患标记框','info'); }
+
+// BBox
+var bboxLayer=document.getElementById('bboxLayer');
+bboxLayer.addEventListener('mousedown',function(e){
+  if(!currentDrawingItem||e.button!==0)return;
+  var r=document.getElementById('imageCanvasWrap').getBoundingClientRect();
+  var img=document.getElementById('mainImage');
+  drawStartX=(e.clientX-r.left)*img.naturalWidth/r.width; drawStartY=(e.clientY-r.top)*img.naturalHeight/r.height;
+  isDrawing=true; var db=document.getElementById('bboxDrawing');
+  db.style.display='block'; db.style.left=(e.clientX-r.left)+'px'; db.style.top=(e.clientY-r.top)+'px';
+  db.style.width='0px'; db.style.height='0px'; e.preventDefault();
+});
+bboxLayer.addEventListener('mousemove',function(e){
+  if(!isDrawing)return; var r=document.getElementById('imageCanvasWrap').getBoundingClientRect();
+  var curX=e.clientX-r.left, curY=e.clientY-r.top;
+  var spX=drawStartX/(document.getElementById('mainImage').naturalWidth/r.width);
+  var spY=drawStartY/(document.getElementById('mainImage').naturalHeight/r.height);
+  var db=document.getElementById('bboxDrawing');
+  db.style.left=Math.min(spX,curX)+'px'; db.style.top=Math.min(spY,curY)+'px';
+  db.style.width=Math.abs(curX-spX)+'px'; db.style.height=Math.abs(curY-spY)+'px';
+});
+bboxLayer.addEventListener('mouseup',function(e){
+  if(!isDrawing)return; isDrawing=false; document.getElementById('bboxDrawing').style.display='none';
+  var r=document.getElementById('imageCanvasWrap').getBoundingClientRect();
+  var img=document.getElementById('mainImage');
+  var endX=(e.clientX-r.left)*img.naturalWidth/r.width, endY=(e.clientY-r.top)*img.naturalHeight/r.height;
+  var x=Math.min(drawStartX,endX),y=Math.min(drawStartY,endY),w=Math.abs(endX-drawStartX),h=Math.abs(endY-drawStartY);
+  if(w<15||h<15)return;
+  addBBox(currentDrawingItem,{x:x,y:y,w:w,h:h},img.naturalWidth,img.naturalHeight);
+});
+function addBBox(name,bbox,imgW,imgH){
+  itemHazards[name].hasIssue=true; itemHazards[name].hazardCounter++;
+  var hid='hz-'+name.replace(/[^a-zA-Z一-鿿]/g,'')+'-'+itemHazards[name].hazardCounter;
+  var color=bboxColors[(itemHazards[name].hazardCounter-1)%bboxColors.length];
+  itemHazards[name].hazards[hid]={bbox:bbox,imgW:imgW,imgH:imgH,color:color,index:itemHazards[name].hazardCounter,formValues:{}};
+  drawBBox(hid,bbox,imgW,imgH,color,itemHazards[name].hazardCounter);
+  renderEntryList(); updateBboxCount();
+}
+function drawBBox(hid,bbox,imgW,imgH,color,idx){
+  var wrap=document.getElementById('imageCanvasWrap'); var r=wrap.getBoundingClientRect();
+  var sx=r.width/imgW, sy=r.height/imgH;
+  var el=document.createElement('div'); el.id='bbox-'+hid; el.className='bbox-rect';
+  el.style.left=(bbox.x*sx)+'px'; el.style.top=(bbox.y*sy)+'px';
+  el.style.width=(bbox.w*sx)+'px'; el.style.height=(bbox.h*sy)+'px'; el.style.borderColor=color;
+  var num=document.createElement('div'); num.className='bbox-number'; num.style.backgroundColor=color;
+  num.textContent=abbr(currentDrawingItem)+idx; el.appendChild(num);
+  document.getElementById('bboxLayer').appendChild(el);
+}
+function abbr(n){var m={'高处作业':'高','基坑工程':'坑','施工升降机':'梯','消防安全':'消','起重吊装及施工机具':'吊','场容场貌':'场'};return m[n]||n[0];}
+
+function renderHazardForms(name){
+  var ih=itemHazards[name];
+  var container=document.getElementById('hzList-'+name.replace(/[^a-zA-Z一-鿿]/g,''));
+  if(!container)return;
+  var h='';
+  Object.keys(ih.hazards).forEach(function(hid){
+    var hz=ih.hazards[hid];
+    h+='<div style="border:1px solid '+hz.color+';border-radius:6px;padding:8px;margin-bottom:8px;background:#FFFBEB">';
+    h+='<div style="font-weight:600;font-size:11px;color:'+hz.color+';margin-bottom:6px">🔴 隐患'+cn(hz.index)+' <span style="float:right;cursor:pointer;color:var(--red)" onclick="rmHazard(\''+name+'\',\''+hid+'\')">✕</span></div>';
+    h+='<div class="fg"><label>事实描述 <span class="required">*</span></label><select id="selItem-'+hid+'" onchange="onCascade(\''+hid+'\',1,\''+name+'\')"><option value="">— 请选择 —</option>';
+    Object.keys(CASCADE_DATA[name]||{}).sort().forEach(function(d){ h+='<option value="'+esc(d)+'">'+d.substring(0,50)+'</option>'; });
+    h+='</select></div><div class="cascade-arrow">⬇</div>';
+    h+='<div class="fg"><label>规定条款 <span class="required">*</span></label><select id="selClause-'+hid+'" onchange="onCascade(\''+hid+'\',2,\''+name+'\')" disabled><option value="">— 请先选择事实描述 —</option></select></div>';
+    h+='<div class="cascade-arrow">⬇</div>';
+    h+='<div class="fg"><label>规定原文 <span class="required">*</span></label><select id="selText-'+hid+'" disabled><option value="">— 请先选择规定条款 —</option></select></div>';
+    h+='</div>';
+  });
+  container.innerHTML=h;
+}
+function onCascade(hid,level,name){
+  var itemSel=document.getElementById('selItem-'+hid), clauseSel=document.getElementById('selClause-'+hid), textSel=document.getElementById('selText-'+hid);
+  var dv=itemSel?itemSel.value:'';
+  if(level<=1){ clauseSel.innerHTML='<option value="">— 请选择规定条款 —</option>'; clauseSel.disabled=true; textSel.innerHTML='<option value="">— 请先选择规定条款 —</option>'; textSel.disabled=true;
+    if(dv&&CASCADE_DATA[name]&&CASCADE_DATA[name][dv]){ var cs=Object.keys(CASCADE_DATA[name][dv]).sort(); clauseSel.disabled=false; cs.forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;clauseSel.appendChild(o);}); } }
+  if(level<=2){ textSel.innerHTML='<option value="">— 请先选择规定条款 —</option>'; textSel.disabled=true;
+    var cv=clauseSel?clauseSel.value:''; if(dv&&cv&&CASCADE_DATA[name]&&CASCADE_DATA[name][dv]&&CASCADE_DATA[name][dv][cv]){ var ts=CASCADE_DATA[name][dv][cv]; textSel.disabled=false; ts.forEach(function(t){var o=document.createElement('option');o.value=t;o.textContent=t.substring(0,60);textSel.appendChild(o);}); } }
+}
+function rmHazard(name,hid){ var el=document.getElementById('bbox-'+hid); if(el)el.remove(); delete itemHazards[name].hazards[hid]; if(Object.keys(itemHazards[name].hazards).length===0) itemHazards[name].hasIssue=false; renderEntryList(); updateBboxCount(); }
+function updateBboxCount(){ var t=0; ALL_ITEMS.forEach(function(n){ if(coveredItems[n]) t+=Object.keys(itemHazards[n].hazards).length; }); document.getElementById('bboxCount').textContent='已标记：'+t+' 处'; }
+
+// Submit
+function submitAll(){
+  var data={}; var cnt=0;
+  ALL_ITEMS.forEach(function(n){ if(coveredItems[n]){ cnt++; data[n]=itemHazards[n]; } });
+  if(cnt===0){ showToast('请至少勾选一个覆盖的检查项目','error'); return; }
+  console.log('方案B提交:',JSON.stringify(data,null,2));
+  showToast('提交成功！覆盖 '+cnt+' 项','success');
+}
+
+// Image list (same as before, simplified)
+var IMAGE_LIST=[], currentImg=0, imgStore={};
+(function(){for(var i=0;i<12;i++){var t='0'+Math.floor(8+Math.random()*9)+':'+(Math.random()>0.5?'0':'')+Math.floor(Math.random()*60);IMAGE_LIST.push({id:'img-'+i,seq:i+1,filename:'CAM-03_20250701_'+t.replace(':','')+'00.jpg',time:t.replace(/^0/,'')});}renderImgList();})();
+function renderImgList(f){f=f||'all';var h='',vis=IMAGE_LIST.filter(function(im){var d=imgStore[im.id]&&imgStore[im.id].done;if(f==='done')return d;if(f==='todo')return !d;return true;});vis.forEach(function(im){var d=imgStore[im.id]&&imgStore[im.id].done;h+='<div class="ils-item'+(im.id===IMAGE_LIST[currentImg].id?' active':'')+'" onclick="switchImg(\''+im.id+'\')"><span class="ils-seq">'+im.seq+'</span><span class="ils-info"><span class="ils-fname">'+im.filename+'</span><span class="ils-meta">'+im.time+'</span></span><span class="ils-status">'+(d?'✅':'⬜')+'</span></div>'});document.getElementById('ilsList').innerHTML=h||'<div style="text-align:center;padding:20px;color:var(--text-secondary);font-size:12px">无匹配</div>';}
+function filterImg(el,f){document.querySelectorAll('.ils-filter').forEach(function(x){x.classList.remove('active')});el.classList.add('active');renderImgList(f);}
+function switchImg(id){saveState();for(var i=0;i<IMAGE_LIST.length;i++){if(IMAGE_LIST[i].id===id){currentImg=i;break;}}restoreState();loadImage();renderImgList(document.querySelector('.ils-filter.active').dataset.filter);}
+function saveState(){var s={coveredItems:{},itemHazards:{}};ALL_ITEMS.forEach(function(n){s.coveredItems[n]=coveredItems[n];s.itemHazards[n]=JSON.parse(JSON.stringify(itemHazards[n]));});s.currentDrawingItem=currentDrawingItem;imgStore[IMAGE_LIST[currentImg].id]=s;var done=ALL_ITEMS.some(function(n){return coveredItems[n];});imgStore[IMAGE_LIST[currentImg].id].done=done;}
+function restoreState(){var s=imgStore[IMAGE_LIST[currentImg].id];if(s){coveredItems=s.coveredItems;itemHazards=s.itemHazards;currentDrawingItem=s.currentDrawingItem||null;}else{ALL_ITEMS.forEach(function(n){coveredItems[n]=false;itemHazards[n]={hasIssue:false,hazards:{},hazardCounter:0};});currentDrawingItem=null;}document.getElementById('bboxLayer').innerHTML='';ALL_ITEMS.forEach(function(n){if(coveredItems[n]){Object.keys(itemHazards[n].hazards).forEach(function(hid){var hz=itemHazards[n].hazards[hid];drawBBox(hid,hz.bbox,hz.imgW,hz.imgH,hz.color,hz.index);});}});renderTagGrid();renderEntryList();updateBboxCount();}
+function loadImage(){var svg='<svg xmlns="http://www.w3.org/2000/svg" width="860" height="540" viewBox="0 0 860 540"><defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#87CEEB"/><stop offset="100%" stop-color="#C8D6E5"/></linearGradient></defs><rect width="860" height="540" fill="url(#s)"/><rect x="180" y="90" width="360" height="410" fill="#A0A0A0" rx="3"/><rect x="180" y="90" width="360" height="16" fill="#B0B0B0"/><circle cx="300" cy="230" r="13" fill="#FFD700"/><circle cx="410" cy="340" r="12" fill="#FF6347"/><line x1="650" y1="500" x2="650" y2="40" stroke="#666" stroke-width="3"/><rect x="0" y="500" width="860" height="40" fill="#8B7355"/><text x="430" y="525" font-size="14" fill="#595959" font-family="Microsoft YaHei,sans-serif" text-anchor="middle">建筑施工场景</text></svg>';document.getElementById('mainImage').src='data:image/svg+xml,'+encodeURIComponent(svg);}
+function cn(n){var m=['零','一','二','三','四','五','六'];return m[n]||String(n);}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;');}
+function showToast(m,t){var el=document.getElementById('toast');el.textContent=m;el.className='toast toast-'+t+' show';setTimeout(function(){el.classList.remove('show')},2200);}
+function exitPage(){if(confirm('确定退出吗？'))showToast('已退出','info');}
+function initImageList(){renderImgList();}
+</script>
+</body>
+</html>
