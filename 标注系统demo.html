@@ -781,7 +781,7 @@ function renderHazardEntry(hazard) {
   html += '<div class="cascade-arrow">⬇</div>';
 
   // L5: 违规描述 (manual input)
-  html += '<div class="fg"><label>违规描述 <span class="required">*</span></label>';
+  html += '<div class="fg"><label>违规描述</label>';
   html += '<textarea id="txtViolation-' + hazard.id + '" placeholder="根据以上选择，用自然语言描述具体的违规事实…"></textarea>';
   html += '</div>';
 
@@ -914,7 +914,7 @@ function submitAll() {
   });
 
   var incomplete = entries.filter(function(e) {
-    return !e.inspection_item || !e.violation_description || !e.regulation_clause || !e.regulation_text || !e.violation_detail;
+    return !e.inspection_item || !e.violation_description || !e.regulation_clause || !e.regulation_text;
   });
 
   if (entries.length === 0) {
