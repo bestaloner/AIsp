@@ -548,6 +548,7 @@ var CASCADE_DATA = {
 var hazardCounter = 0;           // total hazard entries created
 var hazards = {};               // id -> {bbox: {x,y,w,h}, data: {...}}
 var selectedHazardId = null;    // currently selected hazard
+var imageStore = {};            // imageId -> { hazards, hazardCounter, bboxLayerHTML }
 var bboxColors = ['#E2091C','#F57A00','#F59E0B','#52C41A','#009CFF','#2E41CD','#8B5CF6','#06B6D4','#E2091C','#F57A00','#52C41A','#8B5CF6'];
 
 // Drawing state
@@ -610,28 +611,119 @@ function filterImageList(filter, el) {
   renderImageList(filter);
 }
 
+// ═══════════════ Save / Restore per-image ═══════════════
+function saveCurrentImage() {
+  if (!IMAGE_LIST[currentImageIdx]) return;
+  var imgId = IMAGE_LIST[currentImageIdx].id;
+  var savedHazards = {};
+  Object.keys(hazards).forEach(function(hid) {
+    var h = hazards[hid];
+    savedHazards[hid] = {
+      bbox: h.bbox, imgW: h.imgW, imgH: h.imgH,
+      color: h.color, index: h.index, id: h.id,
+      formValues: {
+        selItem: (document.getElementById('selItem-'+hid)||{}).value||'',
+        selDesc: (document.getElementById('selDesc-'+hid)||{}).value||'',
+        selClause: (document.getElementById('selClause-'+hid)||{}).value||'',
+        selText: (document.getElementById('selText-'+hid)||{}).value||'',
+        txtViolation: (document.getElementById('txtViolation-'+hid)||{}).value||''
+      }
+    };
+  });
+  imageStore[imgId] = {
+    hazards: savedHazards,
+    hazardCounter: hazardCounter,
+    bboxLayerHTML: document.getElementById('bboxLayer').innerHTML
+  };
+  imageMarkedStatus[imgId] = Object.keys(hazards).length > 0;
+}
+
 function switchImage(id) {
-  // Save current hazards to current image
-  if (IMAGE_LIST[currentImageIdx]) {
-    imageMarkedStatus[IMAGE_LIST[currentImageIdx].id] = Object.keys(hazards).length > 0;
-  }
-  // Find target index
+  saveCurrentImage();
   for (var i = 0; i < IMAGE_LIST.length; i++) {
     if (IMAGE_LIST[i].id === id) { currentImageIdx = i; break; }
   }
-  // Clear existing hazards and bboxes
-  Object.keys(hazards).forEach(function(hid) { deleteHazard(hid); });
-  hazardCounter = 0;
-  hazards = {};
+  // Clear current state
+  hazardCounter = 0; hazards = {}; selectedHazardId = null;
   document.getElementById('bboxLayer').innerHTML = '';
+  document.getElementById('hazardList').innerHTML = '';
+  document.getElementById('hazardEmpty').style.display = '';
   updateCounts();
-  // Reload image
   loadSampleImage();
+  // Restore saved state
+  var imgId = IMAGE_LIST[currentImageIdx].id;
+  restoreImage(imgId);
   renderImageList(document.querySelector('.ils-filter.active').dataset.filter);
-  showToast('已切换到 ' + IMAGE_LIST[currentImageIdx].filename, 'info');
 }
 
-// Hook into addHazard to update marked status
+function restoreImage(imgId) {
+  var stored = imageStore[imgId];
+  if (!stored || Object.keys(stored.hazards).length === 0) return;
+  hazardCounter = stored.hazardCounter;
+  document.getElementById('bboxLayer').innerHTML = stored.bboxLayerHTML || '';
+  Object.keys(stored.hazards).forEach(function(hid) {
+    var sh = stored.hazards[hid];
+    hazards[hid] = { id: sh.id, bbox: sh.bbox, imgW: sh.imgW, imgH: sh.imgH, color: sh.color, index: sh.index };
+    renderHazardEntryFromSaved(sh);
+    setTimeout(function() {
+      var itemEl = document.getElementById('selItem-'+hid);
+      if (itemEl && sh.formValues.selItem) { itemEl.value = sh.formValues.selItem; onCascadeChange(hid,1); }
+      setTimeout(function() {
+        var descEl = document.getElementById('selDesc-'+hid);
+        if (descEl && sh.formValues.selDesc) { descEl.value = sh.formValues.selDesc; onCascadeChange(hid,2); }
+        setTimeout(function() {
+          var clauseEl = document.getElementById('selClause-'+hid);
+          if (clauseEl && sh.formValues.selClause) { clauseEl.value = sh.formValues.selClause; onCascadeChange(hid,3); }
+          setTimeout(function() {
+            var textEl = document.getElementById('selText-'+hid);
+            var violEl = document.getElementById('txtViolation-'+hid);
+            if (textEl && sh.formValues.selText) textEl.value = sh.formValues.selText;
+            if (violEl) violEl.value = sh.formValues.txtViolation || '';
+          }, 120);
+        }, 120);
+      }, 120);
+    }, 80);
+  });
+  document.querySelectorAll('.bbox-rect').forEach(function(el) {
+    var hid = el.id.replace('bbox-','');
+    el.addEventListener('click', function(e) { e.stopPropagation(); selectHazard(hid);
+      var entryEl = document.getElementById('entry-'+hid);
+      if (entryEl) entryEl.scrollIntoView({behavior:'smooth',block:'center'}); });
+  });
+  updateCounts();
+}
+
+function renderHazardEntryFromSaved(sh) {
+  var list = document.getElementById('hazardList');
+  document.getElementById('hazardEmpty').style.display = 'none';
+  var sb = sh.bbox ? '<span class="badge badge-success">📍 已标记</span>' : '<span class="badge badge-neutral">⬜ 未标记</span>';
+  var html = '<div class="hazard-entry expanded" id="entry-'+sh.id+'">';
+  html += '<div class="hazard-entry-header" onclick="toggleEntry(\''+sh.id+'\')">';
+  html += '<span class="hazard-entry-color" style="background:'+sh.color+'"></span>';
+  html += '<span class="hazard-entry-index">隐患'+toChineseNum(sh.index)+'</span>';
+  html += '<span class="hazard-entry-status">'+sb+'</span><span class="hazard-entry-toggle">▾</span>';
+  html += '<span class="hazard-entry-delete" onclick="event.stopPropagation();deleteHazard(\''+sh.id+'\')" title="删除">✕</span>';
+  html += '</div><div class="hazard-entry-body">';
+  html += '<div class="fg"><label>检查项目 <span class="required">*</span></label>';
+  html += '<select id="selItem-'+sh.id+'" onchange="onCascadeChange(\''+sh.id+'\',1)"><option value="">— 请选择 —</option>';
+  Object.keys(CASCADE_DATA).sort().forEach(function(it) { html += '<option value="'+escAttr(it)+'">'+it+'</option>'; });
+  html += '</select></div><div class="cascade-arrow">⬇</div>';
+  html += '<div class="fg"><label>事实描述 <span class="required">*</span><span class="hint" id="descHint-'+sh.id+'"></span></label>';
+  html += '<select id="selDesc-'+sh.id+'" onchange="onCascadeChange(\''+sh.id+'\',2)" disabled><option value="">— 请先选择检查项目 —</option></select></div>';
+  html += '<div class="cascade-arrow">⬇</div>';
+  html += '<div class="fg"><label>规定条款 <span class="required">*</span><span class="hint" id="clauseHint-'+sh.id+'"></span></label>';
+  html += '<select id="selClause-'+sh.id+'" onchange="onCascadeChange(\''+sh.id+'\',3)" disabled><option value="">— 请先选择事实描述 —</option></select></div>';
+  html += '<div class="cascade-arrow">⬇</div>';
+  html += '<div class="fg"><label>规定原文 <span class="required">*</span><span class="hint" id="textHint-'+sh.id+'"></span></label>';
+  html += '<select id="selText-'+sh.id+'" disabled><option value="">— 请先选择规定条款 —</option></select></div>';
+  html += '<div class="cascade-arrow">⬇</div>';
+  html += '<div class="fg"><label>违规描述</label>';
+  html += '<textarea id="txtViolation-'+sh.id+'" placeholder="根据以上选择，用自然语言描述具体的违规事实…"></textarea></div>';
+  html += '</div></div>';
+  list.insertAdjacentHTML('beforeend', html);
+}
+
+// Hook addHazard to update marked status and auto-save
 var _origAddHazard = addHazard;
 addHazard = function(bbox, imgW, imgH) {
   _origAddHazard(bbox, imgW, imgH);
@@ -644,7 +736,6 @@ addHazard = function(bbox, imgW, imgH) {
 var _origDeleteHazard = deleteHazard;
 deleteHazard = function(id) {
   _origDeleteHazard(id);
-  // Update status after a short delay to let hazards update
   setTimeout(function() {
     if (IMAGE_LIST[currentImageIdx]) {
       imageMarkedStatus[IMAGE_LIST[currentImageIdx].id] = Object.keys(hazards).length > 0;
@@ -954,6 +1045,13 @@ function toggleEntry(id) {
   entry.classList.toggle('expanded');
   selectHazard(id);
 }
+
+// Auto-save on any cascade change
+var _origCascade = onCascadeChange;
+onCascadeChange = function(hid, level) {
+  _origCascade(hid, level);
+  saveCurrentImage();
+};
 
 // ═══════════════ Cascading Logic ═══════════════
 function onCascadeChange(hazardId, level) {
