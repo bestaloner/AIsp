@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>隐患标注系统 · VisionGuard · AI 能力平台</title>
+<style>
+/* ====== V4.1 Design System: Enterprise White Theme ====== */
+:root {
+  --color-header-bg: #2E41CD;
+  --color-content-bg: #F0F2F5;
+  --color-card-bg: #FFFFFF;
+  --color-table-header: #1A2D99;
+  --text-primary: #262626;
+  --text-secondary: #8C8C8C;
+  --text-white: #FFFFFF;
+  --border-color: #D9D9D9;
+  --border-light: #E8E8E8;
+  --radius-sm: 4px; --radius-md: 8px; --radius-lg: 10px;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.08);
+  --blue-primary: #2E41CD;
+  --blue-light: #009CFF;
+  --orange: #F57A00;
+  --green: #52C41A;
+  --red: #E2091C;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 150ms var(--ease);
+
+  /* 12 bbox colors */
+  --bbox-1:#E2091C; --bbox-2:#F57A00; --bbox-3:#F59E0B; --bbox-4:#52C41A;
+  --bbox-5:#009CFF; --bbox-6:#2E41CD; --bbox-7:#8B5CF6; --bbox-8:#06B6D4;
+  --bbox-9:#E2091C; --bbox-10:#F57A00; --bbox-11:#52C41A; --bbox-12:#8B5CF6;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 14px; }
+body {
+  font-family: 'Microsoft YaHei', 'PingFang SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--text-primary); background: var(--color-content-bg);
+  line-height: 1.6; height: 100vh; overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  display: flex; flex-direction: column;
+}
+
+/* ====== Header ====== */
+.platform-header {
+  height: 48px; min-height: 48px;
+  background: var(--color-header-bg); color: var(--text-white);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px; flex-shrink: 0; font-size: 14px; font-weight: 500;
+}
+.platform-header-left { display: flex; align-items: center; gap: 16px; }
+.platform-logo { font-size: 16px; font-weight: 700; letter-spacing: 1.5px; }
+.platform-logo .lg-accent { color: var(--blue-light); }
+.platform-breadcrumb { font-size: 12px; opacity: 0.8; }
+.platform-breadcrumb span { opacity: 0.5; }
+.platform-header-right { display: flex; align-items: center; gap: 14px; font-size: 12px; }
+.platform-avatar {
+  width: 30px; height: 30px; background: rgba(255,255,255,0.2);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600;
+}
+
+/* ====== Toolbar ====== */
+.toolbar {
+  height: 42px; min-height: 42px; background: var(--color-card-bg);
+  border-bottom: 1px solid var(--border-color);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px; flex-shrink: 0;
+}
+.toolbar-left { display: flex; align-items: center; gap: 12px; }
+.toolbar-title { font-weight: 600; font-size: 14px; }
+.toolbar-right { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); }
+.toolbar-hint {
+  color: var(--orange); font-size: 11px;
+  display: flex; align-items: center; gap: 4px;
+}
+
+/* ====== Buttons ====== */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 4px; padding: 7px 14px; border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  border: 1px solid transparent; transition: all var(--transition-fast);
+  font-family: inherit; white-space: nowrap;
+}
+.btn-primary { background: var(--blue-primary); color: #fff; }
+.btn-primary:hover { background: #2539B5; box-shadow: 0 2px 6px rgba(46,65,205,0.3); }
+.btn-outline { background: transparent; color: var(--text-primary); border: 1px solid var(--border-color); }
+.btn-outline:hover { border-color: var(--blue-primary); color: var(--blue-primary); }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-xs { padding: 2px 7px; font-size: 11px; }
+.btn-icon { padding: 5px 8px; font-size: 14px; line-height: 1; }
+
+/* ====== Badges ====== */
+.badge {
+  display: inline-flex; align-items: center; padding: 2px 8px;
+  border-radius: 20px; font-size: 11px; font-weight: 500; gap: 3px;
+}
+.badge-success { background: #F6FFED; color: #389E0D; border: 1px solid #B7EB8F; }
+.badge-info { background: #E6F7FF; color: #096DD9; border: 1px solid #91D5FF; }
+.badge-neutral { background: #FAFAFA; color: #8C8C8C; border: 1px solid #D9D9D9; }
+
+/* ====== Main Layout ====== */
+.main { flex: 1; display: flex; overflow: hidden; }
+
+/* ── Left: Image Panel ── */
+.image-panel {
+  flex: 1; display: flex; flex-direction: column;
+  background: #F5F5F5; border-right: 1px solid var(--border-color);
+  overflow: hidden; position: relative;
+}
+.image-topbar {
+  padding: 6px 14px; display: flex; align-items: center; justify-content: space-between;
+  background: #FAFAFA; border-bottom: 1px solid var(--border-light); flex-shrink: 0;
+  font-size: 12px; color: var(--text-secondary);
+}
+.image-container {
+  flex: 1; position: relative; overflow: auto;
+  display: flex; align-items: center; justify-content: center;
+  padding: 12px;
+}
+.image-canvas-wrap {
+  position: relative; display: inline-block;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.1); border-radius: var(--radius-sm);
+  overflow: hidden; line-height: 0;
+}
+.image-canvas-wrap img {
+  display: block; max-width: 100%; max-height: calc(100vh - 210px);
+  user-select: none; -webkit-user-drag: none;
+}
+/* BBox drawing layer */
+.bbox-layer {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  cursor: crosshair;
+}
+/* Existing bboxes */
+.bbox-rect {
+  position: absolute; border: 2.5px solid; border-radius: 2px;
+  pointer-events: auto; cursor: pointer; z-index: 2;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+  transition: box-shadow 0.15s;
+}
+.bbox-rect:hover { box-shadow: 0 0 0 5px rgba(0,0,0,0.12); z-index: 5; }
+.bbox-rect.selected { box-shadow: 0 0 0 6px rgba(46,65,205,0.2); z-index: 10; }
+.bbox-number {
+  position: absolute; top: -24px; left: -1px;
+  color: #fff; font-size: 10px; font-weight: 700;
+  padding: 2px 6px; border-radius: 3px 3px 0 0; white-space: nowrap;
+  pointer-events: none;
+}
+/* Drawing preview */
+.bbox-drawing {
+  position: absolute; border: 2px dashed var(--blue-primary);
+  background: rgba(46,65,205,0.08); pointer-events: none; z-index: 20;
+  display: none;
+}
+
+/* ── Right: Hazard List Panel ── */
+.hazard-panel {
+  width: 460px; min-width: 460px; flex-shrink: 0;
+  display: flex; flex-direction: column; overflow: hidden;
+  background: var(--color-content-bg);
+}
+.hazard-panel-header {
+  padding: 10px 14px; background: var(--color-card-bg);
+  border-bottom: 1px solid var(--border-color);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.hazard-panel-title { font-weight: 600; font-size: 14px; }
+.hazard-panel-title .count { color: var(--text-secondary); font-weight: 400; font-size: 12px; }
+.hazard-list {
+  flex: 1; overflow-y: auto; padding: 8px;
+}
+.hazard-list::-webkit-scrollbar { width: 5px; }
+.hazard-list::-webkit-scrollbar-track { background: transparent; }
+.hazard-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+
+/* Empty state */
+.hazard-empty {
+  text-align: center; padding: 48px 20px; color: var(--text-secondary);
+  font-size: 13px; line-height: 2;
+}
+.hazard-empty .icon { font-size: 40px; opacity: 0.4; margin-bottom: 8px; }
+
+/* ── Hazard Entry Card ── */
+.hazard-entry {
+  background: var(--color-card-bg); border: 1px solid var(--border-color);
+  border-radius: var(--radius-md); margin-bottom: 10px;
+  box-shadow: var(--shadow-card); overflow: hidden;
+}
+.hazard-entry.selected { border-color: var(--blue-primary); }
+.hazard-entry-header {
+  padding: 10px 12px; display: flex; align-items: center; gap: 8px;
+  cursor: pointer; user-select: none; transition: background 0.15s;
+  border-bottom: 1px solid transparent;
+}
+.hazard-entry-header:hover { background: #FAFBFC; }
+.hazard-entry.expanded .hazard-entry-header { border-bottom-color: var(--border-light); }
+.hazard-entry-color {
+  width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0;
+}
+.hazard-entry-index { font-weight: 700; font-size: 13px; flex: 1; }
+.hazard-entry-status { font-size: 11px; }
+.hazard-entry-toggle { font-size: 10px; color: var(--text-secondary); transition: transform 0.2s; }
+.hazard-entry.expanded .hazard-entry-toggle { transform: rotate(180deg); }
+.hazard-entry-delete {
+  color: var(--text-secondary); cursor: pointer; padding: 2px 6px;
+  border-radius: var(--radius-sm); font-size: 14px; line-height: 1;
+  transition: all var(--transition-fast);
+}
+.hazard-entry-delete:hover { color: var(--red); background: #FFF2F0; }
+
+/* Entry body */
+.hazard-entry-body {
+  display: none; padding: 12px;
+  border-top: 1px solid var(--border-light);
+}
+.hazard-entry.expanded .hazard-entry-body { display: block; }
+
+/* Form fields inside entry */
+.fg { margin-bottom: 10px; }
+.fg:last-child { margin-bottom: 0; }
+.fg label {
+  display: block; font-size: 11px; font-weight: 600;
+  color: var(--text-secondary); margin-bottom: 4px;
+}
+.fg label .required { color: var(--red); margin-left: 1px; }
+.fg label .hint { font-weight: 400; color: var(--orange); font-size: 10px; margin-left: 4px; }
+.fg select {
+  width: 100%; height: 36px; background: #FFFFFF;
+  border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+  font-size: 12px; color: var(--text-primary); outline: none;
+  transition: all var(--transition-fast); font-family: inherit;
+  cursor: pointer; -webkit-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238C8C8C' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 8px center;
+  padding: 0 28px 0 10px;
+}
+.fg select:focus { border-color: var(--blue-primary); box-shadow: 0 0 0 2px rgba(46,65,205,0.1); }
+.fg select:disabled { background: #F5F5F5; color: #BFBFBF; cursor: not-allowed; }
+.fg textarea {
+  width: 100%; padding: 8px 10px; border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm); font-size: 12px; color: var(--text-primary);
+  outline: none; transition: all var(--transition-fast); font-family: inherit;
+  resize: vertical; min-height: 60px; background: #FFFFFF;
+}
+.fg textarea:focus { border-color: var(--blue-primary); box-shadow: 0 0 0 2px rgba(46,65,205,0.1); }
+.fg textarea::placeholder { color: #BFBFBF; }
+
+/* Cascade arrows between fields */
+.cascade-arrow {
+  text-align: center; font-size: 10px; color: var(--text-secondary);
+  margin: -4px 0; line-height: 1;
+}
+
+/* ── Footer ── */
+.hazard-panel-footer {
+  padding: 12px 14px; border-top: 1px solid var(--border-color);
+  background: var(--color-card-bg); flex-shrink: 0;
+  display: flex; gap: 8px;
+}
+.hazard-panel-footer .btn { flex: 1; }
+
+/* Toast */
+.toast {
+  position: fixed; top: 58px; right: 16px;
+  padding: 10px 18px; border-radius: var(--radius-sm);
+  font-size: 13px; z-index: 999; font-weight: 500;
+  animation: slideIn 0.3s var(--ease); display: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+.toast.show { display: block; }
+.toast-success { background: var(--green); color: #fff; }
+.toast-error { background: var(--red); color: #fff; }
+.toast-info { background: var(--blue-primary); color: #fff; }
+@keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+/* Tooltip for image */
+.image-tooltip {
+  position: absolute; background: rgba(0,0,0,0.75); color: #fff;
+  padding: 4px 8px; border-radius: 4px; font-size: 11px;
+  pointer-events: none; z-index: 30; display: none;
+  white-space: nowrap;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ Header ═══ -->
+<div class="platform-header">
+  <div class="platform-header-left">
+    <div class="platform-logo">Vision<span class="lg-accent">Guard</span></div>
+    <div class="platform-breadcrumb"><span>│</span> AI 能力平台 <span>›</span> <strong>隐患标注系统</strong></div>
+  </div>
+  <div class="platform-header-right">
+    <span>CAM-03</span>
+    <span>2025-07-01</span>
+    <div class="platform-avatar">张</div>
+  </div>
+</div>
+
+<!-- ═══ Toolbar ═══ -->
+<div class="toolbar">
+  <div class="toolbar-left">
+    <span class="toolbar-title">📝 图像标注工作台</span>
+    <span class="badge badge-info">标注中</span>
+  </div>
+  <div class="toolbar-right">
+    <span class="toolbar-hint">💡 在图像上拖拽绘制隐患标记框 → 右侧自动生成隐患条目</span>
+    <span>CAM-03_20250701_143000.jpg</span>
+  </div>
+</div>
+
+<!-- ═══ Main ═══ -->
+<div class="main">
+
+  <!-- Left: Image -->
+  <div class="image-panel">
+    <div class="image-topbar">
+      <span>📷 抓拍图像预览</span>
+      <span id="bboxCount" style="color:var(--blue-primary);font-weight:600">已标记：0 处</span>
+    </div>
+    <div class="image-container" id="imageContainer">
+      <div class="image-canvas-wrap" id="imageCanvasWrap">
+        <img id="mainImage" src="" alt="标注图像" />
+        <div class="bbox-layer" id="bboxLayer"></div>
+        <div class="bbox-drawing" id="bboxDrawing"></div>
+        <div class="image-tooltip" id="imageTooltip"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Hazard List -->
+  <div class="hazard-panel" id="hazardPanel">
+    <div class="hazard-panel-header">
+      <span class="hazard-panel-title">📋 隐患列表 <span class="count" id="hazardCount">（共 0 处）</span></span>
+    </div>
+    <div class="hazard-list" id="hazardList">
+      <div class="hazard-empty" id="hazardEmpty">
+        <div class="icon">🖱️</div>
+        <div>在左侧图像上<strong>拖拽鼠标</strong>绘制隐患标记框<br>即可自动生成隐患条目</div>
+      </div>
+    </div>
+    <div class="hazard-panel-footer">
+      <button class="btn btn-outline" onclick="exitAnnotation()">退出</button>
+      <button class="btn btn-primary" onclick="submitAll()" style="flex:2">✓ 提交标注</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════ DATA ═══════════ -->
+<script>
+// ── 四级联动数据 ──
+var CASCADE_DATA = {
+  "高处作业": {
+    "施工现场存在坠落高度基准面2m及以上的作业面临边未设置安全防护设施": {
+      "GB 55023-2022第4.4.4条": ["脚手架作业层应采取安全防护措施，并应符合下列规定:1 当作业层边缘与结构外表面的距离大于150mm时，应采取防护措施。"],
+      "GB 55023-2022第5.2.1条": ["落地作业脚手架的搭设应与主体结构工程施工同步，一次搭设高度不应超过最上层连墙件2步，且自由高度不应大于4m;","剪刀撑、斜撑杆等加固杆件应随架体同步搭设;"],
+      "JGJ 80-2016第4.1.1条": ["坠落高度基准面2m及以上进行临边作业时，应在临空一侧设置防护栏杆，并应采用密目式安全立网或工具式栏板封闭。"],
+      "JGJ 80-2016第4.1.2条": ["施工的楼梯口、楼梯平台和梯段边，应安装防护栏杆；外设楼梯口、楼梯平台和梯段边还应采用密目式安全立网封闭。"],
+      "JGJ 80-2016第4.1.3条": ["建筑物外围边沿处，对没有设置外脚手架的工程，应设置防护栏杆;对有外脚手架的工程，应采用密目式安全立网全封闭。"]
+    },
+    "外脚手架未与主体结构工程施工同步搭设。": {
+      "GB 55023-2022第4.4.4条": ["脚手架作业层应采取安全防护措施，并应符合下列规定:1 当作业层边缘与结构外表面的距离大于150mm时，应采取防护措施。"],
+      "GB 55023-2022第5.2.1条": ["落地作业脚手架的搭设应与主体结构工程施工同步，一次搭设高度不应超过最上层连墙件2步，且自由高度不应大于4m;","剪刀撑、斜撑杆等加固杆件应随架体同步搭设;"],
+      "JGJ 80-2016第4.1.1条": ["坠落高度基准面2m及以上进行临边作业时，应在临空一侧设置防护栏杆，并应采用密目式安全立网或工具式栏板封闭。"],
+      "JGJ 80-2016第4.1.2条": ["施工的楼梯口、楼梯平台和梯段边，应安装防护栏杆；外设楼梯口、楼梯平台和梯段边还应采用密目式安全立网封闭。"],
+      "JGJ 80-2016第4.1.3条": ["建筑物外围边沿处，对没有设置外脚手架的工程，应设置防护栏杆;对有外脚手架的工程，应采用密目式安全立网全封闭。"]
+    },
+    "外架边缘与建筑物间隙大于150mm未采取防护措施": {
+      "GB 55023-2022第4.4.4条": ["脚手架作业层应采取安全防护措施，并应符合下列规定:1 当作业层边缘与结构外表面的距离大于150mm时，应采取防护措施。"],
+      "GB 55023-2022第5.2.1条": ["落地作业脚手架的搭设应与主体结构工程施工同步"],
+      "GB 55023-2022第5.2.1条(2)": ["剪刀撑、斜撑杆等加固杆件应随架体同步搭设;"],
+      "JGJ 80-2016第4.1.1条": ["坠落高度基准面2m及以上进行临边作业时，应在临空一侧设置防护栏杆，并应采用密目式安全立网或工具式栏板封闭。"],
+      "JGJ 80-2016第4.1.2条": ["施工的楼梯口、楼梯平台和梯段边，应安装防护栏杆；外设楼梯口、楼梯平台和梯段边还应采用密目式安全立网封闭。"],
+      "JGJ 80-2016第4.1.3条": ["建筑物外围边沿处，对没有设置外脚手架的工程，应设置防护栏杆;对有外脚手架的工程，应采用密目式安全立网全封闭。"]
+    },
+    "洞口作业防坠落措施不符合要求": {
+      "JGJ80-2016第4.2.1条": [
+        "1.当竖向洞口短边边长小于500mm时，应采取封堵措施;当垂直洞口短边边长大于或等于500mm时，应在临空一侧设置高度不小于1.2m的防护栏杆，并应采用密目式安全立网或工具式栏板封闭，设置挡脚板;",
+        "2.当非竖向洞口短边边长为25mm~500mm时，应采用承载力满足使用要求的盖板覆盖，盖板四周搁置应均衡，且应防止盖板移位；",
+        "3.当非竖向洞口短边边长为500mm~1500mm时，应采用盖板覆盖或防护栏杆等措施，并应固定牢固;",
+        "4.当非竖向洞口短边边长大于或等于1500mm时，应在洞口作业侧设置高度不小于1.2m的防护栏杆，洞口应采用安全平网封闭。"
+      ]
+    },
+    "现场作业人员未按规定配备安全帽就上岗作业 。": {
+      "JGJ 184-2009 第2.0.4条": ["2.0.4 进入施工现场人员必须佩戴安全帽。作业人员必须戴安全帽、穿工作鞋和工作服；应按作业要求正确使用劳动防护用品。在2m及以上的无可靠安全防护设施的高处、悬崖和陡坡作业时，必须系挂安全带。"],
+      "JGJ/T 429-2018第5.1.6条": ["凡在2m以上的悬空作业人员，应佩戴安全带，安全带及其使用除应符合现行国家标准《安全带》GB 6095的规定"],
+      "JGJ/T 429-2018第6.0.5条": ["进入施工现场的人员必须正确佩戴安全帽，安全帽质量应符合现行国家标准《安全帽》GB 2811的规定。"]
+    },
+    "现场2m以上的悬空作业人员，未按规定佩戴安全带。": {
+      "JGJ 184-2009 第2.0.4条": ["2.0.4 进入施工现场人员必须佩戴安全帽。作业人员必须戴安全帽、穿工作鞋和工作服；应按作业要求正确使用劳动防护用品。在2m及以上的无可靠安全防护设施的高处、悬崖和陡坡作业时，必须系挂安全带。"],
+      "JGJ/T 429-2018第5.1.6条": ["凡在2m以上的悬空作业人员，应佩戴安全带，安全带及其使用除应符合现行国家标准《安全带》GB 6095的规定"],
+      "JGJ/T 429-2018第6.0.5条": ["进入施工现场的人员必须正确佩戴安全帽，安全帽质量应符合现行国家标准《安全帽》GB 2811的规定。"]
+    },
+    "施工现场人员进出的通道口未按规定搭设安全防护棚 。": {
+      "JGJ 80-2016 第7.2.1条": ["1.当安全防护棚为非机动车辆通行时，棚底至地面高度不应小于3m;当安全防护棚为机动车辆通行时，棚底至地面高度不应小于4m。","2.当建筑物高度大于24m并采用木质板搭设时，应搭设双层安全防护棚。两层防护的间距不应小于700mm，安全防护棚的高度不应小于4m。","3.当安全防护棚的顶棚采用竹笆或木质板搭设时，应采用双层搭设，间距不应小于700mm;当采用木质板或与其等强度的其他材料搭设时，可采用单层搭设，木板厚度不应小于50mm。"],
+      "JGJ T 429-2018 第6.0.1条": ["交叉作业时，下层作业位置应处于上层作业的坠落半径之外，在坠落半径内时，必须设置安全防护棚或其他隔离措施"],
+      "JGJ T 429-2018 第6.0.2条": ["1.人员进出的通道口(包括物料提升机、施工升降机的进出通道口)自建筑物施工至二层起，其上部应设置安全防护棚","2.上方施工可能坠落物件的影响范围内的通行道路和集中加工场地;自建筑物施工至二层起，其上部应设置安全防护棚","3.起重机的起重臂回转范围之内的通道自建筑物施工至二层起，其上部应设置安全防护棚"]
+    },
+    "钢筋加工场未按规定搭设安全防护棚 。": {
+      "JGJ 80-2016 第7.2.1条": ["1.当安全防护棚为非机动车辆通行时，棚底至地面高度不应小于3m;当安全防护棚为机动车辆通行时，棚底至地面高度不应小于4m。","2.当建筑物高度大于24m并采用木质板搭设时，应搭设双层安全防护棚。两层防护的间距不应小于700mm，安全防护棚的高度不应小于4m。","3.当安全防护棚的顶棚采用竹笆或木质板搭设时，应采用双层搭设，间距不应小于700mm;当采用木质板或与其等强度的其他材料搭设时，可采用单层搭设，木板厚度不应小于50mm。"],
+      "JGJ T 429-2018 第6.0.1条": ["交叉作业时，下层作业位置应处于上层作业的坠落半径之外，在坠落半径内时，必须设置安全防护棚或其他隔离措施"],
+      "JGJ T 429-2018 第6.0.2条": ["1.人员进出的通道口(包括物料提升机、施工升降机的进出通道口)自建筑物施工至二层起，其上部应设置安全防护棚","2.上方施工可能坠落物件的影响范围内的通行道路和集中加工场地;自建筑物施工至二层起，其上部应设置安全防护棚","3.起重机的起重臂回转范围之内的通道自建筑物施工至二层起，其上部应设置安全防护棚"]
+    }
+  },
+  "基坑工程": {
+    "未按要求在基坑顶采取有效截水措施": {
+      "JGJ 120-2012 第8.1.6条": ["1.雨期施工时，应在坑顶、坑底采取有效的截排水措施;对地势低洼的基坑，应考虑周边汇水区域地面径流向基坑汇水的影响;排水沟、集水井应采取防渗措施;","2.基坑周边地面宜作硬化或防渗处理","3.基坑周边的施工用水应有排放措施，不得渗入土体内;","4.当坑体渗水、积水或有渗流时，应及时进行疏导、排泄、截断水源","5.开挖至坑底后，应及时进行混凝土垫层和主体地下结构施工;","6.主体地下结构施工时，结构外墙与基坑侧壁之间应及时回填"]
+    },
+    "未按要求在基坑底采取有效排水措施。": {
+      "JGJ 120-2012 第8.1.6条": ["1.雨期施工时，应在坑顶、坑底采取有效的截排水措施;对地势低洼的基坑，应考虑周边汇水区域地面径流向基坑汇水的影响;排水沟、集水井应采取防渗措施;","2.基坑周边地面宜作硬化或防渗处理","3.基坑周边的施工用水应有排放措施，不得渗入土体内;","4.当坑体渗水、积水或有渗流时，应及时进行疏导、排泄、截断水源","5.开挖至坑底后，应及时进行混凝土垫层和主体地下结构施工;","6.主体地下结构施工时，结构外墙与基坑侧壁之间应及时回填"]
+    },
+    "坑边存在施工机械作业或堆载，荷载可能超过设计允许要求": {
+      "JGJ 180-2009第6.3.9条": ["除基坑支护设计允许外，基坑边不得堆土、堆料、放置机具。"],
+      "JGJ 120-2012第8.1.5条": ["基坑周边施工材料、设施或车辆荷载严禁超过设计要求的地面荷载限值"],
+      "JGJ 311-2013第8.3.2条": ["挖土机械不应停留在水平支撑上方进行挖土作业，当在支撑上部行走时，应在支撑上方回填不少于300mm厚的土层，并应采取铺设路基箱等措施。"],
+      "JGJ 311-2013第11.2.2条": ["基坑周边使用荷载不应超过设计限值。基坑周边1.5m范围内不宜堆载，3m以内限制堆载，坑边严禁重型车辆通行。"],
+      "GB 51004-2015第9.4.6条": ["重型机械在坡顶边缘作业宜设置专门平台，土方运输车辆应在设计安全防护距离以外行驶，应限制坡顶周围有振动荷载作用。"],
+      "JGJT429-2018第4.1.7条": ["施工现场物料不宜堆置在基坑边缘、边坡坡顶、桩孔边，当需堆置时，堆置的重量和距离应符合设计规定。各类施工机械距基坑边缘的距离不宜小于1.5m。"],
+      "GB 55003-2021第7.4.3条第二款": ["基坑周边施工材料、设施或车辆荷载严禁超过设计要求的地面荷载限值。"],
+      "GB 55034-2022 第3.5.3条": ["边坡及基坑周边堆放材料、停放设备设施或使用机械设备等荷载严禁超过设计要求的地面荷载限值。"],
+      "《房屋市政工程生产安全重大事故隐患判定标准(2024版)》第十四条": ["一、基坑周边堆载超过设计允许值；","二、无支护基坑（槽）周边，在坑底边线周边与开挖深度相等范围内堆载；","三、楼板、屋面和地下室顶板等结构构件或脚手架上堆载超过设计允许值。"]
+    },
+    "挖土机械和运输车辆直接在支撑上行走或作业。": {
+      "JGJ 180-2009第6.3.9条": ["除基坑支护设计允许外，基坑边不得堆土、堆料、放置机具。"],
+      "JGJ 120-2012第8.1.5条": ["基坑周边施工材料、设施或车辆荷载严禁超过设计要求的地面荷载限值"],
+      "JGJ 311-2013第8.3.2条": ["挖土机械不应停留在水平支撑上方进行挖土作业，当在支撑上部行走时，应在支撑上方回填不少于300mm厚的土层，并应采取铺设路基箱等措施。"],
+      "JGJ 311-2013第11.2.2条": ["基坑周边使用荷载不应超过设计限值。基坑周边1.5m范围内不宜堆载，3m以内限制堆载，坑边严禁重型车辆通行。"],
+      "GB 51004-2015第9.4.6条": ["重型机械在坡顶边缘作业宜设置专门平台，土方运输车辆应在设计安全防护距离以外行驶，应限制坡顶周围有振动荷载作用。"],
+      "JGJT429-2018第4.1.7条": ["施工现场物料不宜堆置在基坑边缘、边坡坡顶、桩孔边，当需堆置时，堆置的重量和距离应符合设计规定。"],
+      "GB 55003-2021第7.4.3条第二款": ["基坑周边施工材料、设施或车辆荷载严禁超过设计要求的地面荷载限值。"],
+      "GB 55034-2022 第3.5.3条": ["边坡及基坑周边堆放材料、停放设备设施或使用机械设备等荷载严禁超过设计要求的地面荷载限值。"],
+      "《房屋市政工程生产安全重大事故隐患判定标准(2024版)》第十四条": ["一、基坑周边堆载超过设计允许值；","二、无支护基坑（槽）周边，在坑底边线周边与开挖深度相等范围内堆载；","三、楼板、屋面和地下室顶板等结构构件或脚手架上堆载超过设计允许值。"]
+    },
+    "无支护基坑(槽)周边，在坑底边线周边与开挖深度相等范围内堆载": {
+      "JGJ 180-2009第6.3.9条": ["除基坑支护设计允许外，基坑边不得堆土、堆料、放置机具。"],
+      "JGJ 120-2012第8.1.5条": ["基坑周边施工材料、设施或车辆荷载严禁超过设计要求的地面荷载限值"],
+      "JGJ 311-2013第8.3.2条": ["挖土机械不应停留在水平支撑上方进行挖土作业，当在支撑上部行走时，应在支撑上方回填不少于300mm厚的土层，并应采取铺设路基箱等措施。"],
+      "JGJ 311-2013第11.2.2条": ["基坑周边使用荷载不应超过设计限值。基坑周边1.5m范围内不宜堆载，3m以内限制堆载，坑边严禁重型车辆通行。"],
+      "GB 51004-2015第9.4.6条": ["重型机械在坡顶边缘作业宜设置专门平台，土方运输车辆应在设计安全防护距离以外行驶，应限制坡顶周围有振动荷载作用。"],
+      "JGJT429-2018第4.1.7条": ["施工现场物料不宜堆置在基坑边缘、边坡坡顶、桩孔边，当需堆置时，堆置的重量和距离应符合设计规定。"],
+      "GB 55003-2021第7.4.3条第二款": ["基坑周边施工材料、设施或车辆荷载严禁超过设计要求的地面荷载限值。"],
+      "GB 55034-2022 第3.5.3条": ["边坡及基坑周边堆放材料、停放设备设施或使用机械设备等荷载严禁超过设计要求的地面荷载限值。"],
+      "《房屋市政工程生产安全重大事故隐患判定标准(2024版)》第十四条": ["一、基坑周边堆载超过设计允许值；","二、无支护基坑（槽）周边，在坑底边线周边与开挖深度相等范围内堆载；","三、楼板、屋面和地下室顶板等结构构件或脚手架上堆载超过设计允许值。"]
+    }
+  },
+  "施工升降机": {
+    "工人违规无证操作施工升降机": {
+      "《房屋市政工程生产安全重大事故隐患判定标准(2024版)》第四条": ["建筑施工特种作业人员未取得有效特种作业人员操作资格证书上岗作业"],
+      "JGJ 33-2012第2.0.7条": ["操作人员在作业过程中，应集中精力，正确操作，并应检查机械工况，不得擅自离开工作岗位或将机械交给其他无证人员操作。无关人员不得进人作业区或操作室内。"]
+    },
+    "施工升降机承载人数超过9人。": {
+      "韶建电[2017]68号": ["推行限载管理，施工现场上下班高峰期，项目部应统筹安排施工升降机使用，加强调度管理，原则上承载人数不得超过9人（含司机）。"]
+    }
+  },
+  "消防安全": {
+    "施工现场工人随地吸烟": {
+      "GB 50720-2011第6.4.5条": ["施工现场严禁吸烟。"]
+    }
+  },
+  "起重吊装及施工机具": {
+    "施工现场使用承插型盘扣式钢管等材料简易搭设非标料斗进行吊装作业。": {
+      "闽建办建函〔2024〕60号第二条第（三）款": ["规范使用料斗。吊装易散落材料时，必须使用料斗吊运，且装载不得过满。严禁使用承插型盘扣式钢管等材料简易搭设非标料斗进行吊装作业。严禁将箍筋挂成“雨伞状”直接吊装。"]
+    },
+    "将箍筋挂成“雨伞状”直接吊装 。": {
+      "闽建办建函〔2024〕60号第二条第（三）款": ["规范使用料斗。吊装易散落材料时，必须使用料斗吊运，且装载不得过满。严禁使用承插型盘扣式钢管等材料简易搭设非标料斗进行吊装作业。严禁将箍筋挂成“雨伞状”直接吊装。"]
+    },
+    "吊篮内操作人员的数量不符合使用要求。": {
+      "JGJ/T429-2018第5.8.5条": ["吊篮内操作人员的数量应符合产品说明书的使用要求。"],
+      "JGJ/T429-2018第5.5.8条": ["吊篮内的作业人员不应超过2个。"],
+      "JB/T 11699-2013 6.2.3条": ["使用双动力吊篮时操作人员不允许单独一人进行作业。"]
+    }
+  },
+  "场容场貌": {
+    "施工现场围墙(或围挡)未连续封闭设置。": {
+      "JGJ 59-2011第3.2.3条": ["市区主要路段的工地应设置高度不小于2.5m的封闭围挡;","围挡应坚固、稳定、整洁、美观。"]
+    }
+  }
+};
+
+// ═══════════════ Application State ═══════════════
+var hazardCounter = 0;           // total hazard entries created
+var hazards = {};               // id -> {bbox: {x,y,w,h}, data: {...}}
+var selectedHazardId = null;    // currently selected hazard
+var bboxColors = ['#E2091C','#F57A00','#F59E0B','#52C41A','#009CFF','#2E41CD','#8B5CF6','#06B6D4','#E2091C','#F57A00','#52C41A','#8B5CF6'];
+
+// Drawing state
+var isDrawing = false;
+var drawStartX, drawStartY;
+
+// ═══════════════ Image Loading ═══════════════
+function loadSampleImage() {
+  var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="860" height="540" viewBox="0 0 860 540">'
+    + '<defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#87CEEB"/><stop offset="100%" stop-color="#C8D6E5"/></linearGradient>'
+    + '<linearGradient id="bldg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#A0A0A0"/><stop offset="100%" stop-color="#787878"/></linearGradient></defs>'
+    + '<rect width="860" height="540" fill="url(#sky)"/>'
+    + '<rect x="180" y="90" width="360" height="410" fill="url(#bldg)" rx="3"/>'
+    + '<rect x="180" y="90" width="360" height="16" fill="#B0B0B0"/>'
+    + '<line x1="180" y1="110" x2="180" y2="500" stroke="#C8C8C8" stroke-width="2"/>'
+    + '<line x1="540" y1="110" x2="540" y2="500" stroke="#C8C8C8" stroke-width="2"/>'
+    + '<line x1="180" y1="160" x2="540" y2="160" stroke="#D0D0D0" stroke-width="1.5"/>'
+    + '<line x1="180" y1="250" x2="540" y2="250" stroke="#D0D0D0" stroke-width="1.5"/>'
+    + '<line x1="180" y1="340" x2="540" y2="340" stroke="#D0D0D0" stroke-width="1.5"/>'
+    + '<line x1="180" y1="430" x2="540" y2="430" stroke="#D0D0D0" stroke-width="1.5"/>'
+    + '<circle cx="300" cy="230" r="13" fill="#FFD700" stroke="#E8C800" stroke-width="1"/>'
+    + '<rect x="292" y="243" width="16" height="26" fill="#FF8C00" rx="4"/>'
+    + '<circle cx="410" cy="340" r="12" fill="#FF6347" stroke="#E8553D" stroke-width="1"/>'
+    + '<rect x="403" y="352" width="14" height="22" fill="#4169E1" rx="4"/>'
+    + '<line x1="650" y1="500" x2="650" y2="40" stroke="#666" stroke-width="3"/>'
+    + '<line x1="633" y1="60" x2="800" y2="60" stroke="#666" stroke-width="2.5"/>'
+    + '<line x1="650" y1="40" x2="633" y2="60" stroke="#666" stroke-width="2"/>'
+    + '<line x1="800" y1="60" x2="800" y2="160" stroke="#666" stroke-width="1.5"/>'
+    + '<circle cx="650" cy="38" r="5" fill="#E2091C"/>'
+    + '<rect x="0" y="500" width="860" height="40" fill="#8B7355"/>'
+    + '<rect x="0" y="500" width="860" height="5" fill="#6B8E23"/>'
+    + '<rect x="60" y="455" width="70" height="45" fill="#D2B48C" stroke="#A0522D" stroke-width="1.5" rx="3"/>'
+    + '<rect x="740" y="455" width="70" height="45" fill="#D2B48C" stroke="#A0522D" stroke-width="1.5" rx="3"/>'
+    + '<text x="430" y="525" font-size="14" fill="#595959" font-family="Microsoft YaHei,sans-serif" text-anchor="middle">建筑施工场景 — 示例图像（在图上拖拽绘制标记框）</text>'
+    + '</svg>';
+  document.getElementById('mainImage').src = 'data:image/svg+xml,' + encodeURIComponent(svg);
+}
+
+// ═══════════════ BBox Drawing ═══════════════
+var bboxLayer = document.getElementById('bboxLayer');
+var bboxDrawing = document.getElementById('bboxDrawing');
+var imageTooltip = document.getElementById('imageTooltip');
+var imageWrap = document.getElementById('imageCanvasWrap');
+
+bboxLayer.addEventListener('mousedown', function(e) {
+  if (e.button !== 0) return; // left button only
+  var rect = imageWrap.getBoundingClientRect();
+  var img = document.getElementById('mainImage');
+  var scaleX = img.naturalWidth / rect.width;
+  var scaleY = img.naturalHeight / rect.height;
+
+  drawStartX = (e.clientX - rect.left) * scaleX;
+  drawStartY = (e.clientY - rect.top) * scaleY;
+  isDrawing = true;
+
+  bboxDrawing.style.display = 'block';
+  bboxDrawing.style.left = (e.clientX - rect.left) + 'px';
+  bboxDrawing.style.top = (e.clientY - rect.top) + 'px';
+  bboxDrawing.style.width = '0px';
+  bboxDrawing.style.height = '0px';
+
+  e.preventDefault();
+});
+
+bboxLayer.addEventListener('mousemove', function(e) {
+  var rect = imageWrap.getBoundingClientRect();
+  var img = document.getElementById('mainImage');
+  var scaleX = img.naturalWidth / rect.width;
+  var scaleY = img.naturalHeight / rect.height;
+
+  var curX = (e.clientX - rect.left);
+  var curY = (e.clientY - rect.top);
+
+  if (isDrawing) {
+    var startPX = drawStartX / scaleX;
+    var startPY = drawStartY / scaleY;
+    bboxDrawing.style.left = Math.min(startPX, curX) + 'px';
+    bboxDrawing.style.top = Math.min(startPY, curY) + 'px';
+    bboxDrawing.style.width = Math.abs(curX - startPX) + 'px';
+    bboxDrawing.style.height = Math.abs(curY - startPY) + 'px';
+  }
+
+  // Show tooltip
+  var imgX = curX * scaleX;
+  var imgY = curY * scaleY;
+  imageTooltip.style.display = 'block';
+  imageTooltip.style.left = (curX + 14) + 'px';
+  imageTooltip.style.top = (curY - 10) + 'px';
+  imageTooltip.textContent = isDrawing
+    ? '拖拽中… (' + Math.round(Math.abs((e.clientX - rect.left) - drawStartX/scaleX)) + '×' + Math.round(Math.abs((e.clientY - rect.top) - drawStartY/scaleY)) + 'px)'
+    : '在此处拖拽绘制标记框';
+});
+
+bboxLayer.addEventListener('mouseup', function(e) {
+  if (!isDrawing) return;
+  isDrawing = false;
+  bboxDrawing.style.display = 'none';
+
+  var rect = imageWrap.getBoundingClientRect();
+  var img = document.getElementById('mainImage');
+  var scaleX = img.naturalWidth / rect.width;
+  var scaleY = img.naturalHeight / rect.height;
+
+  var endX = (e.clientX - rect.left) * scaleX;
+  var endY = (e.clientY - rect.top) * scaleY;
+
+  var x = Math.min(drawStartX, endX);
+  var y = Math.min(drawStartY, endY);
+  var w = Math.abs(endX - drawStartX);
+  var h = Math.abs(endY - drawStartY);
+
+  // Minimum size threshold
+  if (w < 15 || h < 15) { imageTooltip.style.display = 'none'; return; }
+
+  addHazard({ x: x, y: y, w: w, h: h }, img.naturalWidth, img.naturalHeight);
+  imageTooltip.style.display = 'none';
+});
+
+bboxLayer.addEventListener('mouseleave', function() {
+  imageTooltip.style.display = 'none';
+  if (isDrawing) {
+    isDrawing = false;
+    bboxDrawing.style.display = 'none';
+  }
+});
+
+// ═══════════════ Hazard Management ═══════════════
+function addHazard(bbox, imgW, imgH) {
+  hazardCounter++;
+  var id = 'hz-' + hazardCounter;
+  var colorIdx = (hazardCounter - 1) % bboxColors.length;
+
+  var hazard = {
+    id: id,
+    bbox: bbox,       // in image pixel coordinates
+    imgW: imgW,
+    imgH: imgH,
+    color: bboxColors[colorIdx],
+    index: hazardCounter
+  };
+
+  hazards[id] = hazard;
+
+  // Draw bbox on image
+  renderBBox(hazard);
+  // Create entry in right panel
+  renderHazardEntry(hazard);
+  // Update UI
+  updateCounts();
+  selectHazard(id);
+}
+
+function addHazardManually() {
+  hazardCounter++;
+  var id = 'hz-' + hazardCounter;
+  var colorIdx = (hazardCounter - 1) % bboxColors.length;
+
+  var hazard = {
+    id: id,
+    bbox: null,  // no bbox = 未标记
+    imgW: 860,
+    imgH: 540,
+    color: bboxColors[colorIdx],
+    index: hazardCounter
+  };
+
+  hazards[id] = hazard;
+  renderHazardEntry(hazard);
+  updateCounts();
+  selectHazard(id);
+}
+
+function deleteHazard(id) {
+  // Remove bbox from image
+  var bboxEl = document.getElementById('bbox-' + id);
+  if (bboxEl) bboxEl.remove();
+
+  // Remove entry
+  var entryEl = document.getElementById('entry-' + id);
+  if (entryEl) entryEl.remove();
+
+  delete hazards[id];
+  if (selectedHazardId === id) selectedHazardId = null;
+
+  updateCounts();
+}
+
+function selectHazard(id) {
+  selectedHazardId = id;
+  // Update selection state on image
+  document.querySelectorAll('.bbox-rect').forEach(function(el) { el.classList.remove('selected'); });
+  var bboxEl = document.getElementById('bbox-' + id);
+  if (bboxEl) bboxEl.classList.add('selected');
+
+  // Update selection state in list
+  document.querySelectorAll('.hazard-entry').forEach(function(el) { el.classList.remove('selected'); });
+  var entryEl = document.getElementById('entry-' + id);
+  if (entryEl) entryEl.classList.add('selected');
+}
+
+// ═══════════════ Render BBox on Image ═══════════════
+function renderBBox(hazard) {
+  if (!hazard.bbox) return;
+
+  var bbox = hazard.bbox;
+  var wrap = document.getElementById('imageCanvasWrap');
+  var img = document.getElementById('mainImage');
+  var rect = wrap.getBoundingClientRect();
+  var scaleX = rect.width / hazard.imgW;
+  var scaleY = rect.height / hazard.imgH;
+
+  var el = document.createElement('div');
+  el.id = 'bbox-' + hazard.id;
+  el.className = 'bbox-rect';
+  el.style.left = (bbox.x * scaleX) + 'px';
+  el.style.top = (bbox.y * scaleY) + 'px';
+  el.style.width = (bbox.w * scaleX) + 'px';
+  el.style.height = (bbox.h * scaleY) + 'px';
+  el.style.borderColor = hazard.color;
+  el.title = '隐患' + toChineseNum(hazard.index) + ' — 点击查看';
+  el.addEventListener('click', function(e) {
+    e.stopPropagation();
+    selectHazard(hazard.id);
+    // Scroll to entry
+    var entryEl = document.getElementById('entry-' + hazard.id);
+    if (entryEl) entryEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+
+  // Number label
+  var num = document.createElement('div');
+  num.className = 'bbox-number';
+  num.style.backgroundColor = hazard.color;
+  num.textContent = toChineseNum(hazard.index);
+  el.appendChild(num);
+
+  document.getElementById('bboxLayer').appendChild(el);
+}
+
+// ═══════════════ Render Hazard Entry ═══════════════
+function renderHazardEntry(hazard) {
+  var list = document.getElementById('hazardList');
+  document.getElementById('hazardEmpty').style.display = 'none';
+
+  var statusBadge = hazard.bbox
+    ? '<span class="badge badge-success">📍 已标记</span>'
+    : '<span class="badge badge-neutral">⬜ 未标记</span>';
+
+  var html = '<div class="hazard-entry expanded selected" id="entry-' + hazard.id + '">';
+  html += '<div class="hazard-entry-header" onclick="toggleEntry(\'' + hazard.id + '\')">';
+  html += '<span class="hazard-entry-color" style="background:' + hazard.color + '"></span>';
+  html += '<span class="hazard-entry-index">隐患' + toChineseNum(hazard.index) + '</span>';
+  html += '<span class="hazard-entry-status">' + statusBadge + '</span>';
+  html += '<span class="hazard-entry-toggle">▾</span>';
+  html += '<span class="hazard-entry-delete" onclick="event.stopPropagation();deleteHazard(\'' + hazard.id + '\')" title="删除">✕</span>';
+  html += '</div>';
+
+  html += '<div class="hazard-entry-body">';
+  // L1: 检查项目
+  html += '<div class="fg"><label>检查项目 <span class="required">*</span></label>';
+  html += '<select id="selItem-' + hazard.id + '" onchange="onCascadeChange(\'' + hazard.id + '\', 1)">';
+  html += '<option value="">— 请选择 —</option>';
+  Object.keys(CASCADE_DATA).sort().forEach(function(item) {
+    html += '<option value="' + escAttr(item) + '">' + item + '</option>';
+  });
+  html += '</select></div>';
+
+  html += '<div class="cascade-arrow">⬇</div>';
+
+  // L2: 事实描述
+  html += '<div class="fg"><label>事实描述 <span class="required">*</span><span class="hint" id="descHint-' + hazard.id + '"></span></label>';
+  html += '<select id="selDesc-' + hazard.id + '" onchange="onCascadeChange(\'' + hazard.id + '\', 2)" disabled>';
+  html += '<option value="">— 请先选择检查项目 —</option>';
+  html += '</select></div>';
+
+  html += '<div class="cascade-arrow">⬇</div>';
+
+  // L3: 规定条款
+  html += '<div class="fg"><label>规定条款 <span class="required">*</span><span class="hint" id="clauseHint-' + hazard.id + '"></span></label>';
+  html += '<select id="selClause-' + hazard.id + '" onchange="onCascadeChange(\'' + hazard.id + '\', 3)" disabled>';
+  html += '<option value="">— 请先选择事实描述 —</option>';
+  html += '</select></div>';
+
+  html += '<div class="cascade-arrow">⬇</div>';
+
+  // L4: 规定原文
+  html += '<div class="fg"><label>规定原文 <span class="required">*</span><span class="hint" id="textHint-' + hazard.id + '"></span></label>';
+  html += '<select id="selText-' + hazard.id + '" disabled>';
+  html += '<option value="">— 请先选择规定条款 —</option>';
+  html += '</select></div>';
+
+  html += '<div class="cascade-arrow">⬇</div>';
+
+  // L5: 违规描述 (manual input)
+  html += '<div class="fg"><label>违规描述 <span class="required">*</span></label>';
+  html += '<textarea id="txtViolation-' + hazard.id + '" placeholder="根据以上选择，用自然语言描述具体的违规事实…"></textarea>';
+  html += '</div>';
+
+  html += '</div></div>';
+
+  list.insertAdjacentHTML('beforeend', html);
+}
+
+function toggleEntry(id) {
+  var entry = document.getElementById('entry-' + id);
+  entry.classList.toggle('expanded');
+  selectHazard(id);
+}
+
+// ═══════════════ Cascading Logic ═══════════════
+function onCascadeChange(hazardId, level) {
+  var itemVal = document.getElementById('selItem-' + hazardId).value;
+  var descVal = document.getElementById('selDesc-' + hazardId).value;
+  var clauseVal = document.getElementById('selClause-' + hazardId).value;
+
+  if (level <= 1) {
+    // Item changed → rebuild desc
+    var descSel = document.getElementById('selDesc-' + hazardId);
+    var clauseSel = document.getElementById('selClause-' + hazardId);
+    var textSel = document.getElementById('selText-' + hazardId);
+
+    descSel.innerHTML = '<option value="">— 请选择事实描述 —</option>';
+    clauseSel.innerHTML = '<option value="">— 请先选择事实描述 —</option>';
+    clauseSel.disabled = true;
+    textSel.innerHTML = '<option value="">— 请先选择规定条款 —</option>';
+    textSel.disabled = true;
+
+    if (itemVal && CASCADE_DATA[itemVal]) {
+      var descs = Object.keys(CASCADE_DATA[itemVal]).sort();
+      descSel.disabled = false;
+      descs.forEach(function(d) {
+        var o = document.createElement('option');
+        o.value = d; o.textContent = d.length > 55 ? d.substring(0,55)+'…' : d;
+        o.title = d; descSel.appendChild(o);
+      });
+      document.getElementById('descHint-' + hazardId).textContent = descs.length + ' 项可选';
+    } else {
+      descSel.disabled = true;
+      document.getElementById('descHint-' + hazardId).textContent = '';
+    }
+    document.getElementById('clauseHint-' + hazardId).textContent = '';
+    document.getElementById('textHint-' + hazardId).textContent = '';
+  }
+
+  if (level <= 2) {
+    // Desc changed → rebuild clause
+    var clauseSel2 = document.getElementById('selClause-' + hazardId);
+    var textSel2 = document.getElementById('selText-' + hazardId);
+
+    clauseSel2.innerHTML = '<option value="">— 请选择规定条款 —</option>';
+    textSel2.innerHTML = '<option value="">— 请先选择规定条款 —</option>';
+    textSel2.disabled = true;
+
+    if (itemVal && descVal && CASCADE_DATA[itemVal] && CASCADE_DATA[itemVal][descVal]) {
+      var clauses = Object.keys(CASCADE_DATA[itemVal][descVal]).sort();
+      clauseSel2.disabled = false;
+      clauses.forEach(function(c) {
+        var o = document.createElement('option');
+        o.value = c; o.textContent = c; o.title = c;
+        clauseSel2.appendChild(o);
+      });
+      document.getElementById('clauseHint-' + hazardId).textContent = clauses.length + ' 项可选';
+    } else {
+      clauseSel2.disabled = true;
+      document.getElementById('clauseHint-' + hazardId).textContent = '';
+    }
+    document.getElementById('textHint-' + hazardId).textContent = '';
+  }
+
+  if (level <= 3) {
+    // Clause changed → rebuild text
+    var textSel3 = document.getElementById('selText-' + hazardId);
+    textSel3.innerHTML = '<option value="">— 请选择规定原文 —</option>';
+
+    if (itemVal && descVal && clauseVal && CASCADE_DATA[itemVal] && CASCADE_DATA[itemVal][descVal] && CASCADE_DATA[itemVal][descVal][clauseVal]) {
+      var texts = CASCADE_DATA[itemVal][descVal][clauseVal];
+      textSel3.disabled = false;
+      texts.forEach(function(t) {
+        var o = document.createElement('option');
+        o.value = t; o.textContent = t.length > 65 ? t.substring(0,65)+'…' : t;
+        o.title = t; textSel3.appendChild(o);
+      });
+      document.getElementById('textHint-' + hazardId).textContent = texts.length + ' 项可选';
+    } else {
+      textSel3.disabled = true;
+      document.getElementById('textHint-' + hazardId).textContent = '';
+    }
+  }
+}
+
+// ═══════════════ Utilities ═══════════════
+function toChineseNum(n) {
+  var map = ['零','一','二','三','四','五','六','七','八','九','十','十一','十二'];
+  return map[n] || String(n);
+}
+
+function escAttr(s) {
+  return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function updateCounts() {
+  var count = Object.keys(hazards).length;
+  document.getElementById('hazardCount').textContent = '（共 ' + count + ' 处）';
+  document.getElementById('bboxCount').textContent = '已标记：' + count + ' 处';
+  if (count === 0) {
+    document.getElementById('hazardEmpty').style.display = '';
+  }
+}
+
+// ═══════════════ Submit / Exit ═══════════════
+function submitAll() {
+  var entries = [];
+  Object.keys(hazards).forEach(function(id) {
+    var h = hazards[id];
+    entries.push({
+      index: h.index,
+      bbox: h.bbox,
+      is_marked: !!h.bbox,
+      inspection_item: document.getElementById('selItem-' + id).value || '',
+      violation_description: document.getElementById('selDesc-' + id).value || '',
+      regulation_clause: document.getElementById('selClause-' + id).value || '',
+      regulation_text: document.getElementById('selText-' + id).value || '',
+      violation_detail: document.getElementById('txtViolation-' + id).value || ''
+    });
+  });
+
+  var incomplete = entries.filter(function(e) {
+    return !e.inspection_item || !e.violation_description || !e.regulation_clause || !e.regulation_text || !e.violation_detail;
+  });
+
+  if (entries.length === 0) {
+    showToast('请至少添加一处隐患标注', 'error'); return;
+  }
+  if (incomplete.length > 0) {
+    showToast('还有 ' + incomplete.length + ' 处隐患未填写完整，请检查', 'error'); return;
+  }
+
+  console.log('提交标注:', JSON.stringify(entries, null, 2));
+  showToast('✓ 全部 ' + entries.length + ' 处隐患标注提交成功！', 'success');
+}
+
+function exitAnnotation() {
+  if (Object.keys(hazards).length > 0) {
+    if (confirm('确定退出吗？未提交的标注将丢失。')) {
+      showToast('已退出标注', 'info');
+    }
+  } else {
+    showToast('已退出标注', 'info');
+  }
+}
+
+// ═══════════════ Toast ═══════════════
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast toast-' + type + ' show';
+  clearTimeout(t._timeout);
+  t._timeout = setTimeout(function() { t.classList.remove('show'); }, 2400);
+}
+
+// ═══════════════ Init ═══════════════
+loadSampleImage();
+
+// Click on empty area of bbox layer to deselect
+document.getElementById('bboxLayer').addEventListener('click', function(e) {
+  if (e.target === document.getElementById('bboxLayer')) {
+    selectedHazardId = null;
+    document.querySelectorAll('.bbox-rect').forEach(function(el) { el.classList.remove('selected'); });
+    document.querySelectorAll('.hazard-entry').forEach(function(el) { el.classList.remove('selected'); });
+  }
+});
+
+// Handle window resize to reposition bboxes
+window.addEventListener('resize', function() {
+  Object.keys(hazards).forEach(function(id) {
+    var h = hazards[id];
+    if (!h.bbox) return;
+    var bboxEl = document.getElementById('bbox-' + id);
+    if (!bboxEl) return;
+    var wrap = document.getElementById('imageCanvasWrap');
+    var rect = wrap.getBoundingClientRect();
+    var scaleX = rect.width / h.imgW;
+    var scaleY = rect.height / h.imgH;
+    bboxEl.style.left = (h.bbox.x * scaleX) + 'px';
+    bboxEl.style.top = (h.bbox.y * scaleY) + 'px';
+    bboxEl.style.width = (h.bbox.w * scaleX) + 'px';
+    bboxEl.style.height = (h.bbox.h * scaleY) + 'px';
+  });
+});
+</script>
+</body>
+</html>
