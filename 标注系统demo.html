@@ -104,7 +104,56 @@ body {
 /* ====== Main Layout ====== */
 .main { flex: 1; display: flex; overflow: hidden; }
 
-/* ── Left: Image Panel ── */
+/* ── Image List Sidebar ── */
+.image-list-sidebar {
+  width: 220px; min-width: 220px; flex-shrink: 0;
+  background: var(--color-card-bg); border-right: 1px solid var(--border-color);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.ils-header {
+  padding: 10px 12px; border-bottom: 1px solid var(--border-light);
+  font-weight: 600; font-size: 13px; flex-shrink: 0;
+  background: #FAFAFA;
+}
+.ils-filters {
+  display: flex; padding: 8px 10px; gap: 4px;
+  border-bottom: 1px solid var(--border-light); flex-shrink: 0;
+}
+.ils-filter {
+  flex: 1; text-align: center; padding: 4px 0; border-radius: var(--radius-sm);
+  font-size: 11px; cursor: pointer; border: 1px solid var(--border-color);
+  background: #fff; color: var(--text-secondary); transition: all var(--transition-fast);
+  user-select: none;
+}
+.ils-filter:hover { border-color: var(--blue-primary); color: var(--blue-primary); }
+.ils-filter.active { background: var(--blue-primary); color: #fff; border-color: var(--blue-primary); }
+.ils-list {
+  flex: 1; overflow-y: auto;
+}
+.ils-list::-webkit-scrollbar { width: 4px; }
+.ils-list::-webkit-scrollbar-track { background: transparent; }
+.ils-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+.ils-item {
+  display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+  cursor: pointer; border-bottom: 1px solid var(--border-light);
+  transition: all var(--transition-fast); font-size: 12px;
+}
+.ils-item:hover { background: #F5F7FA; }
+.ils-item.active { background: #E6F0FF; border-left: 3px solid var(--blue-primary); }
+.ils-item .ils-seq {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: #F0F2F5; color: var(--text-secondary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; flex-shrink: 0;
+}
+.ils-item.active .ils-seq { background: var(--blue-primary); color: #fff; }
+.ils-item .ils-info { flex: 1; min-width: 0; }
+.ils-item .ils-fname { font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ils-item .ils-meta { font-size: 10px; color: var(--text-secondary); }
+.ils-status { font-size: 16px; flex-shrink: 0; }
+.ils-empty { text-align: center; padding: 24px 12px; color: var(--text-secondary); font-size: 12px; }
+
+/* ── Center: Image Panel ── */
 .image-panel {
   flex: 1; display: flex; flex-direction: column;
   background: #F5F5F5; border-right: 1px solid var(--border-color);
@@ -316,7 +365,18 @@ body {
 <!-- ═══ Main ═══ -->
 <div class="main">
 
-  <!-- Left: Image -->
+  <!-- Image List Sidebar -->
+  <div class="image-list-sidebar" id="imageListSidebar">
+    <div class="ils-header">🖼️ 图像序列</div>
+    <div class="ils-filters">
+      <div class="ils-filter active" data-filter="all" onclick="filterImageList('all', this)">全部</div>
+      <div class="ils-filter" data-filter="marked" onclick="filterImageList('marked', this)">已标记</div>
+      <div class="ils-filter" data-filter="unmarked" onclick="filterImageList('unmarked', this)">未标记</div>
+    </div>
+    <div class="ils-list" id="ilsList"></div>
+  </div>
+
+  <!-- Center: Image -->
   <div class="image-panel">
     <div class="image-topbar">
       <span>📷 抓拍图像预览</span>
@@ -493,6 +553,105 @@ var bboxColors = ['#E2091C','#F57A00','#F59E0B','#52C41A','#009CFF','#2E41CD','#
 // Drawing state
 var isDrawing = false;
 var drawStartX, drawStartY;
+
+// ═══════════════ Image List ═══════════════
+var IMAGE_LIST = [];
+var currentImageIdx = 0;
+var imageMarkedStatus = {};  // imageId -> true/false
+
+// Generate mock image list (simulate a camera's daily snapshots)
+(function initImageList() {
+  var times = ['08:15','08:42','09:10','09:35','10:02','10:28','11:05','11:33','12:10','13:45','14:20','14:55','15:30','16:05','16:40','17:15'];
+  for (var i = 0; i < times.length; i++) {
+    var id = 'img-' + (i+1);
+    IMAGE_LIST.push({
+      id: id,
+      seq: i + 1,
+      filename: 'CAM-03_20250701_' + times[i].replace(':','') + '00.jpg',
+      time: times[i],
+      camera: 'CAM-03'
+    });
+    imageMarkedStatus[id] = false;
+  }
+  // Mark first image as having some annotations by default
+  renderImageList();
+})();
+
+function renderImageList(filter) {
+  filter = filter || 'all';
+  var list = document.getElementById('ilsList');
+  var html = '';
+  var visible = IMAGE_LIST.filter(function(img) {
+    var marked = imageMarkedStatus[img.id];
+    if (filter === 'marked') return marked;
+    if (filter === 'unmarked') return !marked;
+    return true;
+  });
+
+  if (visible.length === 0) {
+    html = '<div class="ils-empty">无匹配结果</div>';
+  } else {
+    visible.forEach(function(img) {
+      var marked = imageMarkedStatus[img.id];
+      var activeClass = (img.id === (IMAGE_LIST[currentImageIdx] || {}).id) ? ' active' : '';
+      html += '<div class="ils-item' + activeClass + '" onclick="switchImage(\'' + img.id + '\')" data-id="' + img.id + '">';
+      html += '<span class="ils-seq">' + img.seq + '</span>';
+      html += '<span class="ils-info"><span class="ils-fname">' + img.filename + '</span><span class="ils-meta">' + img.time + ' · ' + img.camera + '</span></span>';
+      html += '<span class="ils-status">' + (marked ? '✅' : '⬜') + '</span>';
+      html += '</div>';
+    });
+  }
+  list.innerHTML = html;
+}
+
+function filterImageList(filter, el) {
+  document.querySelectorAll('.ils-filter').forEach(function(f) { f.classList.remove('active'); });
+  el.classList.add('active');
+  renderImageList(filter);
+}
+
+function switchImage(id) {
+  // Save current hazards to current image
+  if (IMAGE_LIST[currentImageIdx]) {
+    imageMarkedStatus[IMAGE_LIST[currentImageIdx].id] = Object.keys(hazards).length > 0;
+  }
+  // Find target index
+  for (var i = 0; i < IMAGE_LIST.length; i++) {
+    if (IMAGE_LIST[i].id === id) { currentImageIdx = i; break; }
+  }
+  // Clear existing hazards and bboxes
+  Object.keys(hazards).forEach(function(hid) { deleteHazard(hid); });
+  hazardCounter = 0;
+  hazards = {};
+  document.getElementById('bboxLayer').innerHTML = '';
+  updateCounts();
+  // Reload image
+  loadSampleImage();
+  renderImageList(document.querySelector('.ils-filter.active').dataset.filter);
+  showToast('已切换到 ' + IMAGE_LIST[currentImageIdx].filename, 'info');
+}
+
+// Hook into addHazard to update marked status
+var _origAddHazard = addHazard;
+addHazard = function(bbox, imgW, imgH) {
+  _origAddHazard(bbox, imgW, imgH);
+  if (IMAGE_LIST[currentImageIdx]) {
+    imageMarkedStatus[IMAGE_LIST[currentImageIdx].id] = true;
+    renderImageList(document.querySelector('.ils-filter.active').dataset.filter);
+  }
+};
+
+var _origDeleteHazard = deleteHazard;
+deleteHazard = function(id) {
+  _origDeleteHazard(id);
+  // Update status after a short delay to let hazards update
+  setTimeout(function() {
+    if (IMAGE_LIST[currentImageIdx]) {
+      imageMarkedStatus[IMAGE_LIST[currentImageIdx].id] = Object.keys(hazards).length > 0;
+      renderImageList(document.querySelector('.ils-filter.active').dataset.filter);
+    }
+  }, 100);
+};
 
 // ═══════════════ Image Loading ═══════════════
 function loadSampleImage() {
