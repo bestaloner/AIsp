@@ -582,8 +582,38 @@ function renderTabBar() {
 }
 
 function updateTabBar() {
-  // Lightweight refresh: update dot and badge for active tab
-  renderTabBar();
+  // Lightweight, non-destructive update: modify existing DOM elements directly.
+  // This is critical — using innerHTML (renderTabBar) during drawing destroys
+  // the tab bar DOM and can cause state to jump back to default.
+  var btns = document.querySelectorAll('#tabBar .tab-btn');
+  for (var i = 0; i < btns.length; i++) {
+    var btn = btns[i];
+    var btnText = (btn.textContent || '').replace(/\d+/g,'').trim();
+    for (var j = 0; j < ALL_ITEMS.length; j++) {
+      var n = ALL_ITEMS[j];
+      if (btnText.indexOf(n.substring(0,4)) === 0 || n.substring(0,4).indexOf(btnText) === 0) {
+        var st = itemStates[n];
+        var count = Object.keys(st.hazards).length;
+        // Update dot class
+        var dot = btn.querySelector('.tab-dot');
+        if (dot) {
+          dot.className = 'tab-dot ' + (st.status === 'issue' ? 'dot-issue' : (st.status === 'safe' ? 'dot-safe' : 'dot-none'));
+        }
+        // Update badge
+        var badge = btn.querySelector('.tab-badge');
+        if (count > 0) {
+          if (badge) { badge.textContent = count; }
+          else { var b = document.createElement('span'); b.className = 'tab-badge'; b.textContent = count; btn.appendChild(b); }
+        } else {
+          if (badge) badge.remove();
+        }
+        // Update active class
+        if (activeTab === n) { btn.classList.add('active'); }
+        else { btn.classList.remove('active'); }
+        break;
+      }
+    }
+  }
 }
 
 function switchTab(name) {
