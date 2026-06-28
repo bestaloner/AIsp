@@ -46,7 +46,7 @@ body { font-family: 'Microsoft YaHei','PingFang SC',-apple-system,sans-serif; co
 .image-container { flex: 1; position: relative; overflow: auto; display: flex; align-items: center; justify-content: center; padding: 12px; }
 .image-canvas-wrap { position: relative; display: inline-block; box-shadow: 0 2px 16px rgba(0,0,0,0.1); border-radius: var(--radius-sm); overflow: hidden; line-height: 0; }
 .image-canvas-wrap img { display: block; max-width: 100%; max-height: calc(100vh - 210px); user-select: none; }
-.bbox-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: crosshair; }
+.bbox-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: crosshair; z-index: 5; }
 .bbox-rect { position: absolute; border: 2.5px solid; border-radius: 2px; pointer-events: auto; cursor: pointer; z-index: 2; }
 .bbox-number { position: absolute; top: -24px; left: -1px; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px 3px 0 0; }
 .bbox-drawing { position: absolute; border: 2px dashed var(--blue-primary); background: rgba(46,65,205,0.08); pointer-events: none; z-index: 20; display: none; }
@@ -257,7 +257,12 @@ function startDraw(name){ currentDrawingItem=name; showToast('请在图像上拖
 // BBox
 var bboxLayer=document.getElementById('bboxLayer');
 bboxLayer.addEventListener('mousedown',function(e){
-  if(!currentDrawingItem||e.button!==0)return;
+  if(e.button!==0)return;
+  if(!currentDrawingItem){
+    var first=ALL_ITEMS.find(function(n){return coveredItems[n]&&itemHazards[n].hasIssue;});
+    if(!first){var anyCov=ALL_ITEMS.find(function(n){return coveredItems[n];}); if(anyCov){toggleIssue(anyCov,true); first=anyCov;} else {showToast('请先勾选覆盖的检查项目并标记为有隐患','error');return;}}
+    currentDrawingItem=first;
+  }
   var r=document.getElementById('imageCanvasWrap').getBoundingClientRect();
   var img=document.getElementById('mainImage');
   drawStartX=(e.clientX-r.left)*img.naturalWidth/r.width; drawStartY=(e.clientY-r.top)*img.naturalHeight/r.height;
