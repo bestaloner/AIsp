@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>方案D：标签页式 · 隐患标注系统</title>
 <style>
-/* ====== V4.1 Design System: Enterprise White Theme ====== */
+/* ====== V4.1 Design System ====== */
 :root {
   --color-header-bg: #2E41CD; --color-content-bg: #F0F2F5; --color-card-bg: #FFFFFF;
   --text-primary: #262626; --text-secondary: #8C8C8C; --text-white: #FFFFFF;
@@ -25,12 +25,8 @@ body {
   display: flex; flex-direction: column;
 }
 
-/* ====== Header ====== */
-.platform-header {
-  height: 48px; min-height: 48px; background: var(--color-header-bg); color: var(--text-white);
-  display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
-  flex-shrink: 0; font-size: 14px; font-weight: 500;
-}
+/* Header */
+.platform-header { height: 48px; min-height: 48px; background: var(--color-header-bg); color: var(--text-white); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; flex-shrink: 0; font-size: 14px; font-weight: 500; }
 .platform-header-left { display: flex; align-items: center; gap: 16px; }
 .platform-logo { font-size: 16px; font-weight: 700; letter-spacing: 1.5px; }
 .platform-logo .lg-accent { color: var(--blue-light); }
@@ -39,46 +35,29 @@ body {
 .platform-header-right { display: flex; align-items: center; gap: 14px; font-size: 12px; }
 .platform-avatar { width: 30px; height: 30px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
 
-/* ====== Toolbar ====== */
-.toolbar {
-  height: 42px; min-height: 42px; background: var(--color-card-bg);
-  border-bottom: 1px solid var(--border-color); display: flex; align-items: center;
-  justify-content: space-between; padding: 0 16px; flex-shrink: 0;
-}
+/* Toolbar */
+.toolbar { height: 42px; min-height: 42px; background: var(--color-card-bg); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; flex-shrink: 0; }
 .toolbar-left { display: flex; align-items: center; gap: 12px; }
 .toolbar-title { font-weight: 600; font-size: 14px; }
 .toolbar-right { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); }
 
-/* ====== Buttons ====== */
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 4px;
-  padding: 7px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500;
-  cursor: pointer; border: 1px solid transparent; transition: all var(--transition-fast);
-  font-family: inherit; white-space: nowrap;
-}
+/* Buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 7px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid transparent; transition: all var(--transition-fast); font-family: inherit; white-space: nowrap; }
 .btn-primary { background: var(--blue-primary); color: #fff; }
 .btn-primary:hover { background: #2539B5; }
 .btn-outline { background: transparent; color: var(--text-primary); border: 1px solid var(--border-color); }
 .btn-outline:hover { border-color: var(--blue-primary); color: var(--blue-primary); }
 
-/* ====== Badges ====== */
-.badge {
-  display: inline-flex; align-items: center; padding: 2px 8px;
-  border-radius: 20px; font-size: 11px; font-weight: 500; gap: 3px;
-}
-.badge-danger { background: #FFF2F0; color: #CF1322; border: 1px solid #FFCCC7; }
-.badge-success { background: #F6FFED; color: #389E0D; border: 1px solid #B7EB8F; }
+/* Badges */
+.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; gap: 3px; }
 .badge-info { background: #E6F7FF; color: #096DD9; border: 1px solid #91D5FF; }
+.badge-success { background: #F6FFED; color: #389E0D; border: 1px solid #B7EB8F; }
 
-/* ====== Main Layout ====== */
+/* Main Layout */
 .main { flex: 1; display: flex; overflow: hidden; }
 
-/* ── Image List Sidebar ── */
-.ils-sidebar {
-  width: 200px; min-width: 200px; flex-shrink: 0;
-  background: var(--color-card-bg); border-right: 1px solid var(--border-color);
-  display: flex; flex-direction: column; overflow: hidden;
-}
+/* Image List Sidebar */
+.ils-sidebar { width: 200px; min-width: 200px; flex-shrink: 0; background: var(--color-card-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; overflow: hidden; }
 .ils-header { padding: 10px 12px; border-bottom: 1px solid var(--border-light); font-weight: 600; font-size: 12px; flex-shrink: 0; background: #FAFAFA; }
 .ils-filters { display: flex; padding: 6px 8px; gap: 3px; border-bottom: 1px solid var(--border-light); flex-shrink: 0; }
 .ils-filter { flex: 1; text-align: center; padding: 3px 0; border-radius: var(--radius-sm); font-size: 10px; cursor: pointer; border: 1px solid var(--border-color); background: #fff; color: var(--text-secondary); }
@@ -98,116 +77,47 @@ body {
 .ils-item .ils-meta { font-size: 9px; color: var(--text-secondary); }
 .ils-status { font-size: 14px; flex-shrink: 0; }
 
-/* ── Center: Image Panel ── */
-.image-panel {
-  flex: 1; display: flex; flex-direction: column;
-  background: #F5F5F5; border-right: 1px solid var(--border-color);
-  overflow: hidden; position: relative;
-}
+/* Center: Image Panel */
+.image-panel { flex: 1; display: flex; flex-direction: column; background: #F5F5F5; border-right: 1px solid var(--border-color); overflow: hidden; position: relative; }
 .image-topbar { padding: 6px 14px; display: flex; align-items: center; justify-content: space-between; background: #FAFAFA; border-bottom: 1px solid var(--border-light); flex-shrink: 0; font-size: 12px; color: var(--text-secondary); }
 .image-container { flex: 1; position: relative; overflow: auto; display: flex; align-items: center; justify-content: center; padding: 12px; }
 .image-canvas-wrap { position: relative; display: inline-block; box-shadow: 0 2px 16px rgba(0,0,0,0.1); border-radius: var(--radius-sm); overflow: hidden; line-height: 0; }
 .image-canvas-wrap img { display: block; max-width: 100%; max-height: calc(100vh - 210px); user-select: none; -webkit-user-drag: none; }
 
-/* BBox drawing layer */
+/* BBox */
 .bbox-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: crosshair; }
 .bbox-rect { position: absolute; border: 2.5px solid; border-radius: 2px; pointer-events: auto; cursor: pointer; z-index: 2; box-shadow: 0 0 0 3px rgba(0,0,0,0.06); }
 .bbox-rect:hover { box-shadow: 0 0 0 5px rgba(0,0,0,0.12); z-index: 5; }
 .bbox-number { position: absolute; top: -24px; left: -1px; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px 3px 0 0; white-space: nowrap; pointer-events: none; }
 .bbox-drawing { position: absolute; border: 2px dashed var(--blue-primary); background: rgba(46,65,205,0.08); pointer-events: none; z-index: 20; display: none; }
-
-/* Tooltip for image */
 .image-tooltip { position: absolute; background: rgba(0,0,0,0.75); color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; pointer-events: none; z-index: 30; display: none; white-space: nowrap; }
 
-/* ── Right: Tab Panel ── */
-.tab-panel {
-  width: 520px; min-width: 520px; flex-shrink: 0;
-  display: flex; overflow: hidden; background: var(--color-content-bg);
-}
+/* Right: Tab Panel */
+.tab-panel { width: 520px; min-width: 520px; flex-shrink: 0; display: flex; overflow: hidden; background: var(--color-content-bg); }
+
 /* Vertical tab bar */
-.tab-bar {
-  width: 95px; min-width: 95px; flex-shrink: 0;
-  background: #FAFAFA; border-right: 1px solid var(--border-color);
-  display: flex; flex-direction: column; overflow-y: auto;
-}
-.tab-btn {
-  display: flex; align-items: center; gap: 4px; padding: 12px 10px;
-  cursor: pointer; border-bottom: 1px solid var(--border-light);
-  font-size: 12px; font-weight: 500; color: var(--text-secondary);
-  transition: all var(--transition-fast); user-select: none;
-  border-left: 3px solid transparent; position: relative;
-}
+.tab-bar { width: 100px; min-width: 100px; flex-shrink: 0; background: #FAFAFA; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; overflow-y: auto; }
+.tab-btn { display: flex; align-items: center; gap: 6px; padding: 14px 10px; cursor: pointer; border-bottom: 1px solid var(--border-light); font-size: 12px; font-weight: 500; color: var(--text-secondary); transition: all var(--transition-fast); user-select: none; border-left: 3px solid transparent; }
 .tab-btn:hover { background: #F0F4FF; color: var(--blue-primary); }
 .tab-btn.active { background: #fff; color: var(--blue-primary); border-left-color: var(--blue-primary); font-weight: 700; }
-.tab-btn .tab-dot {
-  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
-}
-.tab-btn .tab-dot.dot-none { background: #D9D9D9; }
-.tab-btn .tab-dot.dot-issue { background: #E2091C; }
-.tab-btn .tab-dot.dot-safe { background: #52C41A; }
-.tab-btn .tab-dot.dot-na { background: #D46B08; }
+.tab-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.tab-dot.dot-none { background: #D9D9D9; }
+.tab-dot.dot-issue { background: #E2091C; }
+.tab-dot.dot-safe { background: #52C41A; }
+.tab-dot.dot-na { background: #D46B08; }
+.tab-badge { font-size: 10px; background: #E2091C; color: #fff; border-radius: 10px; padding: 1px 6px; margin-left: auto; }
 
-/* Tab content area */
-.tab-content {
-  flex: 1; display: flex; flex-direction: column; overflow: hidden;
-}
-.tab-content-header {
-  padding: 10px 14px; background: var(--color-card-bg);
-  border-bottom: 1px solid var(--border-color); flex-shrink: 0;
-}
-.tab-content-title { font-weight: 600; font-size: 14px; margin-bottom: 6px; }
-.tab-status-row { display: flex; gap: 6px; align-items: center; }
-.tab-status-btn {
-  padding: 5px 14px; border-radius: 20px; font-size: 11px; font-weight: 600;
-  cursor: pointer; border: 2px solid var(--border-color); background: #fff;
-  transition: all var(--transition-fast); user-select: none;
-}
-.tab-status-btn.btn-has-issue { color: #E2091C; border-color: #E2091C; }
-.tab-status-btn.btn-has-issue:hover { background: #FFF2F0; }
-.tab-status-btn.btn-has-issue.active { background: #E2091C; color: #fff; }
-.tab-status-btn.btn-no-issue { color: #52C41A; border-color: #52C41A; }
-.tab-status-btn.btn-no-issue:hover { background: #F6FFED; }
-.tab-status-btn.btn-no-issue.active { background: #52C41A; color: #fff; }
-.tab-status-btn.btn-na { color: #D46B08; border-color: #D46B08; }
-.tab-status-btn.btn-na:hover { background: #FFF7E6; }
-.tab-status-btn.btn-na.active { background: #D46B08; color: #fff; }
-.tab-count { font-size: 11px; color: var(--text-secondary); margin-left: 8px; }
+/* Tab content */
+.tab-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.tab-content-inner { flex: 1; overflow-y: auto; padding: 12px; }
+.tab-content-inner::-webkit-scrollbar { width: 5px; }
+.tab-content-inner::-webkit-scrollbar-track { background: transparent; }
+.tab-content-inner::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
 
-.tab-body {
-  flex: 1; overflow-y: auto; padding: 12px;
-}
-.tab-body::-webkit-scrollbar { width: 5px; }
-.tab-body::-webkit-scrollbar-track { background: transparent; }
-.tab-body::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+.tab-section { background: var(--color-card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; margin-bottom: 10px; box-shadow: var(--shadow-card); }
+.tab-section-title { font-weight: 600; font-size: 13px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
 
-/* Description textarea */
-.desc-section { margin-bottom: 12px; }
-.desc-section label { display: block; font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
-.desc-section textarea {
-  width: 100%; padding: 8px 10px; border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm); font-size: 12px; color: var(--text-primary);
-  outline: none; font-family: inherit; resize: vertical; min-height: 60px; background: #FFFFFF;
-  transition: all var(--transition-fast);
-}
-.desc-section textarea:focus { border-color: var(--blue-primary); box-shadow: 0 0 0 2px rgba(46,65,205,0.1); }
-.desc-section textarea::placeholder { color: #BFBFBF; }
-
-/* Hazard section (when 有隐患 is active) */
-.hazard-section { }
-.hazard-section-header { font-weight: 600; font-size: 12px; color: #E2091C; margin-bottom: 8px; display: flex; align-items: center; gap: 4px; }
-.draw-hint { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; background: #E6F0FF; color: var(--blue-primary); border-radius: var(--radius-sm); font-size: 11px; font-weight: 500; cursor: pointer; margin-bottom: 8px; }
-.hazard-entries { }
-.hazard-entry-card {
-  border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 10px;
-  margin-bottom: 8px; background: #FFFBEB;
-}
-.hazard-entry-header {
-  font-weight: 600; font-size: 12px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;
-}
-.hazard-entry-delete { cursor: pointer; color: var(--text-secondary); font-size: 14px; padding: 2px 6px; border-radius: var(--radius-sm); }
-.hazard-entry-delete:hover { color: #E2091C; background: #FFF2F0; }
-
-/* Form fields */
+/* Form */
 .fg { margin-bottom: 10px; }
 .fg:last-child { margin-bottom: 0; }
 .fg label { display: block; font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
@@ -215,18 +125,38 @@ body {
 .fg select { width: 100%; height: 36px; background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 12px; color: var(--text-primary); outline: none; transition: all var(--transition-fast); font-family: inherit; cursor: pointer; -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238C8C8C' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; padding: 0 28px 0 10px; }
 .fg select:focus { border-color: var(--blue-primary); box-shadow: 0 0 0 2px rgba(46,65,205,0.1); }
 .fg select:disabled { background: #F5F5F5; color: #BFBFBF; cursor: not-allowed; }
-.fg textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 12px; color: var(--text-primary); outline: none; transition: all var(--transition-fast); font-family: inherit; resize: vertical; min-height: 50px; background: #FFFFFF; }
+.fg textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 12px; color: var(--text-primary); outline: none; transition: all var(--transition-fast); font-family: inherit; resize: vertical; min-height: 60px; background: #FFFFFF; }
 .fg textarea:focus { border-color: var(--blue-primary); box-shadow: 0 0 0 2px rgba(46,65,205,0.1); }
 .fg textarea::placeholder { color: #BFBFBF; }
 .cascade-arrow { text-align: center; font-size: 10px; color: var(--text-secondary); margin: -2px 0; }
 
-.safe-message { font-size: 13px; color: #52C41A; padding: 16px; text-align: center; background: #F6FFED; border-radius: var(--radius-md); }
-.na-message { font-size: 13px; color: #D46B08; padding: 16px; text-align: center; background: #FFF7E6; border-radius: var(--radius-md); }
+/* Status buttons */
+.status-row { display: flex; gap: 6px; }
+.status-btn { padding: 5px 14px; border-radius: 20px; font-size: 11px; font-weight: 600; cursor: pointer; border: 2px solid var(--border-color); background: #fff; transition: all var(--transition-fast); user-select: none; }
+.status-btn.btn-issue { color: #E2091C; border-color: #E2091C; }
+.status-btn.btn-issue:hover { background: #FFF2F0; }
+.status-btn.btn-issue.active { background: #E2091C; color: #fff; }
+.status-btn.btn-safe { color: #52C41A; border-color: #52C41A; }
+.status-btn.btn-safe:hover { background: #F6FFED; }
+.status-btn.btn-safe.active { background: #52C41A; color: #fff; }
+.status-btn.btn-na { color: #D46B08; border-color: #D46B08; }
+.status-btn.btn-na:hover { background: #FFF7E6; }
+.status-btn.btn-na.active { background: #D46B08; color: #fff; }
 
-.tab-panel-footer {
-  padding: 12px 14px; border-top: 1px solid var(--border-color);
-  background: var(--color-card-bg); flex-shrink: 0; display: flex; gap: 8px;
-}
+/* Draw hint */
+.draw-hint { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: #E6F0FF; color: var(--blue-primary); border-radius: var(--radius-sm); font-size: 12px; font-weight: 500; cursor: pointer; margin-bottom: 8px; }
+
+/* Hazard entry card */
+.hz-card { border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 10px; margin-bottom: 8px; background: #FFFBEB; }
+.hz-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-weight: 600; font-size: 12px; }
+.hz-card-del { cursor: pointer; color: var(--text-secondary); font-size: 14px; padding: 2px 6px; border-radius: var(--radius-sm); }
+.hz-card-del:hover { color: #E2091C; background: #FFF2F0; }
+
+.safe-msg { text-align: center; padding: 16px; font-size: 13px; color: #52C41A; background: #F6FFED; border-radius: var(--radius-md); }
+.na-msg { text-align: center; padding: 16px; font-size: 13px; color: #D46B08; background: #FFF7E6; border-radius: var(--radius-md); }
+
+/* Footer */
+.tab-panel-footer { padding: 12px 14px; border-top: 1px solid var(--border-color); background: var(--color-card-bg); flex-shrink: 0; display: flex; gap: 8px; }
 .tab-panel-footer .btn { flex: 1; }
 
 /* Toast */
@@ -240,7 +170,6 @@ body {
 </head>
 <body>
 
-<!-- ═══ Header ═══ -->
 <div class="platform-header">
   <div class="platform-header-left">
     <div class="platform-logo">Vision<span class="lg-accent">Guard</span></div>
@@ -249,19 +178,14 @@ body {
   <div class="platform-header-right"><span>CAM-03</span><span>2025-07-01</span><div class="platform-avatar">张</div></div>
 </div>
 
-<!-- ═══ Toolbar ═══ -->
 <div class="toolbar">
-  <div class="toolbar-left">
-    <span class="toolbar-title">📝 方案D：标签页式</span>
-    <span class="badge badge-info">按检查项切换</span>
-  </div>
-  <div class="toolbar-right">💡 左侧标签页切换检查项 → 填写描述 → 勾选有隐患 → 在图上画框填写证据链</div>
+  <div class="toolbar-left"><span class="toolbar-title">📝 方案D：标签页式</span><span class="badge badge-info">按检查项切换</span></div>
+  <div class="toolbar-right">💡 左侧标签切换检查项 → 填写描述 → 勾选有隐患 → 在图上画框填写证据链</div>
 </div>
 
-<!-- ═══ Main ═══ -->
 <div class="main">
 
-  <!-- Image List Sidebar -->
+  <!-- Image List -->
   <div class="ils-sidebar">
     <div class="ils-header">🖼️ 图像序列</div>
     <div class="ils-filters">
@@ -272,12 +196,9 @@ body {
     <div class="ils-list" id="ilsList"></div>
   </div>
 
-  <!-- Center: Image -->
+  <!-- Image -->
   <div class="image-panel">
-    <div class="image-topbar">
-      <span>📷 抓拍图像预览</span>
-      <span id="bboxCount" style="color:var(--blue-primary);font-weight:600">已标记：0 处</span>
-    </div>
+    <div class="image-topbar"><span>📷 抓拍图像预览</span><span id="bboxCount" style="color:var(--blue-primary);font-weight:600">已标记：0 处</span></div>
     <div class="image-container" id="imageContainer">
       <div class="image-canvas-wrap" id="imageCanvasWrap">
         <img id="mainImage" src="" alt="标注图像" />
@@ -288,15 +209,11 @@ body {
     </div>
   </div>
 
-  <!-- Right: Tab Panel -->
+  <!-- Tab Panel -->
   <div class="tab-panel" id="tabPanel">
-    <!-- Vertical tab bar -->
     <div class="tab-bar" id="tabBar"></div>
-
-    <!-- Tab content -->
-    <div class="tab-content" id="tabContent">
-      <div class="tab-content-header" id="tabContentHeader"></div>
-      <div class="tab-body" id="tabBody"></div>
+    <div class="tab-content">
+      <div class="tab-content-inner" id="tabContentInner"></div>
       <div class="tab-panel-footer">
         <button class="btn btn-outline" onclick="exitPage()">退出</button>
         <button class="btn btn-primary" onclick="submitAll()" style="flex:2">✓ 提交标注</button>
@@ -305,49 +222,43 @@ body {
   </div>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ── 四级联动数据 ──
+// ── Data ──
 var CASCADE_DATA = {"高处作业":{"施工现场存在坠落高度基准面2m及以上的作业面临边未设置安全防护设施":{"GB 55023-2022第4.4.4条":["脚手架作业层应采取安全防护措施，并应符合下列规定:1 当作业层边缘与结构外表面的距离大于150mm时，应采取防护措施。"],"JGJ 80-2016第4.1.1条":["坠落高度基准面2m及以上进行临边作业时，应在临空一侧设置防护栏杆，并应采用密目式安全立网或工具式栏板封闭。"]},"现场作业人员未按规定配备安全帽就上岗作业 。":{"JGJ 184-2009 第2.0.4条":["进入施工现场人员必须佩戴安全帽。"]},"现场2m以上的悬空作业人员，未按规定佩戴安全带。":{"JGJ 184-2009 第2.0.4条":["在2m及以上的无可靠安全防护设施的高处作业时，必须系挂安全带。"]}},"基坑工程":{"坑边存在施工机械作业或堆载，荷载可能超过设计允许要求":{"JGJ 120-2012第8.1.5条":["基坑周边施工材料、设施或车辆荷载严禁超过设计要求的地面荷载限值"],"JGJ 311-2013第11.2.2条":["基坑周边1.5m范围内不宜堆载，3m以内限制堆载，坑边严禁重型车辆通行。"]},"未按要求在基坑顶采取有效截水措施":{"JGJ 120-2012 第8.1.6条":["雨期施工时，应在坑顶、坑底采取有效的截排水措施。"]}},"施工升降机":{"工人违规无证操作施工升降机":{"JGJ 33-2012第2.0.7条":["操作人员不得擅自离开工作岗位或将机械交给其他无证人员操作。"]},"施工升降机承载人数超过9人。":{"韶建电[2017]68号":["原则上承载人数不得超过9人（含司机）。"]}},"消防安全":{"施工现场工人随地吸烟":{"GB 50720-2011第6.4.5条":["施工现场严禁吸烟。"]}},"起重吊装及施工机具":{"施工现场使用承插型盘扣式钢管等材料简易搭设非标料斗进行吊装作业。":{"闽建办建函〔2024〕60号第二条第（三）款":["严禁使用承插型盘扣式钢管等材料简易搭设非标料斗进行吊装作业。"]},"吊篮内操作人员的数量不符合使用要求。":{"JGJ/T429-2018第5.5.8条":["吊篮内的作业人员不应超过2个。"]}},"场容场貌":{"施工现场围墙(或围挡)未连续封闭设置。":{"JGJ 59-2011第3.2.3条":["市区主要路段的工地应设置高度不小于2.5m的封闭围挡。"]}}};
 
 var ALL_ITEMS = Object.keys(CASCADE_DATA).sort();
 var bboxColors = ['#E2091C','#F57A00','#F59E0B','#52C41A','#009CFF','#2E41CD','#8B5CF6','#06B6D4','#E2091C','#F57A00','#52C41A','#8B5CF6'];
 
-// ═══════════════ State ═══════════════
-// Per-item state: { status:'none'|'safe'|'issue', hazards:{}, hazardCounter:0, description:'' }
+// ── State ──
+// itemStates[name] = { status:'none'|'safe'|'issue'|'na', hazards:{}, hazardCounter:0, description:'' }
 var itemStates = {};
-var activeTab = '';  // currently selected item name
+var activeTab = '';
 var isDrawing = false, drawStartX, drawStartY;
 var imageStore = {};
 
-// ═══════════════ Image List ═══════════════
+// ── Image List ──
 var IMAGE_LIST=[], currentImg=0;
 (function initImageList(){
   var times = ['08:15','08:42','09:10','09:35','10:02','10:28','11:05','11:33','12:10','13:45','14:20','14:55','15:30','16:05','16:40','17:15'];
-  for (var i = 0; i < times.length; i++) {
-    IMAGE_LIST.push({id:'img-'+i, seq:i+1, filename:'CAM-03_20250701_'+times[i].replace(':','')+'00.jpg', time:times[i]});
-  }
+  for (var i = 0; i < times.length; i++) { IMAGE_LIST.push({id:'img-'+i, seq:i+1, filename:'CAM-03_20250701_'+times[i].replace(':','')+'00.jpg', time:times[i]}); }
   renderImgList();
 })();
 
 function renderImgList(f) {
   f = f || 'all';
-  var h = '', vis = IMAGE_LIST.filter(function(im) {
-    var d = imageStore[im.id] && imageStore[im.id].done;
-    if (f === 'done') return d; if (f === 'todo') return !d; return true;
-  });
+  var h = '', vis = IMAGE_LIST.filter(function(im) { var d = imageStore[im.id]&&imageStore[im.id].done; if (f==='done') return d; if (f==='todo') return !d; return true; });
   vis.forEach(function(im) {
-    var d = imageStore[im.id] && imageStore[im.id].done;
-    var active = (IMAGE_LIST[currentImg] && im.id === IMAGE_LIST[currentImg].id) ? ' active' : '';
-    h += '<div class="ils-item'+active+'" onclick="switchImg(\''+im.id+'\')"><span class="ils-seq">'+im.seq+'</span><span class="ils-info"><span class="ils-fname">'+im.filename+'</span><span class="ils-meta">'+im.time+'</span></span><span class="ils-status">'+(d?'✅':'⬜')+'</span></div>';
+    var d = imageStore[im.id]&&imageStore[im.id].done;
+    var act = (IMAGE_LIST[currentImg]&&im.id===IMAGE_LIST[currentImg].id)?' active':'';
+    h += '<div class="ils-item'+act+'" onclick="switchImg(\''+im.id+'\')"><span class="ils-seq">'+im.seq+'</span><span class="ils-info"><span class="ils-fname">'+im.filename+'</span><span class="ils-meta">'+im.time+'</span></span><span class="ils-status">'+(d?'✅':'⬜')+'</span></div>';
   });
   document.getElementById('ilsList').innerHTML = h || '<div style="text-align:center;padding:20px;color:var(--text-secondary);font-size:12px">无匹配</div>';
 }
 function filterImg(el, f) { document.querySelectorAll('.ils-filter').forEach(function(x){x.classList.remove('active')}); el.classList.add('active'); renderImgList(f); }
 
-// ═══════════════ Image Switch / Save / Restore ═══════════════
+// ── Image Switch ──
 function switchImg(id) {
   saveState();
   for (var i = 0; i < IMAGE_LIST.length; i++) { if (IMAGE_LIST[i].id === id) { currentImg = i; break; } }
@@ -356,21 +267,23 @@ function switchImg(id) {
 
 function saveState() {
   if (!IMAGE_LIST[currentImg]) return;
+  // Save current description before leaving
+  saveDesc(activeTab);
   var imgId = IMAGE_LIST[currentImg].id;
   var s = { itemStates: {}, activeTab: activeTab, bboxLayerHTML: document.getElementById('bboxLayer').innerHTML };
   ALL_ITEMS.forEach(function(n) {
     var st = itemStates[n];
-    var saved = { status: st.status, hazards: {}, hazardCounter: st.hazardCounter, description: (document.getElementById('desc-'+n.replace(/[^a-zA-Z一-鿿]/g,''))||{}).value||st.description };
+    var sv = { status: st.status, hazards: {}, hazardCounter: st.hazardCounter, description: st.description };
     Object.keys(st.hazards).forEach(function(hid) {
       var hz = st.hazards[hid];
-      saved.hazards[hid] = { bbox: hz.bbox, imgW: hz.imgW, imgH: hz.imgH, color: hz.color, index: hz.index, formValues: {} };
-      var fv = saved.hazards[hid].formValues;
-      fv.selItem = (document.getElementById('selItem-'+hid)||{}).value || '';
-      fv.selClause = (document.getElementById('selClause-'+hid)||{}).value || '';
-      fv.selText = (document.getElementById('selText-'+hid)||{}).value || '';
-      fv.txtNote = (document.getElementById('txtNote-'+hid)||{}).value || '';
+      sv.hazards[hid] = { bbox: hz.bbox, imgW: hz.imgW, imgH: hz.imgH, color: hz.color, index: hz.index, formValues: {} };
+      var fv = sv.hazards[hid].formValues;
+      fv.selItem = (document.getElementById('selItem-'+hid)||{}).value||'';
+      fv.selClause = (document.getElementById('selClause-'+hid)||{}).value||'';
+      fv.selText = (document.getElementById('selText-'+hid)||{}).value||'';
+      fv.txtNote = (document.getElementById('txtNote-'+hid)||{}).value||'';
     });
-    s.itemStates[n] = saved;
+    s.itemStates[n] = sv;
   });
   s.done = ALL_ITEMS.some(function(n) { return itemStates[n].status !== 'none'; });
   imageStore[imgId] = s;
@@ -384,9 +297,9 @@ function restoreState() {
     ALL_ITEMS.forEach(function(n) {
       var ss = s.itemStates[n];
       if (ss) {
-        itemStates[n] = { status: ss.status, hazards: {}, hazardCounter: ss.hazardCounter, description: ss.description || '' };
+        itemStates[n] = { status: ss.status, hazards: {}, hazardCounter: ss.hazardCounter, description: ss.description||'' };
         Object.keys(ss.hazards).forEach(function(hid) {
-          itemStates[n].hazards[hid] = { bbox: ss.hazards[hid].bbox, imgW: ss.hazards[hid].imgW, imgH: ss.hazards[hid].imgH, color: ss.hazards[hid].color, index: ss.hazards[hid].index, formValues: ss.hazards[hid].formValues || {} };
+          itemStates[n].hazards[hid] = { bbox: ss.hazards[hid].bbox, imgW: ss.hazards[hid].imgW, imgH: ss.hazards[hid].imgH, color: ss.hazards[hid].color, index: ss.hazards[hid].index, formValues: ss.hazards[hid].formValues||{} };
         });
       }
     });
@@ -399,34 +312,32 @@ function restoreState() {
   renderTabBar();
   renderTabContent();
   updateBboxCount();
-  // Restore form values for active tab
-  restoreFormValues(activeTab);
-  ALL_ITEMS.forEach(function(n) { if (n !== activeTab) restoreFormValues(n); });
+  // Restore form values
+  ALL_ITEMS.forEach(function(n) { restoreFormValues(n); });
 }
 
 function restoreFormValues(itemName) {
   Object.keys(itemStates[itemName].hazards).forEach(function(hid) {
     var fv = itemStates[itemName].hazards[hid].formValues;
-    if (fv && fv.selItem) {
+    if (!fv || !fv.selItem) return;
+    setTimeout(function() {
+      var el = document.getElementById('selItem-'+hid);
+      if (el) { el.value = fv.selItem; onCascade(hid, 1, itemName); }
       setTimeout(function() {
-        var el = document.getElementById('selItem-'+hid);
-        if (el) { el.value = fv.selItem; onCascade(hid, 1, itemName); }
+        var el2 = document.getElementById('selClause-'+hid);
+        if (el2 && fv.selClause) { el2.value = fv.selClause; onCascade(hid, 2, itemName); }
         setTimeout(function() {
-          var el2 = document.getElementById('selClause-'+hid);
-          if (el2 && fv.selClause) { el2.value = fv.selClause; onCascade(hid, 2, itemName); }
-          setTimeout(function() {
-            var el3 = document.getElementById('selText-'+hid);
-            var el4 = document.getElementById('txtNote-'+hid);
-            if (el3 && fv.selText) el3.value = fv.selText;
-            if (el4 && fv.txtNote) el4.value = fv.txtNote;
-          }, 100);
+          var el3 = document.getElementById('selText-'+hid);
+          var el4 = document.getElementById('txtNote-'+hid);
+          if (el3 && fv.selText) el3.value = fv.selText;
+          if (el4 && fv.txtNote) el4.value = fv.txtNote||'';
         }, 100);
-      }, 150);
-    }
+      }, 100);
+    }, 150);
   });
 }
 
-// ═══════════════ Image Loading ═══════════════
+// ── Image Loading ──
 function loadImage() {
   var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="860" height="540" viewBox="0 0 860 540">'
     + '<defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#87CEEB"/><stop offset="100%" stop-color="#C8D6E5"/></linearGradient>'
@@ -464,10 +375,7 @@ var imageWrap = document.getElementById('imageCanvasWrap');
 
 bboxLayer.addEventListener('mousedown', function(e) {
   if (e.button !== 0) return;
-  // Use active tab's item - it must be in 'issue' status
-  if (itemStates[activeTab].status !== 'issue') {
-    showToast('请先勾选当前检查项的「⚠ 有隐患」','error'); return;
-  }
+  if (itemStates[activeTab].status !== 'issue') { showToast('请先勾选当前检查项的「⚠ 有隐患」','error'); return; }
   var rect = imageWrap.getBoundingClientRect();
   var img = document.getElementById('mainImage');
   var scaleX = img.naturalWidth / rect.width;
@@ -491,19 +399,17 @@ bboxLayer.addEventListener('mousemove', function(e) {
   var curX = (e.clientX - rect.left);
   var curY = (e.clientY - rect.top);
   if (isDrawing) {
-    var startPX = drawStartX / scaleX;
-    var startPY = drawStartY / scaleY;
-    bboxDrawing.style.left = Math.min(startPX, curX) + 'px';
-    bboxDrawing.style.top = Math.min(startPY, curY) + 'px';
-    bboxDrawing.style.width = Math.abs(curX - startPX) + 'px';
-    bboxDrawing.style.height = Math.abs(curY - startPY) + 'px';
+    var spX = drawStartX / scaleX;
+    var spY = drawStartY / scaleY;
+    bboxDrawing.style.left = Math.min(spX, curX) + 'px';
+    bboxDrawing.style.top = Math.min(spY, curY) + 'px';
+    bboxDrawing.style.width = Math.abs(curX - spX) + 'px';
+    bboxDrawing.style.height = Math.abs(curY - spY) + 'px';
   }
   imageTooltip.style.display = 'block';
   imageTooltip.style.left = (curX + 14) + 'px';
   imageTooltip.style.top = (curY - 10) + 'px';
-  imageTooltip.textContent = isDrawing
-    ? '拖拽中… (' + Math.round(Math.abs((e.clientX - rect.left) - drawStartX/scaleX)) + '×' + Math.round(Math.abs((e.clientY - rect.top) - drawStartY/scaleY)) + 'px)'
-    : '当前：'+activeTab+' — 在此处拖拽绘制标记框';
+  imageTooltip.textContent = isDrawing ? '拖拽中…' : '当前：'+activeTab+' — 在此处拖拽绘制标记框';
 });
 
 bboxLayer.addEventListener('mouseup', function(e) {
@@ -516,10 +422,8 @@ bboxLayer.addEventListener('mouseup', function(e) {
   var scaleY = img.naturalHeight / rect.height;
   var endX = (e.clientX - rect.left) * scaleX;
   var endY = (e.clientY - rect.top) * scaleY;
-  var x = Math.min(drawStartX, endX);
-  var y = Math.min(drawStartY, endY);
-  var w = Math.abs(endX - drawStartX);
-  var h = Math.abs(endY - drawStartY);
+  var x = Math.min(drawStartX, endX), y = Math.min(drawStartY, endY);
+  var w = Math.abs(endX - drawStartX), h = Math.abs(endY - drawStartY);
   if (w < 15 || h < 15) { imageTooltip.style.display = 'none'; return; }
   addBBox(activeTab, {x:x, y:y, w:w, h:h}, img.naturalWidth, img.naturalHeight);
   imageTooltip.style.display = 'none';
@@ -535,32 +439,29 @@ window.addEventListener('resize', function() {
     Object.keys(itemStates[n].hazards).forEach(function(hid) {
       var hz = itemStates[n].hazards[hid];
       if (!hz.bbox) return;
-      var bboxEl = document.getElementById('bbox-'+hid);
-      if (!bboxEl) return;
+      var el = document.getElementById('bbox-'+hid); if (!el) return;
       var rect = imageWrap.getBoundingClientRect();
-      var scX = rect.width / hz.imgW;
-      var scY = rect.height / hz.imgH;
-      bboxEl.style.left = (hz.bbox.x * scX) + 'px';
-      bboxEl.style.top = (hz.bbox.y * scY) + 'px';
-      bboxEl.style.width = (hz.bbox.w * scX) + 'px';
-      bboxEl.style.height = (hz.bbox.h * scY) + 'px';
+      el.style.left = (hz.bbox.x * rect.width / hz.imgW) + 'px';
+      el.style.top = (hz.bbox.y * rect.height / hz.imgH) + 'px';
+      el.style.width = (hz.bbox.w * rect.width / hz.imgW) + 'px';
+      el.style.height = (hz.bbox.h * rect.height / hz.imgH) + 'px';
     });
   });
 });
 
-// ═══════════════ BBox Management ═══════════════
+// ── BBox Management ──
 function addBBox(itemName, bbox, imgW, imgH) {
   var st = itemStates[itemName];
   st.hazardCounter++;
   var hid = 'hz-'+itemName.replace(/[^a-zA-Z一-鿿]/g,'')+'-'+st.hazardCounter;
   var color = bboxColors[(st.hazardCounter-1) % bboxColors.length];
   st.hazards[hid] = { bbox:bbox, imgW:imgW, imgH:imgH, color:color, index:st.hazardCounter, formValues:{} };
+  // Draw bbox on image
   drawBBoxOnImage(hid, bbox, imgW, imgH, color, st.hazardCounter, itemName);
-  // Append hazard entry into current tab body
-  appendHazardEntry(itemName, hid);
+  // Append form into hazard list (uses insertAdjacentHTML — no DOM destruction)
+  appendHazardForm(itemName, hid);
   updateBboxCount();
-  updateHazardCount(itemName);
-  renderTabBar();
+  updateTabBarBadge(itemName);
 }
 
 function drawBBoxOnImage(hid, bbox, imgW, imgH, color, idx, itemName) {
@@ -577,29 +478,29 @@ function drawBBoxOnImage(hid, bbox, imgW, imgH, color, idx, itemName) {
   document.getElementById('bboxLayer').appendChild(el);
 }
 
-function appendHazardEntry(itemName, hid) {
-  var container = document.getElementById('hazardEntries');
+function appendHazardForm(itemName, hid) {
+  var container = document.getElementById('hzList');
   if (!container) return;
   var hz = itemStates[itemName].hazards[hid];
-  var html = '<div class="hazard-entry-card" id="hzwrap-'+hid+'" style="border-left:3px solid '+hz.color+'">';
-  html += '<div class="hazard-entry-header"><span style="color:'+hz.color+'">🔴 隐患'+cn(hz.index)+'</span><span class="hazard-entry-delete" onclick="rmHazard(\''+itemName+'\',\''+hid+'\')">✕</span></div>';
+  var html = '<div class="hz-card" id="hzwrap-'+hid+'" style="border-left:3px solid '+hz.color+'">';
+  html += '<div class="hz-card-header"><span style="color:'+hz.color+'">🔴 隐患'+cn(hz.index)+'</span><span class="hz-card-del" onclick="rmHazard(\''+itemName+'\',\''+hid+'\')">✕</span></div>';
   html += buildCascadeHTML(itemName, hid);
-  html += '<div class="fg" style="margin-top:8px"><label>违规描述</label><textarea id="txtNote-'+hid+'" placeholder="根据以上选择，用自然语言描述…" style="min-height:50px"></textarea></div>';
+  html += '<div class="fg" style="margin-top:8px"><label>违规描述 <span class="required">*</span></label><textarea id="txtNote-'+hid+'" placeholder="根据以上选择，用自然语言描述具体的违规事实…" style="min-height:50px"></textarea></div>';
   html += '</div>';
   container.insertAdjacentHTML('beforeend', html);
 }
 
-function renderAllHazardEntries(itemName) {
-  var container = document.getElementById('hazardEntries');
+function renderAllHazardForms(itemName) {
+  var container = document.getElementById('hzList');
   if (!container) return;
   var st = itemStates[itemName];
   var html = '';
   Object.keys(st.hazards).forEach(function(hid) {
     var hz = st.hazards[hid];
-    html += '<div class="hazard-entry-card" id="hzwrap-'+hid+'" style="border-left:3px solid '+hz.color+'">';
-    html += '<div class="hazard-entry-header"><span style="color:'+hz.color+'">🔴 隐患'+cn(hz.index)+'</span><span class="hazard-entry-delete" onclick="rmHazard(\''+itemName+'\',\''+hid+'\')">✕</span></div>';
+    html += '<div class="hz-card" id="hzwrap-'+hid+'" style="border-left:3px solid '+hz.color+'">';
+    html += '<div class="hz-card-header"><span style="color:'+hz.color+'">🔴 隐患'+cn(hz.index)+'</span><span class="hz-card-del" onclick="rmHazard(\''+itemName+'\',\''+hid+'\')">✕</span></div>';
     html += buildCascadeHTML(itemName, hid);
-    html += '<div class="fg" style="margin-top:8px"><label>违规描述</label><textarea id="txtNote-'+hid+'" placeholder="根据以上选择，用自然语言描述…" style="min-height:50px"></textarea></div>';
+    html += '<div class="fg" style="margin-top:8px"><label>违规描述 <span class="required">*</span></label><textarea id="txtNote-'+hid+'" placeholder="根据以上选择，用自然语言描述具体的违规事实…" style="min-height:50px"></textarea></div>';
     html += '</div>';
   });
   container.innerHTML = html;
@@ -662,44 +563,58 @@ function rmHazard(itemName, hid) {
   var el = document.getElementById('bbox-'+hid); if (el) el.remove();
   var wrap = document.getElementById('hzwrap-'+hid); if (wrap) wrap.remove();
   delete itemStates[itemName].hazards[hid];
-  if (Object.keys(itemStates[itemName].hazards).length === 0) {
-    // update hazard count display
-  }
   updateBboxCount();
-  updateHazardCount(itemName);
-  renderTabBar();
+  updateTabBarBadge(itemName);
 }
 
-// ═══════════════ Tab Panel Rendering ═══════════════
+// ── Tab Panel ──
+function saveDesc(itemName) {
+  var el = document.getElementById('desc-'+itemName.replace(/[^a-zA-Z一-鿿]/g,''));
+  if (el) itemStates[itemName].description = el.value;
+}
+
 function renderTabBar() {
   var h = '';
   ALL_ITEMS.forEach(function(n) {
     var st = itemStates[n];
-    var dotCls = 'dot-none';
-    if (st.status === 'issue') dotCls = 'dot-issue';
-    else if (st.status === 'safe') dotCls = 'dot-safe';
-    else if (st.status === 'na') dotCls = 'dot-na';
+    var dotCls = st.status === 'issue' ? 'dot-issue' : (st.status === 'safe' ? 'dot-safe' : (st.status === 'na' ? 'dot-na' : 'dot-none'));
     var count = Object.keys(st.hazards).length;
-    var countStr = count > 0 ? ' ('+count+')' : '';
     h += '<div class="tab-btn'+(activeTab===n?' active':'')+'" onclick="switchTab(\''+n+'\')">';
     h += '<span class="tab-dot '+dotCls+'"></span>';
-    h += '<span>'+n.substring(0,4)+countStr+'</span>';
+    h += '<span>'+n.substring(0,4)+'</span>';
+    if (count > 0) h += '<span class="tab-badge">'+count+'</span>';
     h += '</div>';
   });
   document.getElementById('tabBar').innerHTML = h;
 }
 
+function updateTabBarBadge(itemName) {
+  // Quick refresh: find the tab button for this item and update its badge
+  var count = Object.keys(itemStates[itemName].hazards).length;
+  var btns = document.querySelectorAll('.tab-btn');
+  for (var i = 0; i < btns.length; i++) {
+    var span = btns[i].querySelector('span:last-child');
+    if (btns[i].textContent.indexOf(itemName.substring(0,4)) !== -1) {
+      if (count > 0) {
+        if (span && span.classList.contains('tab-badge')) { span.textContent = count; }
+        else { var b = document.createElement('span'); b.className = 'tab-badge'; b.textContent = count; btns[i].appendChild(b); }
+      } else {
+        if (span && span.classList.contains('tab-badge')) span.remove();
+      }
+      // Update dot
+      var dot = btns[i].querySelector('.tab-dot');
+      if (dot) { dot.className = 'tab-dot ' + (itemStates[itemName].status==='issue'?'dot-issue':(itemStates[itemName].status==='safe'?'dot-safe':(itemStates[itemName].status==='na'?'dot-na':'dot-none'))); }
+      break;
+    }
+  }
+}
+
 function switchTab(name) {
-  // Save description from current tab
-  saveDescription(activeTab);
+  if (activeTab === name) return;
+  saveDesc(activeTab);
   activeTab = name;
   renderTabBar();
   renderTabContent();
-}
-
-function saveDescription(itemName) {
-  var descEl = document.getElementById('desc-'+itemName.replace(/[^a-zA-Z一-鿿]/g,''));
-  if (descEl) itemStates[itemName].description = descEl.value;
 }
 
 function renderTabContent() {
@@ -707,55 +622,53 @@ function renderTabContent() {
   var st = itemStates[name];
   var hazardCount = Object.keys(st.hazards).length;
 
-  // Header
-  var hh = '<div class="tab-content-title">'+name+'</div>';
-  hh += '<div class="tab-status-row">';
-  hh += '<span class="tab-status-btn btn-has-issue'+(st.status==='issue'?' active':'')+'" onclick="setItemStatus(\''+name+'\',\'issue\')">⚠ 有隐患</span>';
-  hh += '<span class="tab-status-btn btn-no-issue'+(st.status==='safe'?' active':'')+'" onclick="setItemStatus(\''+name+'\',\'safe\')">✓ 无隐患</span>';
-  hh += '<span class="tab-status-btn btn-na'+(st.status==='na'?' active':'')+'" onclick="setItemStatus(\''+name+'\',\'na\')">🚫 不适用</span>';
-  if (hazardCount > 0) hh += '<span class="tab-count">共 '+hazardCount+' 处隐患标记</span>';
-  hh += '</div>';
-  document.getElementById('tabContentHeader').innerHTML = hh;
+  var h = '';
+  // Section 1: Description
+  h += '<div class="tab-section">';
+  h += '<div class="tab-section-title">📝 检查项目：'+name+'</div>';
+  h += '<div class="fg"><label>检查项目描述 <span style="font-weight:400;color:var(--text-secondary);font-size:10px">（描述当前图像中该检查项的具体情况）</span></label>';
+  h += '<textarea id="desc-'+name.replace(/[^a-zA-Z一-鿿]/g,'')+'" placeholder="例如：经查看，该区域外脚手架搭设基本符合规范，但作业层边缘与结构外表面距离不足150mm，需要整改…">'+esc(st.description||'')+'</textarea>';
+  h += '</div>';
 
-  // Body
-  var hb = '';
+  // Status buttons
+  h += '<div class="status-row" style="margin-top:8px">';
+  h += '<span class="status-btn btn-issue'+(st.status==='issue'?' active':'')+'" onclick="setStatus(\''+name+'\',\'issue\')">⚠ 有隐患</span>';
+  h += '<span class="status-btn btn-safe'+(st.status==='safe'?' active':'')+'" onclick="setStatus(\''+name+'\',\'safe\')">✓ 无隐患</span>';
+  h += '<span class="status-btn btn-na'+(st.status==='na'?' active':'')+'" onclick="setStatus(\''+name+'\',\'na\')">🚫 不适用</span>';
+  h += '</div>';
+  h += '</div>';
 
-  // Description section (always visible)
-  hb += '<div class="desc-section">';
-  hb += '<label>📝 检查项目描述 <span style="font-weight:400;color:var(--text-secondary);font-size:10px">（描述当前图像中该检查项的具体情况）</span></label>';
-  hb += '<textarea id="desc-'+name.replace(/[^a-zA-Z一-鿿]/g,'')+'" placeholder="例如：经查看，该区域外脚手架搭设基本符合规范，但作业层边缘与结构外表面距离不足150mm，需要整改…">'+escAttr(st.description||'')+'</textarea>';
-  hb += '</div>';
-
+  // Section 2: Status-dependent content
   if (st.status === 'none') {
-    hb += '<div style="text-align:center;padding:20px;color:var(--text-secondary);font-size:12px">👆 请先选择上方状态（有隐患 / 无隐患 / 不适用）</div>';
+    h += '<div style="text-align:center;padding:24px;color:var(--text-secondary);font-size:13px">👆 请先选择检查结果（有隐患 / 无隐患 / 不适用）</div>';
   } else if (st.status === 'safe') {
-    hb += '<div class="safe-message">✅ 本检查项确认无隐患<br><span style="font-size:11px;color:var(--text-secondary)">已记录描述，可切换其他标签页继续</span></div>';
+    h += '<div class="safe-msg">✅ 本检查项确认无隐患<br><span style="font-size:11px;font-weight:400">已记录描述，可切换其他标签页继续标注</span></div>';
   } else if (st.status === 'na') {
-    hb += '<div class="na-message">🚫 本检查项不适用于当前图像场景<br><span style="font-size:11px;color:var(--text-secondary)">不参与训练数据生成</span></div>';
+    h += '<div class="na-msg">🚫 本检查项不适用于当前图像场景<br><span style="font-size:11px;font-weight:400">该项不参与训练数据生成</span></div>';
   } else if (st.status === 'issue') {
-    hb += '<div class="hazard-section">';
-    hb += '<div class="hazard-section-header">🔴 隐患标注</div>';
-    hb += '<span class="draw-hint" onclick="showToast(\'在左侧图像上拖拽绘制「'+name+'」的隐患标记框','info')">🖱 在图像上拖拽画框标记隐患位置</span>';
-    hb += '<div class="hazard-entries" id="hazardEntries"></div>';
-    hb += '</div>';
+    // Hazard section — exactly like the original demo's hazard list
+    h += '<div class="tab-section">';
+    h += '<div class="tab-section-title" style="color:#E2091C">🔴 隐患标注</div>';
+    h += '<span class="draw-hint" onclick="showToast(\'请在左侧图像上拖拽绘制「'+name+'」的隐患标记框','info')">🖱 在图像上拖拽画框标记隐患位置</span>';
+    h += '<div id="hzList"></div>';
+    h += '</div>';
   }
 
-  document.getElementById('tabBody').innerHTML = hb;
+  document.getElementById('tabContentInner').innerHTML = h;
 
-  // Re-populate hazard entries if in issue mode
+  // Re-populate hazard forms if in issue mode
   if (st.status === 'issue' && hazardCount > 0) {
-    renderAllHazardEntries(name);
+    renderAllHazardForms(name);
     restoreFormValues(name);
   }
 }
 
-function setItemStatus(name, status) {
+function setStatus(name, status) {
+  saveDesc(name);
   var st = itemStates[name];
+  // Remove bboxes if switching away from issue
   if (status !== 'issue' && st.status === 'issue') {
-    // Remove bboxes when switching away from issue
-    Object.keys(st.hazards).forEach(function(hid) {
-      var el = document.getElementById('bbox-'+hid); if (el) el.remove();
-    });
+    Object.keys(st.hazards).forEach(function(hid) { var el = document.getElementById('bbox-'+hid); if (el) el.remove(); });
     st.hazards = {}; st.hazardCounter = 0;
   }
   st.status = status;
@@ -764,50 +677,35 @@ function setItemStatus(name, status) {
   updateBboxCount();
 }
 
-function updateHazardCount(itemName) {
-  // Just refresh the tab content header count
-  var count = Object.keys(itemStates[itemName].hazards).length;
-  var countEl = document.querySelector('.tab-count');
-  if (countEl) {
-    if (count > 0) countEl.textContent = '共 '+count+' 处隐患标记';
-    else countEl.textContent = '';
-  }
-}
-
 function updateBboxCount() {
   var total = 0;
   ALL_ITEMS.forEach(function(n) { total += Object.keys(itemStates[n].hazards).length; });
   document.getElementById('bboxCount').textContent = '已标记：'+total+' 处';
 }
 
-// ═══════════════ Submit ═══════════════
+// ── Submit ──
 function submitAll() {
-  saveDescription(activeTab);
-  var data = {};
+  saveDesc(activeTab);
+  var data = {}, done = 0;
   ALL_ITEMS.forEach(function(n) {
     var st = itemStates[n];
     data[n] = { status: st.status, description: st.description, hazards: {} };
-    Object.keys(st.hazards).forEach(function(hid) {
-      saveFormValues(n, hid);
-      data[n].hazards[hid] = st.hazards[hid];
-    });
+    if (st.status !== 'none') done++;
+    Object.keys(st.hazards).forEach(function(hid) { saveFormValues(n, hid); data[n].hazards[hid] = itemStates[n].hazards[hid]; });
   });
-  var done = 0;
-  ALL_ITEMS.forEach(function(n) { if (itemStates[n].status !== 'none') done++; });
   if (done === 0) { showToast('请至少标注一项检查项目','error'); return; }
   console.log('方案D提交:', JSON.stringify(data, null, 2));
   showToast('✓ 提交成功！已标注 '+done+' 项（共6项）','success');
 }
 
-// ═══════════════ Utilities ═══════════════
+// ── Utilities ──
 function cn(n) { var m=['零','一','二','三','四','五','六','七','八','九','十','十一','十二']; return m[n]||String(n); }
 function esc(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function itemNameAbbr(n) { var m={'高处作业':'高','基坑工程':'坑','施工升降机':'梯','消防安全':'消','起重吊装及施工机具':'吊','场容场貌':'场'}; return m[n]||n[0]; }
 function showToast(msg, type) { var t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast toast-'+type+' show'; clearTimeout(t._timeout); t._timeout = setTimeout(function() { t.classList.remove('show'); }, 2200); }
 function exitPage() { if (confirm('确定退出吗？')) showToast('已退出','info'); }
 
-// ═══════════════ Init ═══════════════
+// ── Init ──
 (function init() {
   ALL_ITEMS.forEach(function(n) { itemStates[n] = { status: 'none', hazards: {}, hazardCounter: 0, description: '' }; });
   activeTab = ALL_ITEMS[0];
