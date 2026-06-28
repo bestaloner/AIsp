@@ -421,10 +421,21 @@ function addBBoxForItem(itemName, bbox, imgW, imgH) {
   var color = bboxColors[(ci.hazardCounter-1) % bboxColors.length];
   ci.hazards[hid] = { bbox:bbox, imgW:imgW, imgH:imgH, color:color, index:ci.hazardCounter, formValues:{} };
   drawBBoxOnImage(hid, bbox, imgW, imgH, color, ci.hazardCounter);
-  ci.status = 'issue';
-  renderCheckList();
-  renderHazardForms(itemName);
+  // Directly append hazard form into existing container (no renderCheckList — it would destroy DOM)
+  appendHazardForm(itemName, hid);
+  updateSummary();
   updateBboxCount();
+}
+
+function appendHazardForm(itemName, hid) {
+  var container = document.getElementById('hzList-'+itemName.replace(/[^a-zA-Z一-鿿]/g,''));
+  if (!container) return;
+  var h = checkItems[itemName].hazards[hid];
+  var html = '<div style="border:1px solid '+h.color+';border-radius:6px;padding:8px;margin-bottom:8px;background:#FFFBEB" id="hzwrap-'+hid+'">';
+  html += '<div style="font-weight:600;font-size:11px;color:'+h.color+';margin-bottom:6px">🔴 隐患'+toCN(h.index)+' <span style="float:right;cursor:pointer;color:#E2091C" onclick="removeHazard(\''+itemName+'\',\''+hid+'\')">✕</span></div>';
+  html += buildCascadeHTML(itemName, hid);
+  html += '</div>';
+  container.insertAdjacentHTML('beforeend', html);
 }
 
 function drawBBoxOnImage(hid, bbox, imgW, imgH, color, idx) {
@@ -449,7 +460,7 @@ function renderHazardForms(itemName) {
   var html = '';
   Object.keys(ci.hazards).forEach(function(hid) {
     var h = ci.hazards[hid];
-    html += '<div style="border:1px solid '+h.color+';border-radius:6px;padding:8px;margin-bottom:8px;background:#FFFBEB">';
+    html += '<div style="border:1px solid '+h.color+';border-radius:6px;padding:8px;margin-bottom:8px;background:#FFFBEB" id="hzwrap-'+hid+'">';
     html += '<div style="font-weight:600;font-size:11px;color:'+h.color+';margin-bottom:6px">🔴 隐患'+toCN(h.index)+' <span style="float:right;cursor:pointer;color:#E2091C" onclick="removeHazard(\''+itemName+'\',\''+hid+'\')">✕</span></div>';
     html += buildCascadeHTML(itemName, hid);
     html += '</div>';
@@ -519,10 +530,10 @@ function saveFormValues(itemName, hid) {
 
 function removeHazard(itemName, hid) {
   var el = document.getElementById('bbox-'+hid); if (el) el.remove();
+  var wrap = document.getElementById('hzwrap-'+hid); if (wrap) wrap.remove();
   delete checkItems[itemName].hazards[hid];
-  renderHazardForms(itemName);
   if (Object.keys(checkItems[itemName].hazards).length === 0) {
-    checkItems[itemName].status = 'na'; renderCheckList();
+    checkItems[itemName].status = 'na'; renderCheckList(); updateSummary();
   }
   updateBboxCount();
 }
