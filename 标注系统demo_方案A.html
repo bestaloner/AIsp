@@ -420,7 +420,7 @@ function addBBoxForItem(itemName, bbox, imgW, imgH) {
   var hid = 'hz-'+itemName.replace(/[^a-zA-Z一-鿿]/g,'')+'-'+ci.hazardCounter;
   var color = bboxColors[(ci.hazardCounter-1) % bboxColors.length];
   ci.hazards[hid] = { bbox:bbox, imgW:imgW, imgH:imgH, color:color, index:ci.hazardCounter, formValues:{} };
-  drawBBoxOnImage(hid, bbox, imgW, imgH, color, ci.hazardCounter);
+  drawBBoxOnImage(hid, bbox, imgW, imgH, color, ci.hazardCounter, itemName);
   // Directly append hazard form into existing container (no renderCheckList — it would destroy DOM)
   appendHazardForm(itemName, hid);
   updateSummary();
@@ -438,7 +438,7 @@ function appendHazardForm(itemName, hid) {
   container.insertAdjacentHTML('beforeend', html);
 }
 
-function drawBBoxOnImage(hid, bbox, imgW, imgH, color, idx) {
+function drawBBoxOnImage(hid, bbox, imgW, imgH, color, idx, itemName) {
   var wrap = document.getElementById('imageCanvasWrap');
   var r = wrap.getBoundingClientRect();
   var sx = r.width/imgW, sy = r.height/imgH;
@@ -448,7 +448,7 @@ function drawBBoxOnImage(hid, bbox, imgW, imgH, color, idx) {
   el.style.width=(bbox.w*sx)+'px'; el.style.height=(bbox.h*sy)+'px';
   el.style.borderColor=color;
   var num=document.createElement('div'); num.className='bbox-number'; num.style.backgroundColor=color;
-  num.textContent=itemNameAbbr(currentDrawingItem)+idx; el.appendChild(num);
+  num.textContent=itemNameAbbr(itemName||currentDrawingItem)+idx; el.appendChild(num);
   document.getElementById('bboxLayer').appendChild(el);
 }
 
@@ -587,7 +587,7 @@ function restoreState(){
   ALL_ITEMS.forEach(function(n){
     Object.keys(checkItems[n].hazards).forEach(function(hid){
       var h=checkItems[n].hazards[hid];
-      drawBBoxOnImage(hid,h.bbox,h.imgW,h.imgH,h.color,h.index);
+      drawBBoxOnImage(hid,h.bbox,h.imgW,h.imgH,h.color,h.index,n);
     });
   });
   renderCheckList();
