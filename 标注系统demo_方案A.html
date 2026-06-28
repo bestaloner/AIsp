@@ -342,16 +342,16 @@ function setStatus(name, status) {
 
 // BBox drawing
 function startDrawForItem(itemName) { currentDrawingItem = itemName; showToast('请在图像上拖拽绘制「'+itemName+'」的隐患标记框', 'info'); }
-var bboxLayer = document.getElementById('bboxLayer');
-bboxLayer.addEventListener('mousedown', function(e) {
+var drawTarget = document.getElementById('imageCanvasWrap');
+drawTarget.addEventListener('mousedown', function(e) {
   if (e.button !== 0) return;
-  // Auto-select target item if not set
   if (!currentDrawingItem) {
-    var firstIssue = ALL_ITEMS.find(function(n){ return checkItems[n].status === 'issue'; });
-    if (!firstIssue) { showToast('请先将一个检查项设为「有隐患」','error'); return; }
-    currentDrawingItem = firstIssue;
+    for (var i = 0; i < ALL_ITEMS.length; i++) {
+      if (checkItems[ALL_ITEMS[i]].status === 'issue') { currentDrawingItem = ALL_ITEMS[i]; break; }
+    }
+    if (!currentDrawingItem) { showToast('请先将一个检查项设为「有隐患」','error'); return; }
   }
-  var r = document.getElementById('imageCanvasWrap').getBoundingClientRect();
+  var r = drawTarget.getBoundingClientRect();
   var img = document.getElementById('mainImage');
   drawStartX = (e.clientX - r.left) * img.naturalWidth / r.width;
   drawStartY = (e.clientY - r.top) * img.naturalHeight / r.height;
@@ -361,21 +361,22 @@ bboxLayer.addEventListener('mousedown', function(e) {
   db.style.width = '0px'; db.style.height = '0px';
   e.preventDefault();
 });
-bboxLayer.addEventListener('mousemove', function(e) {
+drawTarget.addEventListener('mousemove', function(e) {
   if (!isDrawing) return;
-  var r = document.getElementById('imageCanvasWrap').getBoundingClientRect();
+  var r = drawTarget.getBoundingClientRect();
   var curX = e.clientX - r.left, curY = e.clientY - r.top;
-  var startPX = drawStartX / (document.getElementById('mainImage').naturalWidth/r.width);
-  var startPY = drawStartY / (document.getElementById('mainImage').naturalHeight/r.height);
+  var img = document.getElementById('mainImage');
+  var startPX = drawStartX / (img.naturalWidth/r.width);
+  var startPY = drawStartY / (img.naturalHeight/r.height);
   var db = document.getElementById('bboxDrawing');
   db.style.left = Math.min(startPX,curX)+'px'; db.style.top = Math.min(startPY,curY)+'px';
   db.style.width = Math.abs(curX-startPX)+'px'; db.style.height = Math.abs(curY-startPY)+'px';
 });
-bboxLayer.addEventListener('mouseup', function(e) {
+drawTarget.addEventListener('mouseup', function(e) {
   if (!isDrawing) return;
   isDrawing = false;
   document.getElementById('bboxDrawing').style.display = 'none';
-  var r = document.getElementById('imageCanvasWrap').getBoundingClientRect();
+  var r = drawTarget.getBoundingClientRect();
   var img = document.getElementById('mainImage');
   var endX = (e.clientX - r.left) * img.naturalWidth / r.width;
   var endY = (e.clientY - r.top) * img.naturalHeight / r.height;
