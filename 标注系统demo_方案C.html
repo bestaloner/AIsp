@@ -62,13 +62,13 @@ body { font-family: 'Microsoft YaHei','PingFang SC',-apple-system,sans-serif; co
 .issue-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
 .issue-empty { text-align: center; padding: 32px 16px; color: var(--text-secondary); font-size: 13px; line-height: 2; }
 .issue-empty .big-icon { font-size: 36px; opacity: 0.5; margin-bottom: 8px; }
-.issue-card { background: var(--color-card-bg); border: 1px solid var(--border-color); border-left: 3px solid var(--red); border-radius: var(--radius-md); margin-bottom: 8px; box-shadow: var(--shadow-card); overflow: hidden; }
+.issue-card { background: var(--color-card-bg); border: 1px solid var(--border-color); border-left: 3px solid #E2091C; border-radius: var(--radius-md); margin-bottom: 8px; box-shadow: var(--shadow-card); overflow: hidden; }
 .issue-card-header { padding: 10px 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; background: #FFFBEB; }
 .issue-card.expanded .issue-card-header { border-bottom: 1px solid var(--border-light); }
 .issue-color { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
 .issue-item-name { font-weight: 600; font-size: 13px; flex: 1; }
 .issue-delete { color: var(--text-secondary); cursor: pointer; padding: 2px 6px; border-radius: var(--radius-sm); font-size: 12px; }
-.issue-delete:hover { color: var(--red); background: #FFF2F0; }
+.issue-delete:hover { color: #E2091C; background: #FFF2F0; }
 .issue-toggle { font-size: 10px; color: var(--text-secondary); transition: transform 0.2s; }
 .issue-card.expanded .issue-toggle { transform: rotate(180deg); }
 .issue-body { display: none; padding: 12px; }
@@ -76,7 +76,7 @@ body { font-family: 'Microsoft YaHei','PingFang SC',-apple-system,sans-serif; co
 .fg { margin-bottom: 10px; }
 .fg:last-child { margin-bottom: 0; }
 .fg label { display: block; font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
-.fg label .required { color: var(--red); }
+.fg label .required { color: #E2091C; }
 .fg select, .fg textarea { width: 100%; background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 12px; color: var(--text-primary); outline: none; transition: all var(--transition-fast); font-family: inherit; }
 .fg select { height: 36px; padding: 0 28px 0 10px; cursor: pointer; -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238C8C8C' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; }
 .fg select:focus, .fg textarea:focus { border-color: var(--blue-primary); box-shadow: 0 0 0 2px rgba(46,65,205,0.1); }
@@ -88,14 +88,14 @@ body { font-family: 'Microsoft YaHei','PingFang SC',-apple-system,sans-serif; co
 .na-section-title { font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
 .na-tags { display: flex; flex-wrap: wrap; gap: 4px; }
 .na-tag { padding: 3px 8px; border-radius: 12px; font-size: 10px; cursor: pointer; border: 1px solid var(--border-color); background: #fff; color: var(--text-secondary); transition: all var(--transition-fast); }
-.na-tag:hover { border-color: var(--red); color: var(--red); }
+.na-tag:hover { border-color: #E2091C; color: #E2091C; }
 .na-tag.marked-na { background: #FAFAFA; color: #BFBFBF; border-color: #E8E8E8; text-decoration: line-through; }
 .panel-footer { padding: 12px 14px; border-top: 1px solid var(--border-color); background: var(--color-card-bg); flex-shrink: 0; display: flex; gap: 8px; }
 .panel-footer .btn { flex: 1; }
 .toast { position: fixed; top: 58px; right: 16px; padding: 10px 18px; border-radius: var(--radius-sm); font-size: 13px; z-index: 999; font-weight: 500; display: none; box-shadow: 0 4px 16px rgba(0,0,0,0.15); animation: slideIn 0.3s var(--ease); }
 .toast.show { display: block; }
-.toast-success { background: var(--green); color: #fff; }
-.toast-error { background: var(--red); color: #fff; }
+.toast-success { background: #52C41A; color: #fff; }
+.toast-error { background: #E2091C; color: #fff; }
 .toast-info { background: var(--blue-primary); color: #fff; }
 @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 .ils-sidebar { width: 200px; min-width: 200px; flex-shrink: 0; background: var(--color-card-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; overflow: hidden; }
@@ -165,7 +165,7 @@ body { font-family: 'Microsoft YaHei','PingFang SC',-apple-system,sans-serif; co
     </div>
     <div class="stat-bar" id="statBar">
       <span class="stat-num" id="statNum">6</span> 项默认无隐患 &nbsp;|&nbsp;
-      <span style="color:var(--red)">⚠ <span id="statIssue">0</span> 有隐患</span> &nbsp;|&nbsp;
+      <span style="color:#E2091C">⚠ <span id="statIssue">0</span> 有隐患</span> &nbsp;|&nbsp;
       <span style="color:var(--text-secondary)">— <span id="statNA">0</span> 不适用</span>
     </div>
     <div class="issue-list" id="issueList">
@@ -312,7 +312,7 @@ function renderHazardForms(name){
   Object.keys(ih.hazards).forEach(function(hid){
     var hz=ih.hazards[hid];
     h+='<div style="border:1px solid '+hz.color+';border-radius:6px;padding:8px;margin-bottom:8px;background:#FFFBEB">';
-    h+='<div style="font-weight:600;font-size:11px;color:'+hz.color+';margin-bottom:6px">🔴 隐患'+cn(hz.index)+' <span style="float:right;cursor:pointer;color:var(--red)" onclick="rmHazard(\''+name+'\',\''+hid+'\')">✕</span></div>';
+    h+='<div style="font-weight:600;font-size:11px;color:'+hz.color+';margin-bottom:6px">🔴 隐患'+cn(hz.index)+' <span style="float:right;cursor:pointer;color:#E2091C" onclick="rmHazard(\''+name+'\',\''+hid+'\')">✕</span></div>';
     h+='<div class="fg"><label>事实描述 <span class="required">*</span></label><select id="selItem-'+hid+'" onchange="onCascade(\''+hid+'\',1,\''+name+'\')"><option value="">— 请选择 —</option>';
     Object.keys(CASCADE_DATA[name]||{}).sort().forEach(function(d){ h+='<option value="'+esc(d)+'">'+d.substring(0,50)+'</option>'; });
     h+='</select></div><div class="cascade-arrow">⬇</div>';

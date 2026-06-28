@@ -13,7 +13,7 @@
   --shadow-card: 0 1px 3px rgba(0,0,0,0.08);
   --blue-primary: #2E41CD; --blue-light: #009CFF; --orange: #F57A00;
   --green: #52C41A; --red: #E2091C;
-  --ease: cubic-bezier(0.4, 0, 0.2, 1); --transition-fast: 150ms var(--ease);
+  --ease: cubic-bezier(0.4, 0, 0.2, 1); --transition-fast: 150ms #E2091C;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { font-size: 14px; }
@@ -96,8 +96,8 @@ body {
   border-radius: var(--radius-md); margin-bottom: 8px; overflow: hidden;
   box-shadow: var(--shadow-card); transition: border-color 0.2s;
 }
-.check-item.status-issue { border-left: 3px solid var(--red); }
-.check-item.status-safe { border-left: 3px solid var(--green); }
+.check-item.status-issue { border-left: 3px solid #E2091C; }
+.check-item.status-safe { border-left: 3px solid #52C41A; }
 .check-item.status-na { border-left: 3px solid var(--border-color); opacity: 0.7; }
 .check-item-header {
   padding: 10px 12px; display: flex; align-items: center; gap: 8px;
@@ -122,12 +122,12 @@ body {
 .check-item.expanded .check-item-body { display: block; }
 .check-item.summary-safe .check-item-body,
 .check-item.summary-na .check-item-body { padding: 10px 12px; }
-.safe-message { font-size: 12px; color: var(--green); display: flex; align-items: center; gap: 6px; }
+.safe-message { font-size: 12px; color: #52C41A; display: flex; align-items: center; gap: 6px; }
 .na-message { font-size: 12px; color: var(--text-secondary); }
 .fg { margin-bottom: 10px; }
 .fg:last-child { margin-bottom: 0; }
 .fg label { display: block; font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
-.fg label .required { color: var(--red); }
+.fg label .required { color: #E2091C; }
 .fg select, .fg textarea {
   width: 100%; background: #FFFFFF; border: 1px solid var(--border-color);
   border-radius: var(--radius-sm); font-size: 12px; color: var(--text-primary);
@@ -161,11 +161,11 @@ body {
 .toast {
   position: fixed; top: 58px; right: 16px; padding: 10px 18px; border-radius: var(--radius-sm);
   font-size: 13px; z-index: 999; font-weight: 500; display: none;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15); animation: slideIn 0.3s var(--ease);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15); animation: slideIn 0.3s #E2091C;
 }
 .toast.show { display: block; }
-.toast-success { background: var(--green); color: #fff; }
-.toast-error { background: var(--red); color: #fff; }
+.toast-success { background: #52C41A; color: #fff; }
+.toast-error { background: #E2091C; color: #fff; }
 .toast-info { background: var(--blue-primary); color: #fff; }
 @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 .ils-sidebar {
@@ -244,8 +244,8 @@ body {
       <span class="check-panel-title">📋 检查项目覆盖 <span id="itemCount" style="font-weight:400;font-size:12px;color:var(--text-secondary)">（共6项）</span></span>
     </div>
     <div class="summary-bar" id="summaryBar">
-      <span style="color:var(--red)">⚠ <span id="countIssue">0</span> 有隐患</span>
-      <span style="color:var(--green)">✓ <span id="countSafe">0</span> 无隐患</span>
+      <span style="color:#E2091C">⚠ <span id="countIssue">0</span> 有隐患</span>
+      <span style="color:#52C41A">✓ <span id="countSafe">0</span> 无隐患</span>
       <span style="color:var(--text-secondary)">— <span id="countNA">6</span> 待确认</span>
     </div>
     <div class="check-list" id="checkList"></div>
@@ -414,7 +414,7 @@ function renderHazardForms(itemName) {
   Object.keys(ci.hazards).forEach(function(hid) {
     var h = ci.hazards[hid];
     html += '<div style="border:1px solid '+h.color+';border-radius:6px;padding:8px;margin-bottom:8px;background:#FFFBEB">';
-    html += '<div style="font-weight:600;font-size:11px;color:'+h.color+';margin-bottom:6px">🔴 隐患'+toCN(h.index)+' <span style="float:right;cursor:pointer;color:var(--red)" onclick="removeHazard(\''+itemName+'\',\''+hid+'\')">✕</span></div>';
+    html += '<div style="font-weight:600;font-size:11px;color:'+h.color+';margin-bottom:6px">🔴 隐患'+toCN(h.index)+' <span style="float:right;cursor:pointer;color:#E2091C" onclick="removeHazard(\''+itemName+'\',\''+hid+'\')">✕</span></div>';
     html += buildCascadeHTML(itemName, hid);
     html += '</div>';
   });

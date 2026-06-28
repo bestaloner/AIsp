@@ -68,8 +68,8 @@ body { font-family: 'Microsoft YaHei','PingFang SC',-apple-system,sans-serif; co
 .entry-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
 .entry-empty { text-align: center; padding: 40px 16px; color: var(--text-secondary); font-size: 13px; line-height: 2; }
 .entry-card { background: var(--color-card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); margin-bottom: 8px; box-shadow: var(--shadow-card); overflow: hidden; }
-.entry-card.has-issue { border-left: 3px solid var(--red); }
-.entry-card.no-issue { border-left: 3px solid var(--green); }
+.entry-card.has-issue { border-left: 3px solid #E2091C; }
+.entry-card.no-issue { border-left: 3px solid #52C41A; }
 .entry-header { padding: 10px 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; background: #FAFAFA; transition: background 0.15s; }
 .entry-header:hover { background: #F0F4FF; }
 .entry-card.expanded .entry-header { border-bottom: 1px solid var(--border-light); }
@@ -79,20 +79,20 @@ body { font-family: 'Microsoft YaHei','PingFang SC',-apple-system,sans-serif; co
   padding: 2px 8px; border-radius: 10px; font-size: 10px; cursor: pointer;
   border: 1px solid var(--border-color); background: #fff; transition: all var(--transition-fast);
 }
-.entry-toggle-btn.tgl-issue { color: var(--red); }
-.entry-toggle-btn.tgl-safe { color: var(--green); }
+.entry-toggle-btn.tgl-issue { color: #E2091C; }
+.entry-toggle-btn.tgl-safe { color: #52C41A; }
 .entry-toggle-btn.active-issue { background: #FFF2F0; border-color: #FFCCC7; }
 .entry-toggle-btn.active-safe { background: #F6FFED; border-color: #B7EB8F; }
 .entry-toggle { font-size: 10px; color: var(--text-secondary); transition: transform 0.2s; }
 .entry-card.expanded .entry-toggle { transform: rotate(180deg); }
 .entry-delete { color: var(--text-secondary); cursor: pointer; padding: 2px 6px; border-radius: var(--radius-sm); font-size: 12px; }
-.entry-delete:hover { color: var(--red); background: #FFF2F0; }
+.entry-delete:hover { color: #E2091C; background: #FFF2F0; }
 .entry-body { display: none; padding: 12px; }
 .entry-card.expanded .entry-body { display: block; }
 .fg { margin-bottom: 10px; }
 .fg:last-child { margin-bottom: 0; }
 .fg label { display: block; font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
-.fg label .required { color: var(--red); }
+.fg label .required { color: #E2091C; }
 .fg select, .fg textarea { width: 100%; background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 12px; color: var(--text-primary); outline: none; transition: all var(--transition-fast); font-family: inherit; }
 .fg select { height: 36px; padding: 0 28px 0 10px; cursor: pointer; -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238C8C8C' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; }
 .fg select:focus, .fg textarea:focus { border-color: var(--blue-primary); box-shadow: 0 0 0 2px rgba(46,65,205,0.1); }
@@ -100,13 +100,13 @@ body { font-family: 'Microsoft YaHei','PingFang SC',-apple-system,sans-serif; co
 .fg textarea { padding: 8px 10px; resize: vertical; min-height: 50px; }
 .cascade-arrow { text-align: center; font-size: 10px; color: var(--text-secondary); margin: -2px 0; }
 .draw-hint { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; background: #E6F0FF; color: var(--blue-primary); border-radius: var(--radius-sm); font-size: 11px; font-weight: 500; cursor: pointer; margin-bottom: 8px; }
-.safe-note { font-size: 12px; color: var(--green); }
+.safe-note { font-size: 12px; color: #52C41A; }
 .tag-panel-footer { padding: 12px 14px; border-top: 1px solid var(--border-color); background: var(--color-card-bg); flex-shrink: 0; display: flex; gap: 8px; }
 .tag-panel-footer .btn { flex: 1; }
 .toast { position: fixed; top: 58px; right: 16px; padding: 10px 18px; border-radius: var(--radius-sm); font-size: 13px; z-index: 999; font-weight: 500; display: none; box-shadow: 0 4px 16px rgba(0,0,0,0.15); animation: slideIn 0.3s var(--ease); }
 .toast.show { display: block; }
-.toast-success { background: var(--green); color: #fff; }
-.toast-error { background: var(--red); color: #fff; }
+.toast-success { background: #52C41A; color: #fff; }
+.toast-error { background: #E2091C; color: #fff; }
 .toast-info { background: var(--blue-primary); color: #fff; }
 @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 .ils-sidebar { width: 200px; min-width: 200px; flex-shrink: 0; background: var(--color-card-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; overflow: hidden; }
@@ -225,7 +225,7 @@ function renderEntryList(){
     var expanded=ih.hasIssue;
     h+='<div class="entry-card'+cls+(expanded?' expanded':'')+'" id="ec-'+n.replace(/[^a-zA-Z一-鿿]/g,'')+'">';
     h+='<div class="entry-header" onclick="toggleEntry(\''+n+'\')">';
-    h+='<span class="entry-color" style="background:'+(ih.hasIssue?var(--red):var(--green))+';background:'+(ih.hasIssue?'#E2091C':'#52C41A')+'"></span>';
+    h+='<span class="entry-color" style="background:'+(ih.hasIssue?#E2091C:#52C41A)+';background:'+(ih.hasIssue?'#E2091C':'#52C41A')+'"></span>';
     h+='<span class="entry-name">'+n+'</span>';
     h+='<span class="entry-toggle-btn tgl-safe'+(ih.hasIssue?'':' active-safe')+'" onclick="event.stopPropagation();toggleIssue(\''+n+'\',false)">✓ 无隐患</span>';
     h+='<span class="entry-toggle-btn tgl-issue'+(ih.hasIssue?' active-issue':'')+'" onclick="event.stopPropagation();toggleIssue(\''+n+'\',true)">⚠ 有隐患</span>';
@@ -311,7 +311,7 @@ function renderHazardForms(name){
   Object.keys(ih.hazards).forEach(function(hid){
     var hz=ih.hazards[hid];
     h+='<div style="border:1px solid '+hz.color+';border-radius:6px;padding:8px;margin-bottom:8px;background:#FFFBEB">';
-    h+='<div style="font-weight:600;font-size:11px;color:'+hz.color+';margin-bottom:6px">🔴 隐患'+cn(hz.index)+' <span style="float:right;cursor:pointer;color:var(--red)" onclick="rmHazard(\''+name+'\',\''+hid+'\')">✕</span></div>';
+    h+='<div style="font-weight:600;font-size:11px;color:'+hz.color+';margin-bottom:6px">🔴 隐患'+cn(hz.index)+' <span style="float:right;cursor:pointer;color:#E2091C" onclick="rmHazard(\''+name+'\',\''+hid+'\')">✕</span></div>';
     h+='<div class="fg"><label>事实描述 <span class="required">*</span></label><select id="selItem-'+hid+'" onchange="onCascade(\''+hid+'\',1,\''+name+'\')"><option value="">— 请选择 —</option>';
     Object.keys(CASCADE_DATA[name]||{}).sort().forEach(function(d){ h+='<option value="'+esc(d)+'">'+d.substring(0,50)+'</option>'; });
     h+='</select></div><div class="cascade-arrow">⬇</div>';
