@@ -104,7 +104,6 @@ body {
 .tab-dot.dot-none { background: #D9D9D9; }
 .tab-dot.dot-issue { background: #E2091C; }
 .tab-dot.dot-safe { background: #52C41A; }
-.tab-dot.dot-na { background: #D46B08; }
 .tab-badge { font-size: 10px; background: #E2091C; color: #fff; border-radius: 10px; padding: 1px 6px; margin-left: auto; }
 
 /* Tab content */
@@ -139,9 +138,7 @@ body {
 .status-btn.btn-safe { color: #52C41A; border-color: #52C41A; }
 .status-btn.btn-safe:hover { background: #F6FFED; }
 .status-btn.btn-safe.active { background: #52C41A; color: #fff; }
-.status-btn.btn-na { color: #D46B08; border-color: #D46B08; }
-.status-btn.btn-na:hover { background: #FFF7E6; }
-.status-btn.btn-na.active { background: #D46B08; color: #fff; }
+
 
 /* Draw hint */
 .draw-hint { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: #E6F0FF; color: var(--blue-primary); border-radius: var(--radius-sm); font-size: 12px; font-weight: 500; cursor: pointer; margin-bottom: 8px; }
@@ -153,7 +150,6 @@ body {
 .hz-card-del:hover { color: #E2091C; background: #FFF2F0; }
 
 .safe-msg { text-align: center; padding: 16px; font-size: 13px; color: #52C41A; background: #F6FFED; border-radius: var(--radius-md); }
-.na-msg { text-align: center; padding: 16px; font-size: 13px; color: #D46B08; background: #FFF7E6; border-radius: var(--radius-md); }
 .none-msg { text-align: center; padding: 24px; color: var(--text-secondary); font-size: 13px; }
 
 /* Footer */
@@ -233,7 +229,7 @@ var ALL_ITEMS = Object.keys(CASCADE_DATA).sort();
 var bboxColors = ['#E2091C','#F57A00','#F59E0B','#52C41A','#009CFF','#2E41CD','#8B5CF6','#06B6D4','#E2091C','#F57A00','#52C41A','#8B5CF6'];
 
 // ── State ──
-// itemStates[name] = { status:'none'|'safe'|'issue'|'na', hazards:{hid:{bbox,imgW,imgH,color,index,formValues}}, hazardCounter:int, description:string }
+// itemStates[name] = { status:'none'|'safe'|'issue', hazards:{hid:{bbox,imgW,imgH,color,index,formValues}}, hazardCounter:int, description:string }
 var itemStates = {};
 var activeTab = '';
 var isDrawing = false, drawStartX, drawStartY;
@@ -574,7 +570,7 @@ function renderTabBar() {
   for (var i = 0; i < ALL_ITEMS.length; i++) {
     var n = ALL_ITEMS[i];
     var st = itemStates[n];
-    var dotCls = st.status === 'issue' ? 'dot-issue' : (st.status === 'safe' ? 'dot-safe' : (st.status === 'na' ? 'dot-na' : 'dot-none'));
+    var dotCls = st.status === 'issue' ? 'dot-issue' : (st.status === 'safe' ? 'dot-safe' : 'dot-none');
     var count = Object.keys(st.hazards).length;
     h += '<div class="tab-btn'+(activeTab===n?' active':'')+'" onclick="switchTab(\''+esc(n)+'\')">';
     h += '<span class="tab-dot '+dotCls+'"></span>';
@@ -616,17 +612,14 @@ function renderTabContent() {
   h += '<div class="status-row" style="margin-top:8px">';
   h += '<span class="status-btn btn-issue'+(st.status==='issue'?' active':'')+'" onclick="setStatus(\''+esc(name)+'\',\'issue\')">⚠ 有隐患</span>';
   h += '<span class="status-btn btn-safe'+(st.status==='safe'?' active':'')+'" onclick="setStatus(\''+esc(name)+'\',\'safe\')">✓ 无隐患</span>';
-  h += '<span class="status-btn btn-na'+(st.status==='na'?' active':'')+'" onclick="setStatus(\''+esc(name)+'\',\'na\')">🚫 不适用</span>';
   h += '</div>';
   h += '</div>';
 
   // Section 2: Status-dependent content
   if (st.status === 'none') {
-    h += '<div class="none-msg">👆 请先选择检查结果（有隐患 / 无隐患 / 不适用）</div>';
+    h += '<div class="none-msg">👆 请先选择检查结果（有隐患 / 无隐患）</div>';
   } else if (st.status === 'safe') {
     h += '<div class="safe-msg">✅ 本检查项确认无隐患<br><span style="font-size:11px;font-weight:400">已记录描述，可切换其他标签页继续标注</span></div>';
-  } else if (st.status === 'na') {
-    h += '<div class="na-msg">🚫 本检查项不适用于当前图像场景<br><span style="font-size:11px;font-weight:400">该项不参与训练数据生成</span></div>';
   } else if (st.status === 'issue') {
     h += '<div class="tab-section">';
     h += '<div class="tab-section-title" style="color:#E2091C">🔴 隐患标注</div>';
