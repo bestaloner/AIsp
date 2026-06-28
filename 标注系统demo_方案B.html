@@ -254,40 +254,53 @@ function toggleIssue(name, hasIssue){
 }
 function startDraw(name){ currentDrawingItem=name; showToast('请在图像上拖拽绘制「'+name+'」的隐患标记框','info'); }
 
-// BBox
-var drawTarget=document.getElementById('imageCanvasWrap');
-drawTarget.addEventListener('mousedown',function(e){
+// BBox drawing — events on bboxLayer (matching the working original demo)
+var bboxLayer = document.getElementById('bboxLayer');
+var bboxDrawingEl = document.getElementById('bboxDrawing');
+var imageWrap = document.getElementById('imageCanvasWrap');
+
+bboxLayer.addEventListener('mousedown',function(e){
   if(e.button!==0)return;
   if(!currentDrawingItem){
     for(var i=0;i<ALL_ITEMS.length;i++){if(coveredItems[ALL_ITEMS[i]]&&itemHazards[ALL_ITEMS[i]].hasIssue){currentDrawingItem=ALL_ITEMS[i];break;}}
     if(!currentDrawingItem){for(var i=0;i<ALL_ITEMS.length;i++){if(coveredItems[ALL_ITEMS[i]]){toggleIssue(ALL_ITEMS[i],true);currentDrawingItem=ALL_ITEMS[i];break;}}}
     if(!currentDrawingItem){showToast('请先勾选覆盖的检查项目','error');return;}
   }
-  var r=drawTarget.getBoundingClientRect();
+  var rect=imageWrap.getBoundingClientRect();
   var img=document.getElementById('mainImage');
-  drawStartX=(e.clientX-r.left)*img.naturalWidth/r.width; drawStartY=(e.clientY-r.top)*img.naturalHeight/r.height;
-  isDrawing=true; var db=document.getElementById('bboxDrawing');
-  db.style.display='block'; db.style.left=(e.clientX-r.left)+'px'; db.style.top=(e.clientY-r.top)+'px';
-  db.style.width='0px'; db.style.height='0px'; e.preventDefault();
+  var scaleX=img.naturalWidth/rect.width;
+  var scaleY=img.naturalHeight/rect.height;
+  drawStartX=(e.clientX-rect.left)*scaleX; drawStartY=(e.clientY-rect.top)*scaleY;
+  isDrawing=true;
+  bboxDrawingEl.style.display='block'; bboxDrawingEl.style.left=(e.clientX-rect.left)+'px'; bboxDrawingEl.style.top=(e.clientY-rect.top)+'px';
+  bboxDrawingEl.style.width='0px'; bboxDrawingEl.style.height='0px'; e.preventDefault();
 });
-drawTarget.addEventListener('mousemove',function(e){
-  if(!isDrawing)return; var r=drawTarget.getBoundingClientRect();
-  var curX=e.clientX-r.left, curY=e.clientY-r.top;
+bboxLayer.addEventListener('mousemove',function(e){
+  var rect=imageWrap.getBoundingClientRect();
   var img=document.getElementById('mainImage');
-  var spX=drawStartX/(img.naturalWidth/r.width);
-  var spY=drawStartY/(img.naturalHeight/r.height);
-  var db=document.getElementById('bboxDrawing');
-  db.style.left=Math.min(spX,curX)+'px'; db.style.top=Math.min(spY,curY)+'px';
-  db.style.width=Math.abs(curX-spX)+'px'; db.style.height=Math.abs(curY-spY)+'px';
+  var scaleX=img.naturalWidth/rect.width;
+  var scaleY=img.naturalHeight/rect.height;
+  var curX=e.clientX-rect.left, curY=e.clientY-rect.top;
+  if(isDrawing){
+    var spX=drawStartX/scaleX;
+    var spY=drawStartY/scaleY;
+    bboxDrawingEl.style.left=Math.min(spX,curX)+'px'; bboxDrawingEl.style.top=Math.min(spY,curY)+'px';
+    bboxDrawingEl.style.width=Math.abs(curX-spX)+'px'; bboxDrawingEl.style.height=Math.abs(curY-spY)+'px';
+  }
 });
-drawTarget.addEventListener('mouseup',function(e){
-  if(!isDrawing)return; isDrawing=false; document.getElementById('bboxDrawing').style.display='none';
-  var r=drawTarget.getBoundingClientRect();
+bboxLayer.addEventListener('mouseup',function(e){
+  if(!isDrawing)return; isDrawing=false; bboxDrawingEl.style.display='none';
+  var rect=imageWrap.getBoundingClientRect();
   var img=document.getElementById('mainImage');
-  var endX=(e.clientX-r.left)*img.naturalWidth/r.width, endY=(e.clientY-r.top)*img.naturalHeight/r.height;
+  var scaleX=img.naturalWidth/rect.width;
+  var scaleY=img.naturalHeight/rect.height;
+  var endX=(e.clientX-rect.left)*scaleX, endY=(e.clientY-rect.top)*scaleY;
   var x=Math.min(drawStartX,endX),y=Math.min(drawStartY,endY),w=Math.abs(endX-drawStartX),h=Math.abs(endY-drawStartY);
   if(w<15||h<15)return;
   addBBox(currentDrawingItem,{x:x,y:y,w:w,h:h},img.naturalWidth,img.naturalHeight);
+});
+bboxLayer.addEventListener('mouseleave',function(){
+  if(isDrawing){ isDrawing=false; bboxDrawingEl.style.display='none'; }
 });
 function addBBox(name,bbox,imgW,imgH){
   itemHazards[name].hasIssue=true; itemHazards[name].hazardCounter++;
