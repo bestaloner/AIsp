@@ -5,164 +5,319 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>方案D：标签页式 · 隐患标注系统</title>
 <style>
-/* ====== V4.1 Design System ====== */
+/* ====== Design System v2 ====== */
 :root {
-  --color-header-bg: #2E41CD; --color-content-bg: #F0F2F5; --color-card-bg: #FFFFFF;
-  --text-primary: #262626; --text-secondary: #8C8C8C; --text-white: #FFFFFF;
-  --border-color: #D9D9D9; --border-light: #E8E8E8;
-  --radius-sm: 4px; --radius-md: 8px; --radius-lg: 10px;
-  --shadow-card: 0 1px 3px rgba(0,0,0,0.08);
-  --blue-primary: #2E41CD; --blue-light: #009CFF; --orange: #F57A00;
-  --green: #52C41A; --red: #E2091C;
-  --ease: cubic-bezier(0.4, 0, 0.2, 1); --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --blue-900: #1A237E; --blue-700: #283593; --blue-600: #3949AB; --blue-500: #5C6BC0;
+  --blue-50: #E8EAF6; --blue-25: #F5F6FC;
+  --gray-900: #1A1A2E; --gray-700: #3A3A52; --gray-500: #78849E; --gray-300: #C5CAD8;
+  --gray-100: #EDEFF4; --gray-50: #F7F8FB;
+  --white: #FFFFFF;
+  --green-500: #34A853; --green-50: #EDF7F0;
+  --red-500: #E53935; --red-50: #FEF0EF;
+  --amber-500: #F59E0B; --amber-50: #FFF9EB;
+  --orange-500: #F57A00;
+  --cyan-400: #26C6DA;
+  --radius: 6px; --radius-lg: 10px;
+  --shadow-xs: 0 1px 2px rgba(26,26,46,0.04);
+  --shadow-sm: 0 1px 3px rgba(26,26,46,0.06), 0 1px 2px rgba(26,26,46,0.04);
+  --shadow-md: 0 4px 12px rgba(26,26,46,0.06), 0 2px 4px rgba(26,26,46,0.04);
+  --shadow-lg: 0 8px 24px rgba(26,26,46,0.08), 0 4px 8px rgba(26,26,46,0.04);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 150ms; --duration-normal: 250ms; --duration-slow: 400ms;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { font-size: 14px; }
 body {
-  font-family: 'Microsoft YaHei','PingFang SC',-apple-system,sans-serif;
-  color: var(--text-primary); background: var(--color-content-bg);
+  font-family: -apple-system, BlinkMacSystemFont, 'Microsoft YaHei', 'PingFang SC', 'Segoe UI', sans-serif;
+  color: var(--gray-900); background: var(--gray-50);
   line-height: 1.6; height: 100vh; overflow: hidden;
   display: flex; flex-direction: column;
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
 }
 
-/* Header */
-.platform-header { height: 48px; min-height: 48px; background: var(--color-header-bg); color: var(--text-white); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; flex-shrink: 0; font-size: 14px; font-weight: 500; }
-.platform-header-left { display: flex; align-items: center; gap: 16px; }
-.platform-logo { font-size: 16px; font-weight: 700; letter-spacing: 1.5px; }
-.platform-logo .lg-accent { color: var(--blue-light); }
-.platform-breadcrumb { font-size: 12px; opacity: 0.8; }
-.platform-breadcrumb span { opacity: 0.5; }
-.platform-header-right { display: flex; align-items: center; gap: 14px; font-size: 12px; }
-.platform-avatar { width: 30px; height: 30px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+/* ── Header ── */
+.platform-header {
+  height: 48px; min-height: 48px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--blue-900), var(--blue-700));
+  color: var(--white); display: flex; align-items: center;
+  justify-content: space-between; padding: 0 20px;
+  font-size: 13px; font-weight: 500; letter-spacing: 0.01em;
+}
+.platform-header-left { display: flex; align-items: center; gap: 18px; }
+.platform-logo { font-size: 15px; font-weight: 800; letter-spacing: 2px; }
+.platform-logo .lg-accent { color: var(--cyan-400); }
+.platform-breadcrumb { font-size: 11px; opacity: 0.75; }
+.platform-breadcrumb span { opacity: 0.45; }
+.platform-header-right { display: flex; align-items: center; gap: 14px; font-size: 11px; opacity: 0.85; }
+.platform-avatar {
+  width: 28px; height: 28px; background: rgba(255,255,255,0.15);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; backdrop-filter: blur(4px);
+}
 
-/* Toolbar */
-.toolbar { height: 42px; min-height: 42px; background: var(--color-card-bg); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; flex-shrink: 0; }
-.toolbar-left { display: flex; align-items: center; gap: 12px; }
-.toolbar-title { font-weight: 600; font-size: 14px; }
-.toolbar-right { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); }
+/* ── Toolbar ── */
+.toolbar {
+  height: 40px; min-height: 40px; flex-shrink: 0;
+  background: var(--white); border-bottom: 1px solid var(--gray-100);
+  display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
+}
+.toolbar-left { display: flex; align-items: center; gap: 10px; }
+.toolbar-title { font-weight: 700; font-size: 13px; color: var(--gray-900); }
+.toolbar-right { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--gray-500); }
 
-/* Buttons */
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 7px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid transparent; transition: all var(--transition-fast); font-family: inherit; white-space: nowrap; }
-.btn-primary { background: var(--blue-primary); color: #fff; }
-.btn-primary:hover { background: #2539B5; }
-.btn-outline { background: transparent; color: var(--text-primary); border: 1px solid var(--border-color); }
-.btn-outline:hover { border-color: var(--blue-primary); color: var(--blue-primary); }
+/* ── Buttons ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 8px 16px; border-radius: var(--radius); font-size: 12px; font-weight: 600;
+  cursor: pointer; border: none; transition: all var(--duration-fast) var(--ease-out);
+  font-family: inherit; white-space: nowrap; letter-spacing: 0.01em;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary {
+  background: var(--blue-600); color: #fff;
+  box-shadow: 0 2px 8px rgba(57,73,171,0.25);
+}
+.btn-primary:hover { background: var(--blue-700); box-shadow: 0 4px 14px rgba(57,73,171,0.35); }
+.btn-outline {
+  background: var(--white); color: var(--gray-700);
+  border: 1px solid var(--gray-300);
+}
+.btn-outline:hover { border-color: var(--blue-500); color: var(--blue-600); background: var(--blue-25); }
 
-/* Badges */
-.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; gap: 3px; }
-.badge-info { background: #E6F7FF; color: #096DD9; border: 1px solid #91D5FF; }
-.badge-success { background: #F6FFED; color: #389E0D; border: 1px solid #B7EB8F; }
+/* ── Badges ── */
+.badge {
+  display: inline-flex; align-items: center; padding: 2px 8px;
+  border-radius: 20px; font-size: 10px; font-weight: 600; gap: 3px;
+}
+.badge-info { background: var(--blue-25); color: var(--blue-600); }
 
-/* Main Layout */
+/* ── Main Layout ── */
 .main { flex: 1; display: flex; overflow: hidden; }
 
-/* Image List Sidebar */
-.ils-sidebar { width: 200px; min-width: 200px; flex-shrink: 0; background: var(--color-card-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; overflow: hidden; }
-.ils-header { padding: 10px 12px; border-bottom: 1px solid var(--border-light); font-weight: 600; font-size: 12px; flex-shrink: 0; background: #FAFAFA; }
-.ils-filters { display: flex; padding: 6px 8px; gap: 3px; border-bottom: 1px solid var(--border-light); flex-shrink: 0; }
-.ils-filter { flex: 1; text-align: center; padding: 3px 0; border-radius: var(--radius-sm); font-size: 10px; cursor: pointer; border: 1px solid var(--border-color); background: #fff; color: var(--text-secondary); }
-.ils-filter:hover { border-color: var(--blue-primary); color: var(--blue-primary); }
-.ils-filter.active { background: var(--blue-primary); color: #fff; border-color: var(--blue-primary); }
+/* ── Image List Sidebar ── */
+.ils-sidebar {
+  width: 200px; min-width: 200px; flex-shrink: 0;
+  background: var(--white); border-right: 1px solid var(--gray-100);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.ils-header {
+  padding: 10px 14px; border-bottom: 1px solid var(--gray-100);
+  font-weight: 700; font-size: 11px; flex-shrink: 0; background: var(--gray-50);
+  color: var(--gray-700); text-transform: uppercase; letter-spacing: 0.06em;
+}
+.ils-filters {
+  display: flex; padding: 8px 10px; gap: 4px;
+  border-bottom: 1px solid var(--gray-100); flex-shrink: 0;
+}
+.ils-filter {
+  flex: 1; text-align: center; padding: 4px 0; border-radius: 20px;
+  font-size: 10px; cursor: pointer; border: 1px solid var(--gray-300);
+  background: var(--white); color: var(--gray-500); font-weight: 500;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+.ils-filter:hover { border-color: var(--blue-500); color: var(--blue-600); }
+.ils-filter.active { background: var(--blue-600); color: #fff; border-color: var(--blue-600); }
 .ils-list { flex: 1; overflow-y: auto; }
 .ils-list::-webkit-scrollbar { width: 4px; }
-.ils-list::-webkit-scrollbar-track { background: transparent; }
-.ils-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
-.ils-item { display: flex; align-items: center; gap: 6px; padding: 8px 10px; cursor: pointer; border-bottom: 1px solid var(--border-light); font-size: 11px; }
-.ils-item:hover { background: #F5F7FA; }
-.ils-item.active { background: #E6F0FF; border-left: 3px solid var(--blue-primary); }
-.ils-item .ils-seq { width: 20px; height: 20px; border-radius: 50%; background: #F0F2F5; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; }
-.ils-item.active .ils-seq { background: var(--blue-primary); color: #fff; }
+.ils-list::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 2px; }
+.ils-item {
+  display: flex; align-items: center; gap: 8px; padding: 9px 12px; cursor: pointer;
+  border-bottom: 1px solid var(--gray-100); font-size: 11px;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+.ils-item:hover { background: var(--blue-25); }
+.ils-item.active { background: var(--blue-25); border-left: 3px solid var(--blue-600); }
+.ils-item .ils-seq {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--gray-100); color: var(--gray-500);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; flex-shrink: 0;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+.ils-item.active .ils-seq { background: var(--blue-600); color: #fff; }
 .ils-item .ils-info { flex: 1; min-width: 0; }
-.ils-item .ils-fname { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ils-item .ils-meta { font-size: 9px; color: var(--text-secondary); }
-.ils-status { font-size: 14px; flex-shrink: 0; }
+.ils-item .ils-fname { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--gray-700); }
+.ils-item .ils-meta { font-size: 9px; color: var(--gray-500); }
+.ils-status { font-size: 12px; flex-shrink: 0; }
 
-/* Center: Image Panel */
-.image-panel { flex: 1; display: flex; flex-direction: column; background: #F5F5F5; border-right: 1px solid var(--border-color); overflow: hidden; position: relative; }
-.image-topbar { padding: 6px 14px; display: flex; align-items: center; justify-content: space-between; background: #FAFAFA; border-bottom: 1px solid var(--border-light); flex-shrink: 0; font-size: 12px; color: var(--text-secondary); }
-.image-container { flex: 1; position: relative; overflow: auto; display: flex; align-items: center; justify-content: center; padding: 12px; }
-.image-canvas-wrap { position: relative; display: inline-block; box-shadow: 0 2px 16px rgba(0,0,0,0.1); border-radius: var(--radius-sm); overflow: hidden; line-height: 0; }
-.image-canvas-wrap img { display: block; max-width: 100%; max-height: calc(100vh - 210px); user-select: none; -webkit-user-drag: none; }
+/* ── Center: Image Panel ── */
+.image-panel {
+  flex: 1; display: flex; flex-direction: column;
+  background: #E8ECF0; border-right: 1px solid var(--gray-100);
+  overflow: hidden; position: relative;
+}
+.image-topbar {
+  padding: 6px 14px; display: flex; align-items: center; justify-content: space-between;
+  background: var(--gray-50); border-bottom: 1px solid var(--gray-100);
+  flex-shrink: 0; font-size: 11px; color: var(--gray-500);
+}
+.image-container { flex: 1; position: relative; overflow: auto; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.image-canvas-wrap {
+  position: relative; display: inline-block;
+  box-shadow: var(--shadow-lg); border-radius: var(--radius);
+  overflow: hidden; line-height: 0;
+}
+.image-canvas-wrap img { display: block; max-width: 100%; max-height: calc(100vh - 210px); user-select: none; }
 
-/* BBox */
+/* ── BBox ── */
 .bbox-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: crosshair; }
-.bbox-rect { position: absolute; border: 2.5px solid; border-radius: 2px; pointer-events: auto; cursor: pointer; z-index: 2; box-shadow: 0 0 0 3px rgba(0,0,0,0.06); }
-.bbox-rect:hover { box-shadow: 0 0 0 5px rgba(0,0,0,0.12); z-index: 5; }
-.bbox-number { position: absolute; top: -24px; left: -1px; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px 3px 0 0; white-space: nowrap; pointer-events: none; }
-.bbox-drawing { position: absolute; border: 2px dashed var(--blue-primary); background: rgba(46,65,205,0.08); pointer-events: none; z-index: 20; display: none; }
-.image-tooltip { position: absolute; background: rgba(0,0,0,0.75); color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; pointer-events: none; z-index: 30; display: none; white-space: nowrap; }
+.bbox-rect {
+  position: absolute; border: 2.5px solid; border-radius: 3px;
+  pointer-events: auto; cursor: pointer; z-index: 2;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0) inset, 0 0 0 3px rgba(0,0,0,0.06);
+  transition: box-shadow var(--duration-fast) var(--ease-out);
+}
+.bbox-rect:hover { box-shadow: 0 0 0 9999px rgba(0,0,0,0) inset, 0 0 0 6px rgba(0,0,0,0.12); z-index: 5; }
+.bbox-number {
+  position: absolute; top: -22px; left: -1px;
+  color: #fff; font-size: 9px; font-weight: 700;
+  padding: 2px 6px; border-radius: 3px 3px 0 0; white-space: nowrap; pointer-events: none;
+  letter-spacing: 0.03em;
+}
+.bbox-drawing {
+  position: absolute; border: 2px dashed var(--blue-500);
+  background: rgba(92,107,192,0.06); pointer-events: none; z-index: 20; display: none;
+  border-radius: 2px;
+}
+.image-tooltip {
+  position: absolute; background: var(--gray-900); color: #fff;
+  padding: 4px 10px; border-radius: var(--radius); font-size: 10px;
+  pointer-events: none; z-index: 30; display: none; white-space: nowrap;
+  box-shadow: var(--shadow-md);
+}
 
-/* Right: Tab Panel */
-.tab-panel { width: 520px; min-width: 520px; flex-shrink: 0; display: flex; overflow: hidden; background: var(--color-content-bg); }
+/* ── Right: Tab Panel ── */
+.tab-panel { width: 520px; min-width: 520px; flex-shrink: 0; display: flex; overflow: hidden; background: var(--gray-50); }
 
-/* Vertical tab bar */
-.tab-bar { width: 100px; min-width: 100px; flex-shrink: 0; background: #FAFAFA; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; overflow-y: auto; }
-.tab-btn { display: flex; align-items: center; gap: 6px; padding: 12px 10px; cursor: pointer; border-bottom: 1px solid var(--border-light); font-size: 12px; font-weight: 500; color: var(--text-secondary); transition: all 0.15s; user-select: none; border-left: 3px solid transparent; }
-.tab-btn:hover { background: #F0F4FF; color: var(--blue-primary); }
-.tab-btn.active { background: #fff; color: var(--blue-primary); border-left-color: var(--blue-primary); font-weight: 700; }
-.tab-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.tab-dot.dot-none { background: #D9D9D9; }
-.tab-dot.dot-issue { background: #E2091C; }
-.tab-dot.dot-safe { background: #52C41A; }
-.tab-badge { font-size: 10px; background: #E2091C; color: #fff; border-radius: 10px; padding: 1px 6px; margin-left: auto; }
+/* Tab bar */
+.tab-bar {
+  width: 96px; min-width: 96px; flex-shrink: 0;
+  background: var(--white); border-right: 1px solid var(--gray-100);
+  display: flex; flex-direction: column; overflow-y: auto; padding: 6px 0;
+}
+.tab-btn {
+  display: flex; align-items: center; gap: 7px; padding: 11px 10px; cursor: pointer;
+  font-size: 12px; font-weight: 500; color: var(--gray-500);
+  transition: all var(--duration-fast) var(--ease-out);
+  user-select: none; border-left: 3px solid transparent; position: relative;
+}
+.tab-btn:hover { background: var(--blue-25); color: var(--blue-600); }
+.tab-btn.active { background: var(--blue-25); color: var(--blue-600); border-left-color: var(--blue-600); font-weight: 700; }
+.tab-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; transition: background var(--duration-fast) var(--ease-out); }
+.tab-dot.dot-none { background: var(--gray-300); }
+.tab-dot.dot-issue { background: var(--red-500); box-shadow: 0 0 0 3px rgba(229,57,53,0.15); }
+.tab-dot.dot-safe { background: var(--green-500); box-shadow: 0 0 0 3px rgba(52,168,83,0.15); }
+.tab-badge {
+  font-size: 9px; background: var(--red-500); color: #fff;
+  border-radius: 10px; padding: 1px 6px; margin-left: auto; font-weight: 700;
+  min-width: 18px; text-align: center;
+}
 
 /* Tab content */
 .tab-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-.tab-content-inner { flex: 1; overflow-y: auto; padding: 12px; }
+.tab-content-inner { flex: 1; overflow-y: auto; padding: 14px; }
 .tab-content-inner::-webkit-scrollbar { width: 5px; }
-.tab-content-inner::-webkit-scrollbar-track { background: transparent; }
-.tab-content-inner::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+.tab-content-inner::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 3px; }
 
-.tab-section { background: var(--color-card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; margin-bottom: 10px; box-shadow: var(--shadow-card); }
-.tab-section-title { font-weight: 600; font-size: 13px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.tab-section {
+  background: var(--white); border: 1px solid var(--gray-100);
+  border-radius: var(--radius-lg); padding: 14px; margin-bottom: 10px;
+  box-shadow: var(--shadow-xs);
+}
+.tab-section-title { font-weight: 700; font-size: 13px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; color: var(--gray-900); }
 
-/* Form */
+/* ── Form ── */
 .fg { margin-bottom: 10px; }
 .fg:last-child { margin-bottom: 0; }
-.fg label { display: block; font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
-.fg label .required { color: #E2091C; margin-left: 1px; }
-.fg select { width: 100%; height: 36px; background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 12px; color: var(--text-primary); outline: none; transition: all 0.15s; font-family: inherit; cursor: pointer; -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238C8C8C' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; padding: 0 28px 0 10px; }
-.fg select:focus { border-color: var(--blue-primary); box-shadow: 0 0 0 2px rgba(46,65,205,0.1); }
-.fg select:disabled { background: #F5F5F5; color: #BFBFBF; cursor: not-allowed; }
-.fg textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 12px; color: var(--text-primary); outline: none; transition: all 0.15s; font-family: inherit; resize: vertical; min-height: 60px; background: #FFFFFF; }
-.fg textarea:focus { border-color: var(--blue-primary); box-shadow: 0 0 0 2px rgba(46,65,205,0.1); }
-.fg textarea::placeholder { color: #BFBFBF; }
-.cascade-arrow { text-align: center; font-size: 10px; color: var(--text-secondary); margin: -2px 0; }
+.fg label {
+  display: block; font-size: 10.5px; font-weight: 600;
+  color: var(--gray-500); margin-bottom: 4px;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.fg label .required { color: var(--red-500); margin-left: 1px; }
+.fg select {
+  width: 100%; height: 36px; background: var(--white);
+  border: 1px solid var(--gray-300); border-radius: var(--radius);
+  font-size: 12px; color: var(--gray-900); outline: none;
+  transition: all var(--duration-fast) var(--ease-out); font-family: inherit;
+  cursor: pointer; -webkit-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%2378849E' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center;
+  padding: 0 28px 0 10px;
+}
+.fg select:focus { border-color: var(--blue-500); box-shadow: 0 0 0 3px rgba(92,107,192,0.1); }
+.fg select:disabled { background: var(--gray-50); color: var(--gray-300); cursor: not-allowed; }
+.fg textarea {
+  width: 100%; padding: 9px 10px; border: 1px solid var(--gray-300);
+  border-radius: var(--radius); font-size: 12px; color: var(--gray-900);
+  outline: none; transition: all var(--duration-fast) var(--ease-out);
+  font-family: inherit; resize: vertical; min-height: 56px; background: var(--white);
+}
+.fg textarea:focus { border-color: var(--blue-500); box-shadow: 0 0 0 3px rgba(92,107,192,0.1); }
+.fg textarea::placeholder { color: var(--gray-300); }
+.cascade-arrow { text-align: center; font-size: 10px; color: var(--gray-300); margin: -1px 0 2px; }
 
-/* Status buttons */
-.status-row { display: flex; gap: 6px; }
-.status-btn { padding: 5px 14px; border-radius: 20px; font-size: 11px; font-weight: 600; cursor: pointer; border: 2px solid var(--border-color); background: #fff; transition: all 0.15s; user-select: none; }
-.status-btn.btn-issue { color: #E2091C; border-color: #E2091C; }
-.status-btn.btn-issue:hover { background: #FFF2F0; }
-.status-btn.btn-issue.active { background: #E2091C; color: #fff; }
-.status-btn.btn-safe { color: #52C41A; border-color: #52C41A; }
-.status-btn.btn-safe:hover { background: #F6FFED; }
-.status-btn.btn-safe.active { background: #52C41A; color: #fff; }
+/* ── Status buttons ── */
+.status-row { display: flex; gap: 8px; }
+.status-btn {
+  padding: 6px 16px; border-radius: 20px; font-size: 11px; font-weight: 700;
+  cursor: pointer; border: 2px solid var(--gray-300); background: var(--white);
+  transition: all var(--duration-fast) var(--ease-out); user-select: none;
+  letter-spacing: 0.02em;
+}
+.status-btn.btn-issue { color: var(--red-500); border-color: var(--red-500); }
+.status-btn.btn-issue:hover { background: var(--red-50); }
+.status-btn.btn-issue.active { background: var(--red-500); color: #fff; box-shadow: 0 2px 8px rgba(229,57,53,0.3); }
+.status-btn.btn-safe { color: var(--green-500); border-color: var(--green-500); }
+.status-btn.btn-safe:hover { background: var(--green-50); }
+.status-btn.btn-safe.active { background: var(--green-500); color: #fff; box-shadow: 0 2px 8px rgba(52,168,83,0.3); }
 
+/* ── Draw hint ── */
+.draw-hint {
+  display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px;
+  background: var(--blue-25); color: var(--blue-600); border-radius: 20px;
+  font-size: 11px; font-weight: 600; cursor: pointer; margin-bottom: 10px;
+  border: 1px solid rgba(92,107,192,0.15);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+.draw-hint:hover { background: #DEE3F8; }
 
-/* Draw hint */
-.draw-hint { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: #E6F0FF; color: var(--blue-primary); border-radius: var(--radius-sm); font-size: 12px; font-weight: 500; cursor: pointer; margin-bottom: 8px; }
+/* ── Hazard card ── */
+.hz-card {
+  border: 1px solid var(--gray-100); border-radius: var(--radius-lg);
+  padding: 12px; margin-bottom: 8px; background: var(--amber-50);
+  box-shadow: var(--shadow-xs); transition: box-shadow var(--duration-fast) var(--ease-out);
+}
+.hz-card:hover { box-shadow: var(--shadow-sm); }
+.hz-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-weight: 700; font-size: 11px; }
+.hz-card-del {
+  cursor: pointer; color: var(--gray-500); font-size: 15px; padding: 2px 7px;
+  border-radius: var(--radius); transition: all var(--duration-fast) var(--ease-out);
+}
+.hz-card-del:hover { color: var(--red-500); background: var(--red-50); }
 
-/* Hazard entry card */
-.hz-card { border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 10px; margin-bottom: 8px; background: #FFFBEB; }
-.hz-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-weight: 600; font-size: 12px; }
-.hz-card-del { cursor: pointer; color: var(--text-secondary); font-size: 14px; padding: 2px 6px; border-radius: var(--radius-sm); }
-.hz-card-del:hover { color: #E2091C; background: #FFF2F0; }
+.safe-msg { text-align: center; padding: 20px; font-size: 13px; color: var(--green-500); background: var(--green-50); border-radius: var(--radius-lg); font-weight: 600; }
+.none-msg { text-align: center; padding: 28px; color: var(--gray-500); font-size: 12px; }
 
-.safe-msg { text-align: center; padding: 16px; font-size: 13px; color: #52C41A; background: #F6FFED; border-radius: var(--radius-md); }
-.none-msg { text-align: center; padding: 24px; color: var(--text-secondary); font-size: 13px; }
-
-/* Footer */
-.tab-panel-footer { padding: 12px 14px; border-top: 1px solid var(--border-color); background: var(--color-card-bg); flex-shrink: 0; display: flex; gap: 8px; }
+/* ── Footer ── */
+.tab-panel-footer {
+  padding: 12px 14px; border-top: 1px solid var(--gray-100);
+  background: var(--white); flex-shrink: 0; display: flex; gap: 8px;
+}
 .tab-panel-footer .btn { flex: 1; }
 
-/* Toast */
-.toast { position: fixed; top: 58px; right: 16px; padding: 10px 18px; border-radius: var(--radius-sm); font-size: 13px; z-index: 999; font-weight: 500; animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: none; box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+/* ── Toast ── */
+.toast {
+  position: fixed; top: 58px; right: 20px; padding: 10px 18px;
+  border-radius: var(--radius); font-size: 12px; z-index: 999; font-weight: 600;
+  display: none; box-shadow: var(--shadow-lg); letter-spacing: 0.01em;
+  pointer-events: none;
+}
 .toast.show { display: block; }
-.toast-success { background: var(--green); color: #fff; }
-.toast-error { background: var(--red); color: #fff; }
-.toast-info { background: var(--blue-primary); color: #fff; }
-@keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.toast-success { background: var(--green-500); color: #fff; }
+.toast-error { background: var(--red-500); color: #fff; }
+.toast-info { background: var(--blue-600); color: #fff; }
 </style>
 </head>
 <body>
@@ -170,21 +325,20 @@ body {
 <div class="platform-header">
   <div class="platform-header-left">
     <div class="platform-logo">Vision<span class="lg-accent">Guard</span></div>
-    <div class="platform-breadcrumb"><span>│</span> AI 能力平台 <span>›</span> <strong>隐患标注 · 方案D</strong></div>
+    <div class="platform-breadcrumb"><span>|</span> AI 能力平台 <span>></span> <strong>隐患标注 · 方案D</strong></div>
   </div>
   <div class="platform-header-right"><span>CAM-03</span><span>2025-07-01</span><div class="platform-avatar">张</div></div>
 </div>
 
 <div class="toolbar">
-  <div class="toolbar-left"><span class="toolbar-title">📝 方案D：标签页式标注</span><span class="badge badge-info">6项检查</span></div>
-  <div class="toolbar-right">💡 左侧标签切换检查项 → 填写描述 → 勾选「有隐患」→ 在图上画框 → 联级填写证据链</div>
+  <div class="toolbar-left"><span class="toolbar-title">方案D：标签页式标注</span><span class="badge badge-info">6项检查</span></div>
+  <div class="toolbar-right">左侧标签切换检查项 - 填写描述 - 勾选「有隐患」- 在图上画框 - 联级填写证据链</div>
 </div>
 
 <div class="main">
 
-  <!-- Image List -->
   <div class="ils-sidebar">
-    <div class="ils-header">🖼️ 图像序列</div>
+    <div class="ils-header">图像序列</div>
     <div class="ils-filters">
       <div class="ils-filter active" data-filter="all" onclick="filterImg(this,'all')">全部</div>
       <div class="ils-filter" data-filter="done" onclick="filterImg(this,'done')">已完成</div>
@@ -193,9 +347,8 @@ body {
     <div class="ils-list" id="ilsList"></div>
   </div>
 
-  <!-- Image -->
   <div class="image-panel">
-    <div class="image-topbar"><span>📷 抓拍图像预览</span><span id="bboxCount" style="color:var(--blue-primary);font-weight:600">已标记：0 处</span></div>
+    <div class="image-topbar"><span>抓拍图像预览</span><span id="bboxCount" style="color:var(--blue-600);font-weight:700">已标记：0 处</span></div>
     <div class="image-container" id="imageContainer">
       <div class="image-canvas-wrap" id="imageCanvasWrap">
         <img id="mainImage" src="" alt="标注图像" />
@@ -206,14 +359,13 @@ body {
     </div>
   </div>
 
-  <!-- Tab Panel -->
   <div class="tab-panel" id="tabPanel">
     <div class="tab-bar" id="tabBar"></div>
     <div class="tab-content">
       <div class="tab-content-inner" id="tabContentInner"></div>
       <div class="tab-panel-footer">
         <button class="btn btn-outline" onclick="exitPage()">退出</button>
-        <button class="btn btn-primary" onclick="submitAll()" style="flex:2">✓ 提交标注</button>
+        <button class="btn btn-primary" onclick="submitAll()" style="flex:2">提交标注</button>
       </div>
     </div>
   </div>
@@ -221,25 +373,63 @@ body {
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script>
 // ── Data ──
 var CASCADE_DATA = {"高处作业":{"施工现场存在坠落高度基准面2m及以上的作业面临边未设置安全防护设施":{"GB 55023-2022第4.4.4条":["脚手架作业层应采取安全防护措施，并应符合下列规定:1 当作业层边缘与结构外表面的距离大于150mm时，应采取防护措施。"],"JGJ 80-2016第4.1.1条":["坠落高度基准面2m及以上进行临边作业时，应在临空一侧设置防护栏杆，并应采用密目式安全立网或工具式栏板封闭。"]},"现场作业人员未按规定配备安全帽就上岗作业 。":{"JGJ 184-2009 第2.0.4条":["进入施工现场人员必须佩戴安全帽。"]},"现场2m以上的悬空作业人员，未按规定佩戴安全带。":{"JGJ 184-2009 第2.0.4条":["在2m及以上的无可靠安全防护设施的高处作业时，必须系挂安全带。"]}},"基坑工程":{"坑边存在施工机械作业或堆载，荷载可能超过设计允许要求":{"JGJ 120-2012第8.1.5条":["基坑周边施工材料、设施或车辆荷载严禁超过设计要求的地面荷载限值"],"JGJ 311-2013第11.2.2条":["基坑周边1.5m范围内不宜堆载，3m以内限制堆载，坑边严禁重型车辆通行。"]},"未按要求在基坑顶采取有效截水措施":{"JGJ 120-2012 第8.1.6条":["雨期施工时，应在坑顶、坑底采取有效的截排水措施。"]}},"施工升降机":{"工人违规无证操作施工升降机":{"JGJ 33-2012第2.0.7条":["操作人员不得擅自离开工作岗位或将机械交给其他无证人员操作。"]},"施工升降机承载人数超过9人。":{"韶建电[2017]68号":["原则上承载人数不得超过9人（含司机）。"]}},"消防安全":{"施工现场工人随地吸烟":{"GB 50720-2011第6.4.5条":["施工现场严禁吸烟。"]}},"起重吊装及施工机具":{"施工现场使用承插型盘扣式钢管等材料简易搭设非标料斗进行吊装作业。":{"闽建办建函〔2024〕60号第二条第（三）款":["严禁使用承插型盘扣式钢管等材料简易搭设非标料斗进行吊装作业。"]},"吊篮内操作人员的数量不符合使用要求。":{"JGJ/T429-2018第5.5.8条":["吊篮内的作业人员不应超过2个。"]}},"场容场貌":{"施工现场围墙(或围挡)未连续封闭设置。":{"JGJ 59-2011第3.2.3条":["市区主要路段的工地应设置高度不小于2.5m的封闭围挡。"]}}};
 
 var ALL_ITEMS = Object.keys(CASCADE_DATA).sort();
-var bboxColors = ['#E2091C','#F57A00','#F59E0B','#52C41A','#009CFF','#2E41CD','#8B5CF6','#06B6D4','#E2091C','#F57A00','#52C41A','#8B5CF6'];
+var bboxColors = ['#E53935','#F57A00','#F59E0B','#34A853','#26C6DA','#5C6BC0','#8B5CF6','#EC4899','#E53935','#F57A00','#34A853','#8B5CF6'];
 
 // ── State ──
-// itemStates[name] = { status:'none'|'safe'|'issue', hazards:{hid:{bbox,imgW,imgH,color,index,formValues}}, hazardCounter:int, description:string }
 var itemStates = {};
 var activeTab = '';
 var isDrawing = false, drawStartX, drawStartY;
 var imageStore = {};
 
-// ── Init item states ──
 ALL_ITEMS.forEach(function(n) {
   itemStates[n] = { status: 'none', hazards: {}, hazardCounter: 0, description: '' };
 });
 activeTab = ALL_ITEMS[0];
+
+// ═══════════════ GSAP Animation Helpers ═══════════════
+function animIn(el, vars) {
+  if (typeof gsap === 'undefined') return;
+  vars = vars || {};
+  gsap.fromTo(el,
+    { opacity: 0, y: (vars.y||8), scale: (vars.scale||1) },
+    { opacity: 1, y: 0, scale: 1, duration: (vars.dur||0.3), ease: vars.ease||'power3.out', onComplete: vars.onComplete }
+  );
+}
+function animOut(el, vars) {
+  if (typeof gsap === 'undefined') return;
+  vars = vars || {};
+  gsap.to(el, { opacity: 0, y: (vars.y||-4), duration: (vars.dur||0.15), ease: 'power2.in', onComplete: function() {
+    if (vars.onComplete) vars.onComplete();
+  }});
+}
+function animPress(el) {
+  if (typeof gsap === 'undefined') return;
+  gsap.to(el, { scale: 0.95, duration: 0.08, ease: 'power2.in', onComplete: function() {
+    gsap.to(el, { scale: 1, duration: 0.2, ease: 'elastic.out(1, 0.3)' });
+  }});
+}
+
+function animateHazardCardEntrance(cardEl) {
+  if (typeof gsap === 'undefined') return;
+  gsap.fromTo(cardEl,
+    { opacity: 0, y: 12, scale: 0.96 },
+    { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: 'back.out(1.4)' }
+  );
+}
+
+function animateToast(el) {
+  if (typeof gsap === 'undefined') return;
+  gsap.fromTo(el,
+    { x: 80, opacity: 0 },
+    { x: 0, opacity: 1, duration: 0.3, ease: 'power3.out' }
+  );
+}
 
 // ═══════════════ Image List ═══════════════
 var IMAGE_LIST = [], currentImg = 0;
@@ -256,9 +446,9 @@ function renderImgList(f) {
     var im = vis[i];
     var d = imageStore[im.id] && imageStore[im.id].done;
     var act = (IMAGE_LIST[currentImg] && im.id === IMAGE_LIST[currentImg].id) ? ' active' : '';
-    h += '<div class="ils-item'+act+'" onclick="switchImg(\''+im.id+'\')"><span class="ils-seq">'+im.seq+'</span><span class="ils-info"><span class="ils-fname">'+im.filename+'</span><span class="ils-meta">'+im.time+'</span></span><span class="ils-status">'+(d?'✅':'⬜')+'</span></div>';
+    h += '<div class="ils-item'+act+'" onclick="switchImg(\''+im.id+'\')"><span class="ils-seq">'+im.seq+'</span><span class="ils-info"><span class="ils-fname">'+im.filename+'</span><span class="ils-meta">'+im.time+'</span></span><span class="ils-status">'+(d?'&#x2714;':'&#x25CB;')+'</span></div>';
   }
-  document.getElementById('ilsList').innerHTML = h || '<div style="text-align:center;padding:20px;color:var(--text-secondary);font-size:12px">无匹配</div>';
+  document.getElementById('ilsList').innerHTML = h || '<div style="text-align:center;padding:20px;color:var(--gray-500);font-size:12px">无匹配</div>';
 }
 function filterImg(el, f) { document.querySelectorAll('.ils-filter').forEach(function(x){x.classList.remove('active')}); el.classList.add('active'); renderImgList(f); }
 
@@ -273,9 +463,7 @@ function switchImg(id) {
 
 function saveState() {
   if (!IMAGE_LIST[currentImg]) return;
-  // Save current description
   saveDesc();
-  // Save all form values
   saveAllFormValues();
   var imgId = IMAGE_LIST[currentImg].id;
   var s = { itemStates: {}, activeTab: activeTab, bboxLayerHTML: document.getElementById('bboxLayer').innerHTML };
@@ -312,7 +500,6 @@ function restoreState() {
   renderTabBar();
   renderTabContent();
   updateBboxCount();
-  // Restore form values after DOM is built
   restoreAllFormValues();
 }
 
@@ -358,12 +545,12 @@ function loadImage() {
     + '<line x1="633" y1="60" x2="800" y2="60" stroke="#666" stroke-width="2.5"/>'
     + '<line x1="650" y1="40" x2="633" y2="60" stroke="#666" stroke-width="2"/>'
     + '<line x1="800" y1="60" x2="800" y2="160" stroke="#666" stroke-width="1.5"/>'
-    + '<circle cx="650" cy="38" r="5" fill="#E2091C"/>'
+    + '<circle cx="650" cy="38" r="5" fill="#E53935"/>'
     + '<rect x="0" y="500" width="860" height="40" fill="#8B7355"/>'
     + '<rect x="0" y="500" width="860" height="5" fill="#6B8E23"/>'
     + '<rect x="60" y="455" width="70" height="45" fill="#D2B48C" stroke="#A0522D" stroke-width="1.5" rx="3"/>'
     + '<rect x="740" y="455" width="70" height="45" fill="#D2B48C" stroke="#A0522D" stroke-width="1.5" rx="3"/>'
-    + '<text x="430" y="525" font-size="14" fill="#595959" font-family="Microsoft YaHei,sans-serif" text-anchor="middle">建筑施工场景 — 在图上拖拽绘制隐患标记框</text>'
+    + '<text x="430" y="525" font-size="14" fill="#595959" font-family="Microsoft YaHei,sans-serif" text-anchor="middle">建筑施工场景 - 在图上拖拽绘制隐患标记框</text>'
     + '</svg>';
   document.getElementById('mainImage').src = 'data:image/svg+xml,' + encodeURIComponent(svg);
 }
@@ -376,7 +563,7 @@ var imageWrap = document.getElementById('imageCanvasWrap');
 
 bboxLayer.addEventListener('mousedown', function(e) {
   if (e.button !== 0) return;
-  if (itemStates[activeTab].status !== 'issue') { showToast('请先勾选当前检查项的「⚠ 有隐患」','error'); return; }
+  if (itemStates[activeTab].status !== 'issue') { showToast('请先勾选当前检查项的「有隐患」','error'); return; }
   var rect = imageWrap.getBoundingClientRect();
   var img = document.getElementById('mainImage');
   var scaleX = img.naturalWidth / rect.width;
@@ -410,7 +597,7 @@ bboxLayer.addEventListener('mousemove', function(e) {
   imageTooltip.style.display = 'block';
   imageTooltip.style.left = (curX + 14) + 'px';
   imageTooltip.style.top = (curY - 10) + 'px';
-  imageTooltip.textContent = isDrawing ? '拖拽中…' : '当前：'+activeTab+' — 在此处拖拽绘制标记框';
+  imageTooltip.textContent = isDrawing ? '拖拽中...' : '当前：'+activeTab+' - 在此处拖拽绘制标记框';
 });
 
 bboxLayer.addEventListener('mouseup', function(e) {
@@ -457,9 +644,7 @@ function addBBox(itemName, bbox, imgW, imgH) {
   var hid = 'hz-'+itemName.replace(/[^a-zA-Z一-鿿]/g,'')+'-'+st.hazardCounter;
   var color = bboxColors[(st.hazardCounter - 1) % bboxColors.length];
   st.hazards[hid] = { bbox:bbox, imgW:imgW, imgH:imgH, color:color, index:st.hazardCounter, formValues:{} };
-  // Draw bbox on image
   drawBBoxOnImage(hid, bbox, imgW, imgH, color, st.hazardCounter, itemName);
-  // Append form into hazard list using insertAdjacentHTML (no DOM destruction)
   appendHazardForm(itemName, hid);
   updateBboxCount();
   updateTabBar();
@@ -477,6 +662,10 @@ function drawBBoxOnImage(hid, bbox, imgW, imgH, color, idx, itemName) {
   num.textContent = itemNameAbbr(itemName)+idx;
   el.appendChild(num);
   document.getElementById('bboxLayer').appendChild(el);
+  // Animate bbox entrance
+  if (typeof gsap !== 'undefined') {
+    gsap.fromTo(el, { scale: 0.85, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: 'back.out(1.5)' });
+  }
 }
 
 function appendHazardForm(itemName, hid) {
@@ -484,27 +673,30 @@ function appendHazardForm(itemName, hid) {
   if (!container) return;
   var hz = itemStates[itemName].hazards[hid];
   var html = '<div class="hz-card" id="hzwrap-'+hid+'" style="border-left:3px solid '+hz.color+'">';
-  html += '<div class="hz-card-header"><span style="color:'+hz.color+'">🔴 隐患'+cn(hz.index)+'</span><span class="hz-card-del" onclick="rmHazard(\''+itemName+'\',\''+hid+'\')">✕</span></div>';
+  html += '<div class="hz-card-header"><span style="color:'+hz.color+'">隐患'+cn(hz.index)+'</span><span class="hz-card-del" onclick="rmHazard(\''+itemName+'\',\''+hid+'\')">&times;</span></div>';
   html += buildCascadeHTML(itemName, hid);
-  html += '<div class="fg" style="margin-top:8px"><label>违规描述 <span class="required">*</span></label><textarea id="txtNote-'+hid+'" placeholder="根据以上选择，用自然语言描述具体的违规事实…" style="min-height:50px"></textarea></div>';
+  html += '<div class="fg" style="margin-top:8px"><label>违规描述 <span class="required">*</span></label><textarea id="txtNote-'+hid+'" placeholder="根据以上选择，用自然语言描述具体的违规事实..." style="min-height:50px"></textarea></div>';
   html += '</div>';
   container.insertAdjacentHTML('beforeend', html);
+  // Animate the newly added card
+  var card = document.getElementById('hzwrap-'+hid);
+  if (card) { animateHazardCardEntrance(card); }
 }
 
 function buildCascadeHTML(itemName, hid) {
   var fv = (itemStates[itemName].hazards[hid] || {}).formValues || {};
   var h = '';
   h += '<div class="fg"><label>事实描述 <span class="required">*</span></label>';
-  h += '<select id="selItem-'+hid+'" onchange="onCascade(\''+hid+'\',1,\''+itemName+'\')"><option value="">— 请选择 —</option>';
+  h += '<select id="selItem-'+hid+'" onchange="onCascade(\''+hid+'\',1,\''+itemName+'\')"><option value="">- 请选择 -</option>';
   Object.keys(CASCADE_DATA[itemName] || {}).sort().forEach(function(d) {
-    h += '<option value="'+esc(d)+'"'+(fv.selItem===d?' selected':'')+'>'+d.substring(0,45)+'</option>';
+    h += '<option value="'+esc(d)+'"'+(fv.selItem===d?' selected':'')+'>'+d.substring(0,48)+'</option>';
   });
-  h += '</select></div><div class="cascade-arrow">⬇</div>';
+  h += '</select></div><div class="cascade-arrow">&darr;</div>';
   h += '<div class="fg"><label>规定条款 <span class="required">*</span></label>';
-  h += '<select id="selClause-'+hid+'" onchange="onCascade(\''+hid+'\',2,\''+itemName+'\')" disabled><option value="">— 请先选择事实描述 —</option></select></div>';
-  h += '<div class="cascade-arrow">⬇</div>';
+  h += '<select id="selClause-'+hid+'" onchange="onCascade(\''+hid+'\',2,\''+itemName+'\')" disabled><option value="">- 请先选择事实描述 -</option></select></div>';
+  h += '<div class="cascade-arrow">&darr;</div>';
   h += '<div class="fg"><label>规定原文 <span class="required">*</span></label>';
-  h += '<select id="selText-'+hid+'" disabled><option value="">— 请先选择规定条款 —</option></select></div>';
+  h += '<select id="selText-'+hid+'" disabled><option value="">- 请先选择规定条款 -</option></select></div>';
   return h;
 }
 
@@ -514,8 +706,8 @@ function onCascade(hid, level, itemName) {
   var textSel = document.getElementById('selText-'+hid);
   var descVal = itemSel ? itemSel.value : '';
   if (level <= 1) {
-    clauseSel.innerHTML = '<option value="">— 请选择规定条款 —</option>'; clauseSel.disabled = true;
-    textSel.innerHTML = '<option value="">— 请先选择规定条款 —</option>'; textSel.disabled = true;
+    clauseSel.innerHTML = '<option value="">- 请选择规定条款 -</option>'; clauseSel.disabled = true;
+    textSel.innerHTML = '<option value="">- 请先选择规定条款 -</option>'; textSel.disabled = true;
     if (descVal && CASCADE_DATA[itemName] && CASCADE_DATA[itemName][descVal]) {
       var clauses = Object.keys(CASCADE_DATA[itemName][descVal]).sort();
       clauseSel.disabled = false;
@@ -523,12 +715,12 @@ function onCascade(hid, level, itemName) {
     }
   }
   if (level <= 2) {
-    textSel.innerHTML = '<option value="">— 请先选择规定条款 —</option>'; textSel.disabled = true;
+    textSel.innerHTML = '<option value="">- 请先选择规定条款 -</option>'; textSel.disabled = true;
     var clauseVal = clauseSel ? clauseSel.value : '';
     if (descVal && clauseVal && CASCADE_DATA[itemName] && CASCADE_DATA[itemName][descVal] && CASCADE_DATA[itemName][descVal][clauseVal]) {
       var texts = CASCADE_DATA[itemName][descVal][clauseVal];
       textSel.disabled = false;
-      for (var j = 0; j < texts.length; j++) { var o2 = document.createElement('option'); o2.value = texts[j]; o2.textContent = texts[j].substring(0,55); textSel.appendChild(o2); }
+      for (var j = 0; j < texts.length; j++) { var o2 = document.createElement('option'); o2.value = texts[j]; o2.textContent = texts[j].substring(0,58); textSel.appendChild(o2); }
     }
   }
   saveFormValues(itemName, hid);
@@ -551,8 +743,15 @@ function saveAllFormValues() {
 }
 
 function rmHazard(itemName, hid) {
-  var el = document.getElementById('bbox-'+hid); if (el) el.remove();
-  var wrap = document.getElementById('hzwrap-'+hid); if (wrap) wrap.remove();
+  var el = document.getElementById('bbox-'+hid);
+  var wrap = document.getElementById('hzwrap-'+hid);
+  // Animate out then remove
+  if (el && typeof gsap !== 'undefined') {
+    gsap.to(el, { scale: 0.8, opacity: 0, duration: 0.2, ease: 'power2.in', onComplete: function() { if (el.parentNode) el.remove(); }});
+  } else { if (el) el.remove(); }
+  if (wrap && typeof gsap !== 'undefined') {
+    gsap.to(wrap, { height: 0, opacity: 0, padding: 0, margin: 0, duration: 0.25, ease: 'power2.in', onComplete: function() { if (wrap.parentNode) wrap.remove(); }});
+  } else { if (wrap) wrap.remove(); }
   delete itemStates[itemName].hazards[hid];
   updateBboxCount();
   updateTabBar();
@@ -582,9 +781,6 @@ function renderTabBar() {
 }
 
 function updateTabBar() {
-  // Lightweight, non-destructive update: modify existing DOM elements directly.
-  // This is critical — using innerHTML (renderTabBar) during drawing destroys
-  // the tab bar DOM and can cause state to jump back to default.
   var btns = document.querySelectorAll('#tabBar .tab-btn');
   for (var i = 0; i < btns.length; i++) {
     var btn = btns[i];
@@ -594,22 +790,14 @@ function updateTabBar() {
       if (btnText.indexOf(n.substring(0,4)) === 0 || n.substring(0,4).indexOf(btnText) === 0) {
         var st = itemStates[n];
         var count = Object.keys(st.hazards).length;
-        // Update dot class
         var dot = btn.querySelector('.tab-dot');
-        if (dot) {
-          dot.className = 'tab-dot ' + (st.status === 'issue' ? 'dot-issue' : (st.status === 'safe' ? 'dot-safe' : 'dot-none'));
-        }
-        // Update badge
+        if (dot) { dot.className = 'tab-dot ' + (st.status === 'issue' ? 'dot-issue' : (st.status === 'safe' ? 'dot-safe' : 'dot-none')); }
         var badge = btn.querySelector('.tab-badge');
         if (count > 0) {
           if (badge) { badge.textContent = count; }
           else { var b = document.createElement('span'); b.className = 'tab-badge'; b.textContent = count; btn.appendChild(b); }
-        } else {
-          if (badge) badge.remove();
-        }
-        // Update active class
-        if (activeTab === n) { btn.classList.add('active'); }
-        else { btn.classList.remove('active'); }
+        } else { if (badge) badge.remove(); }
+        if (activeTab === n) { btn.classList.add('active'); } else { btn.classList.remove('active'); }
         break;
       }
     }
@@ -631,36 +819,35 @@ function renderTabContent() {
   var hazardCount = Object.keys(st.hazards).length;
 
   var h = '';
-  // Section 1: Description
   h += '<div class="tab-section">';
-  h += '<div class="tab-section-title">📝 检查项目：<strong>'+name+'</strong></div>';
-  h += '<div class="fg"><label>检查项目描述 <span style="font-weight:400;color:var(--text-secondary);font-size:10px">（描述当前图像中该检查项的具体情况）</span></label>';
-  h += '<textarea id="desc-ta" placeholder="例如：经查看，该区域外脚手架搭设基本符合规范，但作业层边缘与结构外表面距离不足150mm，需要整改…">'+esc(st.description||'')+'</textarea>';
+  h += '<div class="tab-section-title">检查项目：<strong>'+name+'</strong></div>';
+  h += '<div class="fg"><label>检查项目描述 <span style="font-weight:400;color:var(--gray-500);font-size:10px;text-transform:none;letter-spacing:0">（描述当前图像中该检查项的具体情况）</span></label>';
+  h += '<textarea id="desc-ta" placeholder="例如：经查看，该区域外脚手架搭设基本符合规范，但作业层边缘与结构外表面距离不足150mm，需要整改...">'+esc(st.description||'')+'</textarea>';
   h += '</div>';
 
-  // Status buttons
-  h += '<div class="status-row" style="margin-top:8px">';
-  h += '<span class="status-btn btn-issue'+(st.status==='issue'?' active':'')+'" onclick="setStatus(\''+esc(name)+'\',\'issue\')">⚠ 有隐患</span>';
-  h += '<span class="status-btn btn-safe'+(st.status==='safe'?' active':'')+'" onclick="setStatus(\''+esc(name)+'\',\'safe\')">✓ 无隐患</span>';
+  h += '<div class="status-row" style="margin-top:10px">';
+  h += '<span class="status-btn btn-issue'+(st.status==='issue'?' active':'')+'" onclick="setStatus(\''+esc(name)+'\',\'issue\')">有隐患</span>';
+  h += '<span class="status-btn btn-safe'+(st.status==='safe'?' active':'')+'" onclick="setStatus(\''+esc(name)+'\',\'safe\')">无隐患</span>';
   h += '</div>';
   h += '</div>';
 
-  // Section 2: Status-dependent content
   if (st.status === 'none') {
-    h += '<div class="none-msg">👆 请先选择检查结果（有隐患 / 无隐患）</div>';
+    h += '<div class="none-msg">请先选择检查结果（有隐患 / 无隐患）</div>';
   } else if (st.status === 'safe') {
-    h += '<div class="safe-msg">✅ 本检查项确认无隐患<br><span style="font-size:11px;font-weight:400">已记录描述，可切换其他标签页继续标注</span></div>';
+    h += '<div class="safe-msg">本检查项确认无隐患<br><span style="font-size:11px;font-weight:400">已记录描述，可切换其他标签页继续标注</span></div>';
   } else if (st.status === 'issue') {
     h += '<div class="tab-section">';
-    h += '<div class="tab-section-title" style="color:#E2091C">🔴 隐患标注</div>';
-    h += '<span class="draw-hint" onclick="showToast(\'请在左侧图像上拖拽绘制「'+esc(name)+'」的隐患标记框\',\'info\')">🖱 在图像上拖拽画框标记隐患位置</span>';
+    h += '<div class="tab-section-title" style="color:var(--red-500)">隐患标注</div>';
+    h += '<span class="draw-hint" onclick="showToast(\'请在左侧图像上拖拽绘制「'+esc(name)+'」的隐患标记框\',\'info\')">在图像上拖拽画框标记隐患位置</span>';
     h += '<div id="hzList"></div>';
     h += '</div>';
   }
 
   document.getElementById('tabContentInner').innerHTML = h;
 
-  // Rebuild hazard forms for this item
+  // GSAP: subtle fade-in for tab content
+  animIn(document.getElementById('tabContentInner'), { y: 6, dur: 0.25 });
+
   if (st.status === 'issue' && hazardCount > 0) {
     rebuildHazardForms(name);
   }
@@ -670,18 +857,21 @@ function rebuildHazardForms(itemName) {
   var container = document.getElementById('hzList');
   if (!container) return;
   var st = itemStates[itemName];
-  // Build all forms fresh
   var html = '';
   Object.keys(st.hazards).forEach(function(hid) {
     var hz = st.hazards[hid];
     html += '<div class="hz-card" id="hzwrap-'+hid+'" style="border-left:3px solid '+hz.color+'">';
-    html += '<div class="hz-card-header"><span style="color:'+hz.color+'">🔴 隐患'+cn(hz.index)+'</span><span class="hz-card-del" onclick="rmHazard(\''+itemName+'\',\''+hid+'\')">✕</span></div>';
+    html += '<div class="hz-card-header"><span style="color:'+hz.color+'">隐患'+cn(hz.index)+'</span><span class="hz-card-del" onclick="rmHazard(\''+itemName+'\',\''+hid+'\')">&times;</span></div>';
     html += buildCascadeHTML(itemName, hid);
-    html += '<div class="fg" style="margin-top:8px"><label>违规描述 <span class="required">*</span></label><textarea id="txtNote-'+hid+'" placeholder="根据以上选择，用自然语言描述具体的违规事实…" style="min-height:50px">'+esc((hz.formValues&&hz.formValues.txtNote)||'')+'</textarea></div>';
+    html += '<div class="fg" style="margin-top:8px"><label>违规描述 <span class="required">*</span></label><textarea id="txtNote-'+hid+'" placeholder="根据以上选择，用自然语言描述具体的违规事实..." style="min-height:50px">'+esc((hz.formValues&&hz.formValues.txtNote)||'')+'</textarea></div>';
     html += '</div>';
   });
   container.innerHTML = html;
-  // Restore cascade dropdown values
+  // Stagger entrance for rebuilt cards
+  if (typeof gsap !== 'undefined') {
+    var cards = container.querySelectorAll('.hz-card');
+    gsap.fromTo(cards, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.05, ease: 'power3.out' });
+  }
   restoreFormValuesForItem(itemName);
 }
 
@@ -710,7 +900,6 @@ function setStatus(name, status) {
   saveDesc();
   saveAllFormValues();
   var st = itemStates[name];
-  // Remove bboxes if switching away from issue
   if (status !== 'issue' && st.status === 'issue') {
     Object.keys(st.hazards).forEach(function(hid) { var el = document.getElementById('bbox-'+hid); if (el) el.remove(); });
     st.hazards = {}; st.hazardCounter = 0;
@@ -740,14 +929,20 @@ function submitAll() {
   });
   if (done === 0) { showToast('请至少标注一项检查项目','error'); return; }
   console.log('方案D提交:', JSON.stringify(data, null, 2));
-  showToast('✓ 提交成功！已标注 '+done+' 项（共6项）','success');
+  showToast('提交成功！已标注 '+done+' 项（共6项）','success');
 }
 
 // ═══════════════ Utilities ═══════════════
 function cn(n) { var m=['零','一','二','三','四','五','六','七','八','九','十','十一','十二']; return m[n]||String(n); }
 function esc(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function itemNameAbbr(n) { var m={'高处作业':'高','基坑工程':'坑','施工升降机':'梯','消防安全':'消','起重吊装及施工机具':'吊','场容场貌':'场'}; return m[n]||n[0]; }
-function showToast(msg, type) { var t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast toast-'+type+' show'; clearTimeout(t._timeout); t._timeout = setTimeout(function() { t.classList.remove('show'); }, 2200); }
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast toast-'+type+' show';
+  clearTimeout(t._timeout);
+  animateToast(t);
+  t._timeout = setTimeout(function() { t.classList.remove('show'); }, 2200);
+}
 function exitPage() { if (confirm('确定退出吗？')) showToast('已退出','info'); }
 
 // ═══════════════ Init ═══════════════
