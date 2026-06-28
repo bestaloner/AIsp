@@ -131,19 +131,6 @@ body {
 }
 .stats-bar .stat-item { display: flex; align-items: center; gap: 4px; }
 .stats-bar .stat-num { font-size: 18px; }
-.na-tags-section {
-  padding: 8px 14px; background: var(--color-card-bg);
-  border-bottom: 1px solid var(--border-light); flex-shrink: 0;
-}
-.na-tags-title { font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; }
-.na-tags { display: flex; flex-wrap: wrap; gap: 4px; }
-.na-tag {
-  padding: 2px 8px; border-radius: 12px; font-size: 10px; cursor: pointer;
-  border: 1px solid var(--border-color); background: #fff; color: var(--text-secondary);
-  transition: all var(--transition-fast); user-select: none;
-}
-.na-tag:hover { border-color: var(--orange); color: var(--orange); }
-.na-tag.marked-na { background: #FFF7E6; color: #D46B08; border-color: #FFD591; text-decoration: line-through; }
 .issue-list { flex: 1; overflow-y: auto; padding: 8px; }
 .issue-list::-webkit-scrollbar { width: 5px; }
 .issue-list::-webkit-scrollbar-track { background: transparent; }
@@ -218,7 +205,7 @@ body {
     <span class="toolbar-title">📝 方案C：默认全覆盖</span>
     <span class="badge badge-success">默认安全 · 例外标记</span>
   </div>
-  <div class="toolbar-right">💡 所有检查项默认无隐患 — 只需标记有隐患的项和不适用的项</div>
+  <div class="toolbar-right">💡 所有检查项默认无隐患 — 只需在图上画框标记有隐患的项</div>
 </div>
 
 <!-- ═══ Main ═══ -->
@@ -256,11 +243,6 @@ body {
     <div class="stats-bar" id="statsBar">
       <div class="stat-item" style="color:#52C41A">✅ 安全 <span class="stat-num" id="statSafe">6</span></div>
       <div class="stat-item" style="color:#E2091C">⚠ 有隐患 <span class="stat-num" id="statIssue">0</span></div>
-      <div class="stat-item" style="color:#D46B08">🚫 不适用 <span class="stat-num" id="statNA">0</span></div>
-    </div>
-    <div class="na-tags-section">
-      <div class="na-tags-title">点击标记为「不适用」（该项不参与训练）：</div>
-      <div class="na-tags" id="naTags"></div>
     </div>
     <div class="issue-list" id="issueList"></div>
     <div class="issue-panel-footer">
@@ -282,8 +264,7 @@ var ALL_ITEMS = Object.keys(CASCADE_DATA).sort();
 var bboxColors = ['#E2091C','#F57A00','#F59E0B','#52C41A','#009CFF','#2E41CD','#8B5CF6','#06B6D4','#E2091C','#F57A00','#52C41A','#8B5CF6'];
 
 // ═══════════════ State ═══════════════
-// All items default to "safe" — only exceptions are tracked
-var naItems = {};       // itemName -> true/false (marked as not applicable)
+// All items default to "safe" — only items with hazards are tracked
 var issueItems = {};    // itemName -> { hazards:{}, hazardCounter:0 } (only for items with hazards)
 var currentDrawingItem = null;
 var isDrawing = false, drawStartX, drawStartY;
@@ -324,9 +305,8 @@ function switchImg(id) {
 function saveState() {
   if (!IMAGE_LIST[currentImg]) return;
   var imgId = IMAGE_LIST[currentImg].id;
-  var s = { naItems: {}, issueItems: {}, currentDrawingItem: currentDrawingItem, bboxLayerHTML: document.getElementById('bboxLayer').innerHTML };
+  var s = { issueItems: {}, currentDrawingItem: currentDrawingItem, bboxLayerHTML: document.getElementById('bboxLayer').innerHTML };
   ALL_ITEMS.forEach(function(n) {
-    s.naItems[n] = naItems[n];
     var ih = issueItems[n];
     var saved = { hazards: {}, hazardCounter: ih.hazardCounter };
     Object.keys(ih.hazards).forEach(function(hid) {
@@ -340,7 +320,7 @@ function saveState() {
     });
     s.issueItems[n] = saved;
   });
-  s.done = ALL_ITEMS.some(function(n) { return Object.keys(issueItems[n].hazards).length > 0 || naItems[n]; });
+  s.done = ALL_ITEMS.some(function(n) { return Object.keys(issueItems[n].hazards).length > 0; });
   imageStore[imgId] = s;
 }
 
@@ -350,7 +330,6 @@ function restoreState() {
   if (s && s.issueItems) {
     currentDrawingItem = s.currentDrawingItem || null;
     ALL_ITEMS.forEach(function(n) {
-      naItems[n] = s.naItems[n] || false;
       if (s.issueItems[n]) {
         issueItems[n] = { hazards: {}, hazardCounter: s.issueItems[n].hazardCounter };
         var sh = s.issueItems[n].hazards;
@@ -361,12 +340,11 @@ function restoreState() {
     });
     document.getElementById('bboxLayer').innerHTML = s.bboxLayerHTML || '';
   } else {
-    ALL_ITEMS.forEach(function(n) { naItems[n] = false; issueItems[n] = { hazards: {}, hazardCounter: 0 }; });
+    ALL_ITEMS.forEach(function(n) { issueItems[n] = { hazards: {}, hazardCounter: 0 }; });
     currentDrawingItem = null;
     document.getElementById('bboxLayer').innerHTML = '';
   }
   renderIssueList();
-  renderNATags();
   updateStats();
   updateBboxCount();
   // Restore form values
@@ -434,9 +412,9 @@ bboxLayer.addEventListener('mousedown', function(e) {
   // Auto-select first applicable item without hazards
   if (!currentDrawingItem) {
     for (var i = 0; i < ALL_ITEMS.length; i++) {
-      if (!naItems[ALL_ITEMS[i]] && Object.keys(issueItems[ALL_ITEMS[i]].hazards).length === 0) { currentDrawingItem = ALL_ITEMS[i]; break; }
+      if (Object.keys(issueItems[ALL_ITEMS[i]].hazards).length === 0) { currentDrawingItem = ALL_ITEMS[i]; break; }
     }
-    if (!currentDrawingItem) { showToast('所有检查项已有隐患或已标记不适用','error'); return; }
+    if (!currentDrawingItem) { showToast('所有检查项已有隐患','error'); return; }
   }
   var rect = imageWrap.getBoundingClientRect();
   var img = document.getElementById('mainImage');
@@ -639,7 +617,6 @@ function rmHazard(itemName, hid) {
 function renderIssueList() {
   var h = '', any = false;
   ALL_ITEMS.forEach(function(n) {
-    if (naItems[n]) return;  // skip NA items
     var ih = issueItems[n];
     var hasHazards = Object.keys(ih.hazards).length > 0;
     if (!hasHazards) return;  // only show items that have hazards
@@ -651,14 +628,14 @@ function renderIssueList() {
     h += '<span class="issue-item-name">'+n+'</span>';
     h += '<span style="font-size:11px;color:var(--text-secondary)">⚠ '+Object.keys(ih.hazards).length+'处隐患</span>';
     h += '<span class="issue-toggle">▾</span>';
-    h += '<span class="issue-delete" onclick="event.stopPropagation();markNA(\''+n+'\')" title="标记为不适用">🚫</span></div>';
+    h += '<span class="issue-delete" onclick="event.stopPropagation();removeIssueItem(\''+n+'\')" title="移除此隐患项">✕</span></div>';
     h += '<div class="issue-body">';
     h += '<span class="draw-hint" onclick="startDraw(\''+n+'\')">🖱 继续在图像上画框</span>';
     h += '<div id="hzList-'+n.replace(/[^a-zA-Z一-鿿]/g,'')+'"></div>';
     h += '<div class="fg" style="margin-top:8px"><label>违规描述</label><textarea id="note-'+n.replace(/[^a-zA-Z一-鿿]/g,'')+'" placeholder="补充描述…" style="min-height:40px"></textarea></div>';
     h += '</div></div>';
   });
-  if (!any) h = '<div class="issue-empty"><div style="font-size:40px;opacity:0.4;margin-bottom:8px">✅</div><div>所有适用项默认无隐患<br>如需标注隐患，直接在图像上画框或点击下方按钮<br>如有不适用的检查项，点击下方标签标记</div></div>';
+  if (!any) h = '<div class="issue-empty"><div style="font-size:40px;opacity:0.4;margin-bottom:8px">✅</div><div>所有检查项默认无隐患<br>如需标注隐患，直接在图像上画框或点击下方按钮</div></div>';
   document.getElementById('issueList').innerHTML = h;
   // Re-populate forms
   ALL_ITEMS.forEach(function(n) { if (Object.keys(issueItems[n].hazards).length > 0) renderHazardForms(n); });
@@ -666,39 +643,25 @@ function renderIssueList() {
 
 function toggleIssueCard(n) { var el = document.getElementById('ic-'+n.replace(/[^a-zA-Z一-鿿]/g,'')); if (el) el.classList.toggle('expanded'); }
 
-function markNA(n) {
-  naItems[n] = !naItems[n];
-  if (naItems[n]) {
-    // Remove bboxes when marking NA
-    Object.keys(issueItems[n].hazards).forEach(function(hid) {
-      var el = document.getElementById('bbox-'+hid); if (el) el.remove();
-    });
-    issueItems[n] = { hazards: {}, hazardCounter: 0 };
-  }
+function removeIssueItem(n) {
+  // Remove all bboxes for this item
+  Object.keys(issueItems[n].hazards).forEach(function(hid) {
+    var el = document.getElementById('bbox-'+hid); if (el) el.remove();
+  });
+  issueItems[n] = { hazards: {}, hazardCounter: 0 };
   renderIssueList();
-  renderNATags();
   updateStats();
   updateBboxCount();
 }
 
-function renderNATags() {
-  var h = '';
-  ALL_ITEMS.forEach(function(n) {
-    h += '<span class="na-tag'+(naItems[n]?' marked-na':'')+'" onclick="markNA(\''+n+'\')">'+(naItems[n]?'✓ ':'')+n+'</span>';
-  });
-  document.getElementById('naTags').innerHTML = h;
-}
-
 function updateStats() {
-  var issue = 0, na = 0, safe = 0;
+  var issue = 0, safe = 0;
   ALL_ITEMS.forEach(function(n) {
-    if (naItems[n]) na++;
-    else if (Object.keys(issueItems[n].hazards).length > 0) issue++;
+    if (Object.keys(issueItems[n].hazards).length > 0) issue++;
     else safe++;
   });
   document.getElementById('statSafe').textContent = safe;
   document.getElementById('statIssue').textContent = issue;
-  document.getElementById('statNA').textContent = na;
 }
 
 function startDraw(n) { currentDrawingItem = n; showToast('请在图像上拖拽绘制「'+n+'」的隐患标记框','info'); }
@@ -706,9 +669,9 @@ function startDraw(n) { currentDrawingItem = n; showToast('请在图像上拖拽
 function quickAddIssue() {
   var avail = [];
   for (var i = 0; i < ALL_ITEMS.length; i++) {
-    if (!naItems[ALL_ITEMS[i]] && Object.keys(issueItems[ALL_ITEMS[i]].hazards).length === 0) avail.push(ALL_ITEMS[i]);
+    if (Object.keys(issueItems[ALL_ITEMS[i]].hazards).length === 0) avail.push(ALL_ITEMS[i]);
   }
-  if (avail.length === 0) { showToast('所有适用项已有隐患或已标记不适用','error'); return; }
+  if (avail.length === 0) { showToast('所有检查项已有隐患','error'); return; }
   currentDrawingItem = avail[0];
   showToast('请在图像上拖拽绘制「'+avail[0]+'」的隐患标记框。可用项：'+avail.join('、'),'info');
 }
@@ -721,16 +684,15 @@ function updateBboxCount() {
 
 // ═══════════════ Submit ═══════════════
 function submitAll() {
-  var data = {}, issue = 0, na = 0, safe = 0;
+  var data = {}, issue = 0, safe = 0;
   ALL_ITEMS.forEach(function(n) {
     var hasHazards = Object.keys(issueItems[n].hazards).length > 0;
-    data[n] = { status: naItems[n] ? 'na' : (hasHazards ? 'issue' : 'safe'), hazards: {} };
-    if (naItems[n]) na++;
-    else if (hasHazards) { issue++; Object.keys(issueItems[n].hazards).forEach(function(hid) { saveFormValues(n, hid); data[n].hazards[hid] = issueItems[n].hazards[hid]; }); }
+    data[n] = { status: hasHazards ? 'issue' : 'safe', hazards: {} };
+    if (hasHazards) { issue++; Object.keys(issueItems[n].hazards).forEach(function(hid) { saveFormValues(n, hid); data[n].hazards[hid] = issueItems[n].hazards[hid]; }); }
     else safe++;
   });
   console.log('方案C提交:', JSON.stringify(data, null, 2));
-  showToast('✓ 提交成功！有隐患 '+issue+' 项，无隐患 '+safe+' 项，不适用 '+na+' 项','success');
+  showToast('✓ 提交成功！有隐患 '+issue+' 项，无隐患 '+safe+' 项','success');
 }
 
 // ═══════════════ Utilities ═══════════════
@@ -742,9 +704,8 @@ function exitPage() { if (confirm('确定退出吗？')) showToast('已退出','
 
 // ═══════════════ Init ═══════════════
 (function init() {
-  ALL_ITEMS.forEach(function(n) { naItems[n] = false; issueItems[n] = { hazards: {}, hazardCounter: 0 }; });
+  ALL_ITEMS.forEach(function(n) { issueItems[n] = { hazards: {}, hazardCounter: 0 }; });
   renderIssueList();
-  renderNATags();
   updateStats();
   loadImage();
   renderImgList();

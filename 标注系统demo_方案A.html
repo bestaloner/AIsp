@@ -146,7 +146,7 @@ body {
 }
 .check-item.status-issue { border-left: 3px solid #E2091C; }
 .check-item.status-safe { border-left: 3px solid #52C41A; }
-.check-item.status-na { border-left: 3px solid var(--border-color); opacity: 0.7; }
+.check-item.status-none { border-left: 3px solid var(--border-color); }
 .check-item-header {
   padding: 10px 12px; display: flex; align-items: center; gap: 8px;
   cursor: pointer; user-select: none; transition: background 0.15s;
@@ -163,7 +163,6 @@ body {
 .status-btn:hover { border-color: var(--blue-primary); }
 .status-btn.sel-issue { background: #FFF2F0; color: #CF1322; border-color: #FFCCC7; }
 .status-btn.sel-safe { background: #F6FFED; color: #389E0D; border-color: #B7EB8F; }
-.status-btn.sel-na { background: #FAFAFA; color: #8C8C8C; border-color: #D9D9D9; }
 .check-item-toggle { font-size: 10px; color: var(--text-secondary); transition: transform 0.2s; }
 .check-item.expanded .check-item-toggle { transform: rotate(180deg); }
 .check-item-body { display: none; padding: 12px; }
@@ -183,7 +182,7 @@ body {
 .fg textarea::placeholder { color: #BFBFBF; }
 .cascade-arrow { text-align: center; font-size: 10px; color: var(--text-secondary); margin: -2px 0; }
 .safe-message { font-size: 12px; color: #52C41A; display: flex; align-items: center; gap: 6px; }
-.na-message { font-size: 12px; color: var(--text-secondary); }
+.none-message { font-size: 12px; color: var(--text-secondary); }
 
 .check-panel-footer {
   padding: 12px 14px; border-top: 1px solid var(--border-color);
@@ -217,7 +216,7 @@ body {
     <span class="toolbar-title">📝 方案A：两级标注</span>
     <span class="badge badge-purple">检查项目优先</span>
   </div>
-  <div class="toolbar-right">💡 逐项确认：有隐患/无隐患/不适用 → 有隐患时画框 + 填写证据链</div>
+  <div class="toolbar-right">💡 逐项确认：有隐患/无隐患 → 有隐患时画框 + 填写证据链</div>
 </div>
 
 <!-- ═══ Main ═══ -->
@@ -258,7 +257,7 @@ body {
     <div class="summary-bar" id="summaryBar">
       <span style="color:#E2091C">⚠ <span id="countIssue">0</span> 有隐患</span>
       <span style="color:#52C41A">✓ <span id="countSafe">0</span> 无隐患</span>
-      <span style="color:var(--text-secondary)">— <span id="countNA">6</span> 待确认</span>
+      <span style="color:var(--text-secondary)">— <span id="countNone">6</span> 待确认</span>
     </div>
     <div class="check-list" id="checkList"></div>
     <div class="check-panel-footer">
@@ -279,7 +278,7 @@ var ALL_ITEMS = Object.keys(CASCADE_DATA).sort();
 var bboxColors = ['#E2091C','#F57A00','#F59E0B','#52C41A','#009CFF','#2E41CD','#8B5CF6','#06B6D4','#E2091C','#F57A00','#52C41A','#8B5CF6'];
 
 // ═══════════════ State ═══════════════
-var checkItems = {};  // itemName -> {status:'issue'|'safe'|'na', hazards:{}, hazardCounter:0}
+var checkItems = {};  // itemName -> {status:'none'|'issue'|'safe', hazards:{}, hazardCounter:0}
 var currentDrawingItem = null;  // which check item the user is currently drawing for
 var isDrawing = false, drawStartX, drawStartY;
 var imageStore = {};  // imageId -> state
@@ -335,7 +334,7 @@ function saveState() {
     });
     s.checkItems[n] = saved;
   });
-  var done = ALL_ITEMS.some(function(n) { return checkItems[n].status !== 'na'; });
+  var done = ALL_ITEMS.some(function(n) { return checkItems[n].status !== 'none'; });
   s.done = done;
   imageStore[imgId] = s;
 }
@@ -356,7 +355,7 @@ function restoreState() {
     });
     document.getElementById('bboxLayer').innerHTML = s.bboxLayerHTML || '';
   } else {
-    ALL_ITEMS.forEach(function(n) { checkItems[n] = { status: 'na', hazards: {}, hazardCounter: 0 }; });
+    ALL_ITEMS.forEach(function(n) { checkItems[n] = { status: 'none', hazards: {}, hazardCounter: 0 }; });
     currentDrawingItem = null;
     document.getElementById('bboxLayer').innerHTML = '';
   }
@@ -622,7 +621,7 @@ function removeHazard(itemName, hid) {
   var wrap = document.getElementById('hzwrap-'+hid); if (wrap) wrap.remove();
   delete checkItems[itemName].hazards[hid];
   if (Object.keys(checkItems[itemName].hazards).length === 0) {
-    checkItems[itemName].status = 'na'; renderCheckList(); updateSummary();
+    checkItems[itemName].status = 'none'; renderCheckList(); updateSummary();
   }
   updateBboxCount();
 }
@@ -639,13 +638,12 @@ function renderCheckList() {
     html += '<span class="check-item-status-group">';
     html += '<span class="status-btn'+(ci.status==='issue'?' sel-issue':'')+'" onclick="event.stopPropagation();setStatus(\''+name+'\',\'issue\')">⚠ 有隐患</span>';
     html += '<span class="status-btn'+(ci.status==='safe'?' sel-safe':'')+'" onclick="event.stopPropagation();setStatus(\''+name+'\',\'safe\')">✓ 无隐患</span>';
-    html += '<span class="status-btn'+(ci.status==='na'?' sel-na':'')+'" onclick="event.stopPropagation();setStatus(\''+name+'\',\'na\')">— 不适用</span>';
     html += '</span><span class="check-item-toggle">▾</span></div>';
     html += '<div class="check-item-body">';
     if (ci.status === 'safe') {
       html += '<div class="safe-message">✅ 本项确认无隐患 <input style="margin-left:8px;border:1px solid #D9D9D9;border-radius:4px;padding:3px 8px;font-size:11px;width:200px" placeholder="可选备注"></div>';
-    } else if (ci.status === 'na') {
-      html += '<div class="na-message">此项不适用于当前图像场景，不参与训练</div>';
+    } else if (ci.status === 'none') {
+      html += '<div class="none-message">👆 请点击上方按钮选择检查结果</div>';
     } else {
       html += '<span class="draw-hint" onclick="startDrawForItem(\''+name+'\')">🖱 在图像上画框标记隐患</span>';
       html += '<div id="hzList-'+name.replace(/[^a-zA-Z一-鿿]/g,'')+'"></div>';
@@ -691,14 +689,14 @@ function setStatus(name, status) {
 }
 
 function updateSummary() {
-  var issue=0, safe=0, na=0;
+  var issue=0, safe=0, none=0;
   ALL_ITEMS.forEach(function(n) {
     var s = checkItems[n].status;
-    if (s==='issue') issue++; else if (s==='safe') safe++; else na++;
+    if (s==='issue') issue++; else if (s==='safe') safe++; else none++;
   });
   document.getElementById('countIssue').textContent = issue;
   document.getElementById('countSafe').textContent = safe;
-  document.getElementById('countNA').textContent = na;
+  document.getElementById('countNone').textContent = none;
 }
 
 function updateBboxCount() {
@@ -719,7 +717,7 @@ function submitAll() {
     });
   });
   var confirmed = 0;
-  ALL_ITEMS.forEach(function(n) { if (checkItems[n].status !== 'na') confirmed++; });
+  ALL_ITEMS.forEach(function(n) { if (checkItems[n].status !== 'none') confirmed++; });
   if (confirmed === 0) { showToast('请至少确认一项检查项目（有隐患或无隐患）','error'); return; }
   console.log('方案A提交:', JSON.stringify(data, null, 2));
   showToast('✓ 提交成功！已确认 '+confirmed+' 项','success');
@@ -734,7 +732,7 @@ function exitPage() { if (confirm('确定退出吗？')) showToast('已退出','
 
 // ═══════════════ Init ═══════════════
 (function init() {
-  ALL_ITEMS.forEach(function(name) { checkItems[name] = { status: 'na', hazards: {}, hazardCounter: 0 }; });
+  ALL_ITEMS.forEach(function(name) { checkItems[name] = { status: 'none', hazards: {}, hazardCounter: 0 }; });
   renderCheckList();
   loadImage();
   renderImgList();
