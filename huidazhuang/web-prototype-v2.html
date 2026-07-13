@@ -56,8 +56,7 @@ body {
 .content::-webkit-scrollbar { width:6px; }
 .content::-webkit-scrollbar-thumb { background:var(--g3); border-radius:3px; }
 .page { display:none; padding:16px 20px; }
-.page.on { display:block; animation: fadeIn .25s ease; }
-@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+.page.on { display:block; }
 /* ── Cards ── */
 .card { background:#fff; border-radius:var(--rl); padding:16px; box-shadow:var(--shadow); margin-bottom:12px; }
 .card-hd { font-size:15px; font-weight:600; color:var(--g8); margin-bottom:12px; display:flex; align-items:center; gap:6px; }
@@ -1229,11 +1228,13 @@ document.querySelectorAll('.menu-item').forEach(item => {
     this.classList.add('active');
     document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
     const target = document.getElementById('pg-' + pg);
-    if (target) { target.classList.add('on'); }
+    if (!target) return;
+    target.classList.add('on');
     document.getElementById('breadcrumb').textContent = pageTitles[pg] || pg;
     document.getElementById('content').scrollTop = 0;
     curPage = pg;
-    gsap.from(target, { opacity:0, y:12, duration:.25, ease:'power2.out' });
+    // Animate entrance
+    gsap.fromTo(target, { opacity:0, y:12 }, { opacity:1, y:0, duration:.25, ease:'power2.out' });
     // Redraw plane if navigating back to platform
     if (pg === 'platform') { setTimeout(drawPlane, 300); }
     // Render report list if navigating to document
@@ -1325,8 +1326,8 @@ renderAll();
 initPlane();
 
 // Entrance animation
-gsap.from('.stat-box', { y:24, opacity:0, duration:.35, stagger:.07, ease:'power2.out' });
-gsap.from('.card', { y:16, opacity:0, duration:.3, stagger:.05, delay:.2, ease:'power2.out' });
+gsap.fromTo('.stat-box', { y:24, opacity:0 }, { y:0, opacity:1, duration:.35, stagger:.07, ease:'power2.out' });
+gsap.fromTo('.card', { y:16, opacity:0 }, { y:0, opacity:1, duration:.3, stagger:.05, delay:.2, ease:'power2.out' });
 </script>
 </body>
 </html>
