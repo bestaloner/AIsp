@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>慧打桩 - 移动端原型 v2</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+/* ═══════════════════════════════════════════
+   设计规范 — 来自 ynlk-pit-web 源码
+   Primary: #2962FF  |  Light BG: #F0F6FF
+   Card: white + rounded-lg + shadow-sm
+   ═══════════════════════════════════════════ */
+:root {
+  --primary: #2962FF;
+  --primary-light: #F0F6FF;
+  --primary-dark: #1D4ED8;
+  --success: #16A34A;
+  --success-light: #F0FDF4;
+  --warning: #EB5E12;
+  --warning-light: #FFF2EB;
+  --danger: #DC2626;
+  --gray-50: #F8FAFC;
+  --gray-100: #F1F5F9;
+  --gray-200: #E2E8F0;
+  --gray-300: #CBD5E1;
+  --gray-400: #94A3B8;
+  --gray-500: #64748B;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1E293B;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --shadow-card: 0 1px 3px 0 rgba(0,0,0,.06), 0 1px 2px -1px rgba(0,0,0,.06);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+  background: #E8ECF1;
+  display: flex; justify-content: center; align-items: center;
+  min-height: 100vh; color: var(--gray-800);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Device Frame ── */
+.app-shell {
+  width: 100%; max-width: 430px; height: 94vh; max-height: 932px;
+  background: #fff; border-radius: 24px; overflow: hidden;
+  display: flex; flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,.15), 0 0 0 3px #1e293b;
+  position: relative;
+}
+
+/* ── Status Bar ── */
+.status-bar {
+  background: #fff; padding: 10px 20px 4px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 11px; color: var(--gray-500); font-weight: 500;
+}
+.status-bar .time { font-weight:700; color: var(--gray-900); font-size:13px; }
+
+/* ── Header ── */
+.app-hdr {
+  background: #fff; padding: 6px 20px 10px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid #F1F5F9;
+}
+.app-hdr .hdr-title { font-size: 17px; font-weight: 700; color: var(--gray-900); }
+.app-hdr .hdr-badge {
+  font-size: 11px; color: var(--primary); background: var(--primary-light);
+  padding: 3px 10px; border-radius: 12px; font-weight: 600;
+}
+.btn-back {
+  width: 32px; height: 32px; border: none; background: var(--gray-100);
+  border-radius: 8px; cursor: pointer; font-size: 16px; color: var(--gray-600);
+  display: none; align-items: center; justify-content: center;
+}
+
+/* ── Content ── */
+.content-wrap {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch; background: #F8FAFC; position: relative;
+}
+.content-wrap::-webkit-scrollbar { width: 0; }
+.page-view { display: none; padding: 14px; padding-bottom: 20px; animation: fadeUp .25s ease; }
+.page-view.on { display: block; }
+@keyframes fadeUp { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
+
+/* ── Bottom Nav ── */
+.nav-bar {
+  background: #fff; display: flex; border-top: 1px solid var(--gray-200);
+  padding: 2px 0; padding-bottom: max(2px, env(safe-area-inset-bottom));
+}
+.nav-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 5px 0; border: none; background: none; cursor: pointer;
+  color: var(--gray-400); transition: color .2s; gap: 1px; position: relative;
+}
+.nav-btn .n-icon { font-size: 20px; line-height: 1; }
+.nav-btn .n-label { font-size: 10px; font-weight: 600; }
+.nav-btn.cur { color: var(--primary); }
+.nav-btn.cur::after {
+  content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 20px; height: 3px; background: var(--primary); border-radius: 0 0 3px 3px;
+}
+
+/* ── Card (source pattern) ── */
+.card {
+  background: #fff; border-radius: var(--radius-lg); padding: 14px;
+  box-shadow: var(--shadow-card); margin-bottom: 10px;
+}
+.card-header { font-size: 15px; font-weight: 600; color: var(--gray-800); margin-bottom: 10px; }
+.card-header .dot { display: inline-block; width: 6px; height: 6px; background: var(--primary); border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+
+/* ── Stat Grid ── */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stat-cell {
+  background: var(--primary-light); border-radius: var(--radius); padding: 10px 12px;
+}
+.stat-cell .s-label { font-size: 11px; color: var(--gray-500); margin-bottom: 3px; }
+.stat-cell .s-value { font-size: 26px; font-weight: 800; color: var(--primary); line-height: 1; }
+.stat-cell .s-sub { font-size: 10px; color: var(--gray-400); margin-top: 2px; }
+.stat-cell.warn .s-value { color: var(--warning); }
+.stat-cell.ok .s-value { color: var(--success); }
+.stat-cell.muted .s-value { color: var(--gray-400); }
+
+/* ── Section stat row (source pattern from pile-statistics.vue) ── */
+.info-block { background: var(--primary-light); border-radius: var(--radius); padding: 12px; }
+.info-row { display: flex; margin-bottom: 6px; }
+.info-row:last-child { margin-bottom: 0; }
+.info-row .info-item { flex: 1; display: flex; }
+.info-row .info-label { width: 80px; font-size: 12px; color: var(--gray-500); flex-shrink: 0; }
+.info-row .info-val { font-size: 13px; font-weight: 700; color: var(--primary); }
+
+/* ── Progress Ring ── */
+.ring-wrap { display: flex; align-items: center; gap: 14px; }
+.ring-svg { flex-shrink: 0; }
+.ring-center { font-size: 20px; font-weight: 800; fill: var(--primary); }
+.ring-sub { font-size: 9px; fill: var(--gray-400); }
+.ring-detail { font-size: 12px; color: var(--gray-500); line-height: 1.9; }
+.ring-detail b { color: var(--gray-800); }
+
+/* ── Equipment Mini Row ── */
+.equip-row { display: flex; gap: 8px; }
+.equip-mini {
+  flex: 1; text-align: center; padding: 10px 6px;
+  background: var(--primary-light); border-radius: var(--radius);
+}
+.equip-mini .e-val { font-size: 18px; font-weight: 700; }
+.equip-mini .e-lbl { font-size: 10px; color: var(--gray-400); margin-top: 2px; }
+.equip-mini.on .e-val { color: var(--success); }
+.equip-mini.off .e-val { color: var(--danger); }
+.equip-mini.work .e-val { color: var(--warning); }
+
+/* ── Bar Chart ── */
+.bars { display: flex; align-items: flex-end; gap: 6px; height: 120px; padding-top: 4px; }
+.bar-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; height: 100%; justify-content: flex-end; }
+.bar-item .bar { width: 100%; max-width: 36px; border-radius: 5px 5px 2px 2px; background: var(--primary); opacity: .55; min-height: 3px; transition: height .4s; }
+.bar-item .bar.hi { opacity: 1; }
+.bar-item .b-label { font-size: 10px; color: var(--gray-400); }
+.bar-item .b-val { font-size: 10px; color: var(--gray-600); font-weight: 600; }
+
+/* ── Sub Tabs ── */
+.subtabs { display: flex; gap: 0; margin-bottom: 12px; background: var(--gray-100); border-radius: 8px; padding: 2px; }
+.subtab { flex: 1; padding: 7px 0; text-align: center; font-size: 12px; font-weight: 600; border: none; background: transparent; color: var(--gray-500); cursor: pointer; border-radius: 6px; transition: all .2s; }
+.subtab.on { background: #fff; color: var(--primary); box-shadow: var(--shadow-card); }
+
+/* ── Task Tabs ── */
+.tasktabs { display: flex; gap: 0; margin-bottom: 10px; border-bottom: 1.5px solid var(--gray-100); }
+.tasktab { padding: 8px 16px; font-size: 13px; font-weight: 600; border: none; background: none; color: var(--gray-400); cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s; margin-bottom: -1.5px; }
+.tasktab.on { color: var(--primary); border-bottom-color: var(--primary); }
+.tasktab .count { font-size: 10px; background: var(--gray-100); padding: 1px 6px; border-radius: 8px; margin-left: 4px; }
+.tasktab.on .count { background: var(--primary-light); color: var(--primary); }
+
+/* ── Filter Chips ── */
+.chips { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.chip { padding: 4px 12px; border-radius: 14px; font-size: 11px; border: 1px solid var(--gray-200); background: #fff; color: var(--gray-600); cursor: pointer; font-weight: 500; transition: all .15s; }
+.chip.on { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+
+/* ── Status Tags ── */
+.tag {
+  font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 600; white-space: nowrap;
+}
+.tag.ongoing { background: var(--warning-light); color: var(--warning); border: 1px solid var(--warning); }
+.tag.done { background: var(--success-light); color: var(--success); }
+.tag.pending { background: var(--gray-100); color: var(--gray-500); }
+.tag.todo { background: #FEF2F2; color: var(--danger); }
+
+/* ── List Cards ── */
+.list-card {
+  background: #fff; border-radius: var(--radius-lg); padding: 12px 14px;
+  box-shadow: var(--shadow-card); margin-bottom: 7px; cursor: pointer; transition: all .15s;
+}
+.list-card:active { background: #FAFBFC; transform: scale(.985); }
+.list-card .lc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+.list-card .lc-title { font-weight: 700; font-size: 14px; color: var(--gray-900); }
+.list-card .lc-sub { font-size: 11px; color: var(--gray-400); margin-top: 1px; }
+.list-card .lc-meta { font-size: 11px; color: var(--gray-500); margin-top: 3px; display: flex; gap: 14px; }
+
+/* ── Progress Bar ── */
+.pbar { height: 5px; background: var(--gray-100); border-radius: 3px; overflow: hidden; margin-top: 6px; }
+.pbar-fill { height: 100%; border-radius: 3px; background: var(--primary); transition: width .5s; min-width: 4px; }
+.pbar-fill.full { background: var(--success); }
+
+/* ── Process Step Tags ── */
+.step-tags { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 5px; }
+.step-tag { font-size: 9px; padding: 2px 6px; border-radius: 3px; background: var(--gray-100); color: var(--gray-500); white-space: nowrap; }
+.step-tag.act { background: var(--warning-light); color: var(--warning); font-weight: 600; }
+.step-tag.ok { background: var(--success-light); color: var(--success); }
+
+/* ── Buttons ── */
+.btn {
+  padding: 7px 14px; border-radius: 6px; font-size: 12px; border: none; cursor: pointer;
+  font-weight: 600; transition: all .15s; display: inline-flex; align-items: center; gap: 4px;
+}
+.btn:active { transform: scale(.95); }
+.btn-pri { background: var(--primary); color: #fff; }
+.btn-out { background: #fff; color: var(--primary); border: 1.5px solid var(--primary); }
+.btn-sm { padding: 4px 10px; font-size: 10px; border-radius: 5px; }
+.btn-full { width: 100%; justify-content: center; padding: 10px; font-size: 13px; }
+
+/* ── Detail Slide Panel ── */
+.detail-panel {
+  position: absolute; inset: 0; background: #F8FAFC; z-index: 20;
+  transform: translateX(105%); display: flex; flex-direction: column; transition: transform .3s cubic-bezier(.4,0,.2,1);
+}
+.detail-panel.show { transform: translateX(0); }
+.detail-top {
+  background: #fff; padding: 10px 14px; display: flex; align-items: center;
+  gap: 10px; border-bottom: 1px solid #F1F5F9;
+}
+.detail-top .d-title { font-weight: 700; font-size: 15px; }
+.detail-scroll { flex: 1; overflow-y: auto; padding: 14px; padding-bottom: 24px; }
+
+/* ── Stepper ── */
+.stepper { position: relative; padding-left: 22px; }
+.stepper::before { content: ''; position: absolute; left: 9px; top: 6px; bottom: 6px; width: 2px; background: var(--gray-200); }
+.step { position: relative; padding-bottom: 18px; }
+.step:last-child { padding-bottom: 0; }
+.step .s-dot {
+  position: absolute; left: -22px; top: 1px; width: 20px; height: 20px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 10px;
+  border: 2px solid var(--gray-200); background: #fff; color: var(--gray-400); z-index: 1; font-weight: 700;
+}
+.step.done .s-dot { border-color: var(--success); background: var(--success); color: #fff; }
+.step.cur .s-dot { border-color: var(--warning); background: #fff; color: var(--warning); border-width: 2.5px; }
+.step .s-label { font-weight: 600; font-size: 13px; color: var(--gray-800); }
+.step.done .s-label { color: var(--success); }
+.step.cur .s-label { color: var(--warning); }
+.step-fields { display: none; margin-top: 8px; }
+.step.cur .step-fields { display: block; }
+
+/* ── Form ── */
+.f-field { margin-bottom: 10px; }
+.f-field label { display: block; font-size: 11px; color: var(--gray-500); margin-bottom: 3px; font-weight: 500; }
+.f-field input, .f-field select {
+  width: 100%; padding: 8px 10px; border: 1.5px solid var(--gray-200); border-radius: 6px;
+  font-size: 13px; color: var(--gray-800); background: #fff; transition: border .2s;
+}
+.f-field input:focus, .f-field select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(41,98,255,.1); }
+.f-unit { font-size: 10px; color: var(--gray-400); }
+
+/* ── Profile ── */
+.pf-card {
+  background: linear-gradient(135deg, #2962FF, #1D4ED8);
+  border-radius: var(--radius-lg); padding: 18px; color: #fff; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 12px;
+}
+.pf-avatar { width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,.2); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.pf-name { font-size: 17px; font-weight: 700; }
+.pf-role { font-size: 12px; opacity: .8; }
+.settings { background: #fff; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-card); }
+.set-row {
+  padding: 13px 14px; display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--gray-100); cursor: pointer; font-size: 13px;
+}
+.set-row:last-child { border-bottom: none; }
+.set-row:active { background: #FAFBFC; }
+
+/* ── Modal Overlay ── */
+.modal-mask {
+  position: absolute; inset: 0; background: rgba(0,0,0,.4); z-index: 30;
+  display: none; align-items: center; justify-content: center;
+}
+.modal-mask.open { display: flex; }
+.modal-box { background: #fff; border-radius: var(--radius-lg); padding: 18px; width: 84%; max-width: 320px; }
+.modal-box .m-title { font-weight: 700; font-size: 15px; margin-bottom: 12px; }
+.m-actions { display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end; }
+
+/* ── Toast ── */
+.toast {
+  position: absolute; top: 56px; left: 50%; transform: translateX(-50%);
+  background: #1E293B; color: #fff; padding: 8px 18px; border-radius: 18px;
+  font-size: 12px; z-index: 40; pointer-events: none; opacity: 0; transition: opacity .3s;
+}
+.toast.vis { opacity: 1; }
+
+/* ── Misc ── */
+.mt-6 { margin-top: 6px; } .mt-8 { margin-top: 8px; } .mt-10 { margin-top: 10px; }
+.mb-8 { margin-bottom: 8px; } .mb-10 { margin-bottom: 10px; }
+.text-r { text-align: right; } .text-c { text-align: center; }
+.flex-sp { display: flex; justify-content: space-between; align-items: center; }
+.gap-6 { gap: 6px; } .gap-8 { gap: 8px; }
+.text-xs { font-size: 11px; } .text-sm { font-size: 12px; } .text-gray { color: var(--gray-500); }
+</style>
+</head>
+<body>
+
+<div class="app-shell" id="app">
+  <!-- ═══════ Status Bar ═══════ -->
+  <div class="status-bar"><span class="time">9:41</span><span>📶 5G   📡   🔋 85%</span></div>
+
+  <!-- ═══════ Header ═══════ -->
+  <div class="app-hdr" id="hdr">
+    <button class="btn-back" id="btnBack" onclick="closeDetail()">←</button>
+    <span class="hdr-title" id="hdrTitle">🏗️ 慧打桩</span>
+    <span class="hdr-badge" id="hdrBadge">临港科技城项目</span>
+  </div>
+
+  <!-- ═══════ Content ═══════ -->
+  <div class="content-wrap" id="content">
+
+    <!-- ── PAGE: 首页 ── -->
+    <div class="page-view on" id="pg-home">
+      <!-- 日期天气 -->
+      <div class="card" style="padding:8px 14px;">
+        <div class="flex-sp">
+          <span style="font-weight:600;font-size:13px;">📅 2026年7月10日 星期三</span>
+          <span style="color:var(--warning);font-weight:600;">☀️ 晴 18°~28°</span>
+          <span style="font-size:11px;color:var(--gray-400);">武汉</span>
+        </div>
+      </div>
+
+      <!-- 桩基工程情况 — source pattern from pile-statistics.vue -->
+      <div class="card">
+        <div class="card-header"><span class="dot"></span>桩基工程情况</div>
+        <div class="mb-8" style="display:flex;gap:0;border-radius:6px;overflow:hidden;border:1px solid var(--gray-200);">
+          <button class="subtab on" id="tabSupport" onclick="switchPileTab('support')" style="flex:1;">支护桩</button>
+          <button class="subtab" id="tabEng" onclick="switchPileTab('engineering')" style="flex:1;">工程桩</button>
+        </div>
+        <div class="info-block" id="pileInfo">
+          <div class="info-row"><div class="info-item"><span class="info-label">总桩数</span><span class="info-val">486</span></div><div class="info-item"><span class="info-label">已完成桩数</span><span class="info-val">342</span></div></div>
+          <div class="info-row"><div class="info-item"><span class="info-label">待完成桩数</span><span class="info-val">144</span></div><div class="info-item"><span class="info-label">完成度</span><span class="info-val">70.37%</span></div></div>
+          <div class="info-row"><div class="info-item"><span class="info-label">计划完工日期</span><span class="info-val">2026-08-03</span></div><div class="info-item"><span class="info-label">剩余工期</span><span class="info-val">24天</span></div></div>
+          <div class="info-row"><div class="info-item"><span class="info-label">已检测桩数</span><span class="info-val">298</span></div><div class="info-item"><span class="info-label">待检测桩数</span><span class="info-val">188</span></div></div>
+        </div>
+      </div>
+
+      <!-- 今日计划完成情况 -->
+      <div class="card">
+        <div class="card-header"><span class="dot"></span>今日计划完成情况</div>
+        <div class="ring-wrap">
+          <svg width="82" height="82" viewBox="0 0 82 82" class="ring-svg">
+            <circle cx="41" cy="41" r="34" fill="none" stroke="#E2E8F0" stroke-width="7"/>
+            <circle cx="41" cy="41" r="34" fill="none" stroke="#2962FF" stroke-width="7"
+              stroke-dasharray="213.63" stroke-dashoffset="61.95" stroke-linecap="round" transform="rotate(-90 41 41)"/>
+            <text x="41" y="40" text-anchor="middle" class="ring-center">71%</text>
+            <text x="41" y="52" text-anchor="middle" class="ring-sub">完成率</text>
+          </svg>
+          <div class="ring-detail">
+            <div>📋 计划打桩：<b>45</b> 根</div>
+            <div>✅ 已完成：<b>32</b> 根</div>
+            <div>🔄 进行中：<b>8</b> 根</div>
+            <div>⏳ 待施工：<b>5</b> 根</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 设备统计 — source pattern from workspace-equipment.vue -->
+      <div class="card">
+        <div class="card-header"><span class="dot"></span>设备统计</div>
+        <div class="equip-row">
+          <div class="equip-mini on"><div class="e-val">12</div><div class="e-lbl">🟢 在线</div></div>
+          <div class="equip-mini off"><div class="e-val">3</div><div class="e-lbl">🔴 离线</div></div>
+          <div class="equip-mini work"><div class="e-val">8</div><div class="e-lbl">🟡 工作中</div></div>
+        </div>
+        <div style="margin-top:10px;padding:8px 10px;border:1px dashed var(--gray-200);border-radius:6px;display:flex;align-items:center;justify-content:space-between;">
+          <span class="text-xs text-gray">超期维修设备</span>
+          <span style="color:var(--danger);font-weight:700;font-size:13px;cursor:pointer;">2</span>
+          <span class="text-xs" style="color:var(--gray-400);">/ 15 台（13.3%）</span>
+        </div>
+      </div>
+
+      <!-- 近7日打桩趋势 -->
+      <div class="card">
+        <div class="card-header"><span class="dot"></span>近7日打桩趋势（根）</div>
+        <div class="bars" id="barChart"></div>
+      </div>
+    </div>
+
+    <!-- ── PAGE: 进度 ── -->
+    <div class="page-view" id="pg-progress">
+      <div class="subtabs">
+        <button class="subtab on" data-view="plan">📋 施工计划</button>
+        <button class="subtab" data-view="task">📝 施工任务</button>
+      </div>
+
+      <!-- 施工计划视图 -->
+      <div id="view-plan">
+        <div class="flex-sp mb-10" style="gap:6px;">
+          <div class="chips" style="margin-bottom:0;">
+            <span class="chip on" onclick="filterChip(this,'all')">全部</span>
+            <span class="chip" onclick="filterChip(this,'ongoing')">进行中</span>
+            <span class="chip" onclick="filterChip(this,'done')">已完成</span>
+            <span class="chip" onclick="filterChip(this,'pending')">未开始</span>
+          </div>
+          <button class="btn btn-pri btn-sm" onclick="openPlanModal()" style="flex-shrink:0;">+ 新建</button>
+        </div>
+        <div id="planList"></div>
+      </div>
+
+      <!-- 施工任务视图 -->
+      <div id="view-task" style="display:none;">
+        <div class="tasktabs">
+          <button class="tasktab on" onclick="switchTaskTab(this,'dispatched')">已下发<span class="count">12</span></button>
+          <button class="tasktab" onclick="switchTaskTab(this,'undispatched')">未下发<span class="count">8</span></button>
+        </div>
+        <div id="taskList"></div>
+      </div>
+    </div>
+
+    <!-- ── PAGE: 施工 ── -->
+    <div class="page-view" id="pg-construction">
+      <div class="flex-sp mb-10 gap-6">
+        <select style="flex:1;padding:7px 10px;border:1.5px solid var(--gray-200);border-radius:6px;font-size:12px;background:#fff;">
+          <option>全部分区</option><option>A区-基坑支护</option><option>B区-主体工程桩</option><option>C区-围护桩</option>
+        </select>
+        <select style="flex:1;padding:7px 10px;border:1.5px solid var(--gray-200);border-radius:6px;font-size:12px;background:#fff;">
+          <option>全部状态</option><option>未开始</option><option>填报中</option><option>已完成</option>
+        </select>
+        <span class="text-xs text-gray" style="flex-shrink:0;">共 1,286 根</span>
+      </div>
+      <div id="pileList"></div>
+    </div>
+
+    <!-- ── PAGE: 设备 ── -->
+    <div class="page-view" id="pg-equipment">
+      <div class="subtabs">
+        <button class="subtab on" data-eqtab="smart">🚜 智能设备</button>
+        <button class="subtab" data-eqtab="sensor">📡 传感器</button>
+      </div>
+      <div id="smartDevices"></div>
+      <div id="sensorDevices" style="display:none;"></div>
+    </div>
+
+    <!-- ── PAGE: 我的 ── -->
+    <div class="page-view" id="pg-profile">
+      <div class="pf-card">
+        <div class="pf-avatar">👷</div>
+        <div>
+          <div class="pf-name">张建国</div>
+          <div class="pf-role">项目经理 | 临港科技城项目部</div>
+          <div style="font-size:11px;opacity:.6;margin-top:2px;">📱 138****8888</div>
+        </div>
+      </div>
+      <div class="settings">
+        <div class="set-row" onclick="showToast('📝 编辑个人信息')"><span>👤 修改个人信息</span><span style="color:var(--gray-300);">›</span></div>
+        <div class="set-row" onclick="openPwdModal()"><span>🔒 修改登录密码</span><span style="color:var(--gray-300);">›</span></div>
+        <div class="set-row"><span>🔔 消息通知设置</span><span style="color:var(--gray-300);">›</span></div>
+        <div class="set-row"><span>📖 关于慧打桩</span><span style="font-size:11px;color:var(--gray-400);">v2.1.0</span></div>
+        <div class="set-row" style="color:var(--danger);"><span>🚪 退出登录</span><span style="color:var(--danger);">›</span></div>
+      </div>
+    </div>
+
+    <!-- ═══════ DETAIL PANEL: 施工填报 ═══════ -->
+    <div class="detail-panel" id="detailPanel">
+      <div class="detail-top">
+        <button class="btn-back" style="display:flex;" onclick="closeDetail()">←</button>
+        <span class="d-title" id="detailTitle">桩点施工填报</span>
+      </div>
+      <div class="detail-scroll" id="detailBody"></div>
+    </div>
+
+    <!-- ═══════ Toast ═══════ -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ═══════ MODAL: 修改密码 ═══════ -->
+    <div class="modal-mask" id="pwdModal">
+      <div class="modal-box">
+        <div class="m-title">🔒 修改登录密码</div>
+        <div class="f-field"><label>原密码</label><input type="password" placeholder="请输入原密码"></div>
+        <div class="f-field"><label>新密码</label><input type="password" placeholder="8-20位，含字母+数字"></div>
+        <div class="f-field"><label>确认新密码</label><input type="password" placeholder="请再次输入"></div>
+        <div class="m-actions">
+          <button class="btn btn-out btn-sm" onclick="closePwdModal()">取消</button>
+          <button class="btn btn-pri btn-sm" onclick="savePwd()">确认修改</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ MODAL: 新建日计划 ═══════ -->
+    <div class="modal-mask" id="planModal">
+      <div class="modal-box">
+        <div class="m-title">📋 新建日计划</div>
+        <div class="f-field"><label>计划日期</label><input type="date" value="2026-07-11"></div>
+        <div class="f-field"><label>施工分区</label><select><option>A区-基坑支护</option><option>B区-主体工程桩</option><option>C区-围护桩</option></select></div>
+        <div class="f-field"><label>计划打桩数量</label><input type="number" value="20"></div>
+        <div class="f-field"><label>选择桩点范围</label><select style="height:60px;"><option>ZH-087 ~ ZH-106 (20根，未开始)</option></select></div>
+        <div class="m-actions">
+          <button class="btn btn-out btn-sm" onclick="closePlanModal()">取消</button>
+          <button class="btn btn-pri btn-sm" onclick="createPlan()">创建</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ Bottom Nav ═══════ -->
+  <div class="nav-bar">
+    <button class="nav-btn cur" data-pg="home"><span class="n-icon">🏠</span><span class="n-label">首页</span></button>
+    <button class="nav-btn" data-pg="progress"><span class="n-icon">📋</span><span class="n-label">进度</span></button>
+    <button class="nav-btn" data-pg="construction"><span class="n-icon">🔧</span><span class="n-label">施工</span></button>
+    <button class="nav-btn" data-pg="equipment"><span class="n-icon">⚙️</span><span class="n-label">设备</span></button>
+    <button class="nav-btn" data-pg="profile"><span class="n-icon">👤</span><span class="n-label">我的</span></button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  DATA — 基于源码 API 数据结构
+// ═══════════════════════════════════════════
+const pileStats = {
+  support: { total:486, completed:342, pending:144, rate:'70.37', inspected:298, uninspected:188, planDate:'2026-08-03', remain:24 },
+  engineering: { total:800, completed:514, pending:286, rate:'64.25', inspected:420, uninspected:380, planDate:'2026-08-15', remain:36 },
+};
+
+const weekData = [
+  { day:'7/4', val:38 }, { day:'7/5', val:42 }, { day:'7/6', val:35 },
+  { day:'7/7', val:45 }, { day:'7/8', val:40 }, { day:'7/9', val:48 }, { day:'7/10', val:32 },
+];
+
+const plans = [
+  { date:'7月10日', zone:'A区-基坑支护', planned:15, done:12, status:'ongoing', pct:80 },
+  { date:'7月10日', zone:'B区-主体工程桩', planned:20, done:8, status:'ongoing', pct:40 },
+  { date:'7月9日', zone:'A区-基坑支护', planned:18, done:18, status:'done', pct:100 },
+  { date:'7月9日', zone:'C区-围护桩', planned:10, done:10, status:'done', pct:100 },
+  { date:'7月8日', zone:'B区-主体工程桩', planned:22, done:22, status:'done', pct:100 },
+  { date:'7月8日', zone:'A区-基坑支护', planned:15, done:0, status:'pending', pct:0 },
+];
+
+const tasks = {
+  dispatched: [
+    { id:'ZH-001', zone:'A区', type:'支护灌注桩', status:'ongoing', equip:'旋挖机#3', steps:['定位放线','成孔施工','清孔验收','钢筋笼安装','混凝土浇筑'], cur:1 },
+    { id:'ZH-002', zone:'A区', type:'支护灌注桩', status:'ongoing', equip:'旋挖机#1', steps:['定位放线','成孔施工','清孔验收','钢筋笼安装','混凝土浇筑'], cur:3 },
+    { id:'ZH-015', zone:'B区', type:'工程桩', status:'ongoing', equip:'旋挖机#2', steps:['定位放线','成孔施工','清孔验收','钢筋笼安装','混凝土浇筑'], cur:0 },
+    { id:'ZH-023', zone:'A区', type:'支护灌注桩', status:'done', equip:'旋挖机#3', steps:['定位放线','成孔施工','清孔验收','钢筋笼安装','混凝土浇筑'], cur:5 },
+  ],
+  undispatched: [
+    { id:'ZH-088', zone:'A区', type:'支护灌注桩' },
+    { id:'ZH-089', zone:'A区', type:'支护灌注桩' },
+    { id:'ZH-090', zone:'B区', type:'工程桩' },
+    { id:'ZH-091', zone:'B区', type:'工程桩' },
+    { id:'ZH-092', zone:'C区', type:'围护桩' },
+  ]
+};
+
+const piles = [
+  { id:'ZH-001', zone:'A区', type:'支护灌注桩', status:'ongoing', equip:'旋挖机#3', steps:['定位放线','成孔施工','清孔验收','钢筋笼安装','混凝土浇筑','成桩验收'], cur:1 },
+  { id:'ZH-002', zone:'A区', type:'支护灌注桩', status:'ongoing', equip:'旋挖机#1', steps:['定位放线','成孔施工','清孔验收','钢筋笼安装','混凝土浇筑','成桩验收'], cur:3 },
+  { id:'ZH-003', zone:'A区', type:'支护灌注桩', status:'pending', equip:'-', steps:['定位放线','成孔施工','清孔验收','钢筋笼安装','混凝土浇筑','成桩验收'], cur:-1 },
+  { id:'ZH-005', zone:'B区', type:'工程桩', status:'done', equip:'旋挖机#2', steps:['定位放线','成孔施工','清孔验收','钢筋笼安装','混凝土浇筑','成桩验收'], cur:6 },
+  { id:'ZH-008', zone:'B区', type:'工程桩', status:'ongoing', equip:'旋挖机#1', steps:['定位放线','成孔施工','清孔验收','钢筋笼安装','混凝土浇筑','成桩验收'], cur:2 },
+  { id:'ZH-012', zone:'C区', type:'围护桩', status:'done', equip:'旋挖机#3', steps:['定位放线','成孔施工','清孔验收','钢筋笼安装','混凝土浇筑','成桩验收'], cur:6 },
+];
+
+const devices = [
+  { id:'旋挖机#1', type:'旋挖机', status:'online', pos:'ZH-002施工区', coord:'30.9042, 121.9074', working:true, planned:15, done:8 },
+  { id:'旋挖机#2', type:'旋挖机', status:'online', pos:'ZH-008施工区', coord:'30.9051, 121.9080', working:true, planned:12, done:5 },
+  { id:'旋挖机#3', type:'旋挖机', status:'offline', pos:'-', coord:'-', working:false, planned:10, done:3 },
+  { id:'超声检测仪#1', type:'超声孔壁检测仪', status:'online', pos:'待命', coord:'-', working:false, planned:0, done:0 },
+];
+
+const sensors = [
+  { id:'S01', name:'测斜传感器', loc:'A区基坑南侧', status:'online', data:'倾斜度 0.02°' },
+  { id:'S02', name:'测斜传感器', loc:'A区基坑北侧', status:'online', data:'倾斜度 0.01°' },
+  { id:'S03', name:'水位传感器', loc:'B区降水井#1', status:'online', data:'水位 -5.2m' },
+  { id:'S04', name:'沉降传感器', loc:'C区围护桩顶', status:'offline', data:'- (离线)' },
+];
+
+// ═══════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════
+function renderBarChart() {
+  const max = Math.max(...weekData.map(d=>d.val));
+  document.getElementById('barChart').innerHTML = weekData.map(d =>
+    `<div class="bar-item">
+      <div class="b-val">${d.val}</div>
+      <div class="bar ${d.val===max?'hi':''}" style="height:${(d.val/max*90).toFixed(0)}%"></div>
+      <div class="b-label">${d.day}</div>
+    </div>`
+  ).join('');
+}
+
+function renderPlans(filter='all') {
+  const data = filter==='all' ? plans : plans.filter(p=>p.status===filter);
+  const c = document.getElementById('planList');
+  if (!data.length) { c.innerHTML = '<div class="text-c" style="padding:32px;color:var(--gray-400);">📭 暂无计划</div>'; return; }
+  c.innerHTML = data.map(p=>{
+    const stTag = p.status==='ongoing'?'进行中':p.status==='done'?'已完成':'未开始';
+    const stCls = p.status==='ongoing'?'ongoing':p.status==='done'?'done':'pending';
+    return `<div class="list-card">
+      <div class="lc-top"><span class="lc-title">📅 ${p.date} · ${p.zone}</span><span class="tag ${stCls}">${stTag}</span></div>
+      <div class="lc-meta"><span>📌 计划 <b>${p.planned}</b> 根</span><span>✅ 完成 <b>${p.done}</b> 根</span><span>📊 ${p.pct}%</span></div>
+      <div class="pbar"><div class="pbar-fill ${p.pct===100?'full':''}" style="width:${p.pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderTasks(tab='dispatched') {
+  const data = tasks[tab];
+  const c = document.getElementById('taskList');
+  if (!data.length) { c.innerHTML = '<div class="text-c" style="padding:32px;color:var(--gray-400);">📭 暂无任务</div>'; return; }
+  c.innerHTML = data.map(t=>{
+    if (tab==='dispatched') {
+      const stTag = t.status==='ongoing'?'进行中':'已完成';
+      const stCls = t.status==='ongoing'?'ongoing':'done';
+      const stHtml = t.steps.map((s,i)=>{
+        let cls = i<t.cur?'ok':i===t.cur?'act':'';
+        return `<span class="step-tag ${cls}">${s}</span>`;
+      }).join('');
+      return `<div class="list-card">
+        <div class="lc-top"><div><span class="lc-title">🔸 ${t.id}</span><span class="lc-sub"> · ${t.zone} · ${t.type}</span></div><span class="tag ${stCls}">${stTag}</span></div>
+        <div class="lc-meta">🚜 ${t.equip}</div>
+        <div class="step-tags">${stHtml}</div>
+        <div class="text-r mt-8"><button class="btn btn-out btn-sm" onclick="openDetail('${t.id}')">查看详情 →</button></div>
+      </div>`;
+    } else {
+      return `<div class="list-card">
+        <div class="lc-top"><div><span class="lc-title">🔹 ${t.id}</span><span class="lc-sub"> · ${t.zone} · ${t.type}</span></div><span class="tag todo">待下发</span></div>
+        <div class="text-r mt-8"><button class="btn btn-pri btn-sm" onclick="dispatch('${t.id}',this)">📤 下发任务</button></div>
+      </div>`;
+    }
+  }).join('');
+}
+
+function renderPiles() {
+  document.getElementById('pileList').innerHTML = piles.map(p=>{
+    const stTag = p.status==='ongoing'?'填报中':p.status==='done'?'已完成':'未开始';
+    const stCls = p.status==='ongoing'?'ongoing':p.status==='done'?'done':'pending';
+    const stHtml = p.steps.map((s,i)=>{
+      let cls = i<p.cur?'ok':i===p.cur?'act':'';
+      return `<span class="step-tag ${cls}">${s}</span>`;
+    }).join('');
+    const btn = p.status==='ongoing'
+      ? `<button class="btn btn-pri btn-sm" onclick="openDetail('${p.id}')">填报 →</button>`
+      : p.status==='done'
+        ? `<button class="btn btn-out btn-sm" onclick="openDetail('${p.id}')">查看</button>`
+        : `<button class="btn btn-out btn-sm" onclick="openDetail('${p.id}')">开始</button>`;
+    return `<div class="list-card">
+      <div class="lc-top"><div><span class="lc-title">● ${p.id}</span><span class="lc-sub"> · ${p.zone} · ${p.type}</span></div><span class="tag ${stCls}">${stTag}</span></div>
+      <div class="step-tags">${stHtml}</div>
+      ${p.equip!=='-'?`<div class="text-xs text-gray mt-6">🚜 ${p.equip}</div>`:''}
+      <div class="text-r mt-8">${btn}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderDevices() {
+  document.getElementById('smartDevices').innerHTML = devices.map(d=>{
+    const dot = d.status==='online'?(d.working?'🟡':'🟢'):'🔴';
+    const st = d.status==='online'?(d.working?'工作中':'在线'):'离线';
+    const stColor = d.status==='online'?(d.working?'var(--warning)':'var(--success)'):'var(--danger)';
+    return `<div class="list-card">
+      <div class="flex-sp mb-8"><span style="font-weight:700;font-size:14px;">🚜 ${d.id}</span><span style="font-size:10px;color:${stColor};font-weight:600;">${dot} ${st}</span></div>
+      <div class="text-xs text-gray">📍 ${d.pos} | 坐标：${d.coord}</div>
+      ${d.working?`<div class="text-xs text-gray mt-6">📊 计划 ${d.planned}根 | 已施工 ${d.done}根 | 速率 ${(d.done/(d.planned||1)*100).toFixed(0)}%</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function renderSensors() {
+  document.getElementById('sensorDevices').innerHTML = sensors.map(s=>{
+    const dot = s.status==='online'?'🟢':'🔴';
+    return `<div class="list-card">
+      <div class="flex-sp mb-8"><span style="font-weight:700;font-size:14px;">📡 ${s.id} ${s.name}</span><span style="font-size:10px;color:${s.status==='online'?'var(--success)':'var(--danger)'};font-weight:600;">${dot} ${s.status==='online'?'在线':'离线'}</span></div>
+      <div class="text-xs text-gray">📍 ${s.loc}</div>
+      <div class="text-xs mt-6" style="color:var(--primary);font-weight:500;">📊 最新数据：${s.data}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+//  PILE TAB SWITCH (source pattern)
+// ═══════════════════════════════════════════
+function switchPileTab(type) {
+  document.querySelectorAll('#pg-home .subtab').forEach(b=>b.classList.remove('on'));
+  document.getElementById(type==='support'?'tabSupport':'tabEng').classList.add('on');
+  const s = pileStats[type];
+  document.getElementById('pileInfo').innerHTML = `
+    <div class="info-row"><div class="info-item"><span class="info-label">总桩数</span><span class="info-val">${s.total}</span></div><div class="info-item"><span class="info-label">已完成桩数</span><span class="info-val">${s.completed}</span></div></div>
+    <div class="info-row"><div class="info-item"><span class="info-label">待完成桩数</span><span class="info-val">${s.pending}</span></div><div class="info-item"><span class="info-label">完成度</span><span class="info-val">${s.rate}%</span></div></div>
+    <div class="info-row"><div class="info-item"><span class="info-label">计划完工日期</span><span class="info-val">${s.planDate}</span></div><div class="info-item"><span class="info-label">剩余工期</span><span class="info-val">${s.remain}天</span></div></div>
+    <div class="info-row"><div class="info-item"><span class="info-label">已检测桩数</span><span class="info-val">${s.inspected}</span></div><div class="info-item"><span class="info-label">待检测桩数</span><span class="info-val">${s.uninspected}</span></div></div>
+  `;
+}
+
+// ═══════════════════════════════════════════
+//  DETAIL PANEL — 施工填报
+// ═══════════════════════════════════════════
+function openDetail(pileId) {
+  const pile = piles.find(p=>p.id===pileId) || tasks.dispatched.find(t=>t.id===pileId && t.steps);
+  if (!pile) { showToast('未找到桩点信息'); return; }
+
+  document.getElementById('detailTitle').textContent = `🔧 ${pile.id} 施工填报`;
+  const allSteps = pile.steps || pile.stepNames || [];
+  const curStep = pile.cur ?? 0;
+
+  const stepsHtml = allSteps.map((name,i)=>{
+    let cls = '';
+    let icon = '';
+    if (i < curStep) { cls = 'done'; icon = '✓'; }
+    else if (i === curStep) { cls = 'cur'; icon = (i+1).toString(); }
+    else { icon = (i+1).toString(); }
+
+    const fields = [
+      { label:'成孔深度', unit:'mm', name:'depth' },
+      { label:'成孔垂直度', unit:'%', name:'verticality' },
+      { label:'钻杆电流', unit:'A', name:'current' },
+      { label:'进尺深度', unit:'m', name:'footage' },
+      { label:'底部标高', unit:'mm', name:'bottomElevation' },
+    ];
+
+    let fHtml = '';
+    if (cls === 'cur') {
+      fHtml = fields.map(f=>`
+        <div class="f-field"><label>${f.label} ${i===1?'*':''}</label><input type="text" placeholder="请输入${f.label}"><span class="f-unit">${f.unit}</span></div>
+      `).join('');
+    }
+
+    return `<div class="step ${cls}">
+      <div class="s-dot">${icon}</div>
+      <div class="s-label">${name}${cls==='done'?' ✅':cls==='cur'?' 🔄':''}</div>
+      <div class="step-fields">${fHtml}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('detailBody').innerHTML = `
+    <div class="card"><div class="flex-sp"><span style="font-weight:600;">${pile.id} · ${pile.zone||pile.part||''} · ${pile.type||''}</span><span class="text-xs text-gray">🚜 ${pile.equip||'-'}</span></div></div>
+    <div class="card"><div class="card-header"><span class="dot"></span>工艺流程</div><div class="stepper">${stepsHtml}</div></div>
+    <button class="btn btn-pri btn-full" onclick="savePile('${pile.id}')">💾 保存填报数据</button>
+    <button class="btn btn-out btn-full mt-8" onclick="submitPile('${pile.id}')">✅ 提交完成</button>
+    <div class="text-xs text-gray text-c mt-10">提交后将自动流转至下一工艺步骤</div>
+  `;
+
+  const panel = document.getElementById('detailPanel');
+  panel.classList.add('show');
+  gsap.fromTo(panel, {x:'105%'}, {x:'0%', duration:.3, ease:'power2.out'});
+}
+
+function closeDetail() {
+  const panel = document.getElementById('detailPanel');
+  gsap.to(panel, {x:'105%', duration:.25, ease:'power2.in', onComplete:()=>panel.classList.remove('show')});
+}
+
+function savePile(id) { showToast('✅ 数据已保存'); }
+function submitPile(id) { showToast('✅ 已提交，流转至下一工序'); setTimeout(closeDetail,800); }
+
+// ═══════════════════════════════════════════
+//  TASK DISPATCH
+// ═══════════════════════════════════════════
+function dispatch(id, btn) {
+  btn.textContent = '已下发 ✓'; btn.disabled = true;
+  btn.style.background = 'var(--success-light)'; btn.style.color = 'var(--success)'; btn.style.borderColor = 'var(--success)';
+  showToast(`📤 桩点 ${id} 已下发至平板`);
+}
+
+// ═══════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('vis');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('vis'), 1600);
+}
+
+// ═══════════════════════════════════════════
+//  MODALS
+// ═══════════════════════════════════════════
+function openPwdModal() { document.getElementById('pwdModal').classList.add('open'); }
+function closePwdModal() { document.getElementById('pwdModal').classList.remove('open'); }
+function savePwd() { closePwdModal(); showToast('✅ 密码修改成功'); }
+function openPlanModal() { document.getElementById('planModal').classList.add('open'); }
+function closePlanModal() { document.getElementById('planModal').classList.remove('open'); }
+function createPlan() { closePlanModal(); showToast('✅ 日计划创建成功'); renderPlans(); }
+
+// ═══════════════════════════════════════════
+//  FILTER CHIPS
+// ═══════════════════════════════════════════
+function filterChip(el, f) {
+  el.parentElement.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  renderPlans(f);
+}
+
+// ═══════════════════════════════════════════
+//  TASK TAB SWITCH
+// ═══════════════════════════════════════════
+function switchTaskTab(el, tab) {
+  el.parentElement.querySelectorAll('.tasktab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  renderTasks(tab);
+}
+
+// ═══════════════════════════════════════════
+//  PAGE NAVIGATION
+// ═══════════════════════════════════════════
+let curPage = 'home';
+
+function goPage(pg) {
+  if (curPage === pg) return;
+  // Animate out
+  const oldEl = document.getElementById('pg-'+curPage);
+  if (oldEl) {
+    gsap.to(oldEl, {opacity:0, y:8, duration:.12, ease:'power2.in', onComplete:()=>{
+      oldEl.classList.remove('on'); oldEl.style.opacity=''; oldEl.style.transform='';
+    }});
+  }
+  // Animate in
+  const newEl = document.getElementById('pg-'+pg);
+  if (newEl) {
+    newEl.classList.add('on');
+    gsap.fromTo(newEl, {opacity:0, y:12}, {opacity:1, y:0, duration:.22, ease:'power2.out'});
+  }
+  // Nav state
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('cur'));
+  document.querySelector(`.nav-btn[data-pg="${pg}"]`)?.classList.add('cur');
+  // Header title
+  const titles = {home:'🏗️ 慧打桩', progress:'📋 施工进度', construction:'🔧 施工填报', equipment:'⚙️ 设备管理', profile:'👤 我的'};
+  document.getElementById('hdrTitle').textContent = titles[pg]||'慧打桩';
+  curPage = pg;
+  document.getElementById('content').scrollTop = 0;
+  if (document.getElementById('detailPanel').classList.contains('show')) closeDetail();
+}
+
+document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click', ()=>goPage(b.dataset.pg)));
+
+// ═══════════════════════════════════════════
+//  SUB-TABS
+// ═══════════════════════════════════════════
+// Progress plan/task
+document.querySelectorAll('#pg-progress .subtab').forEach(b=>b.addEventListener('click', function(){
+  document.querySelectorAll('#pg-progress .subtab').forEach(s=>s.classList.remove('on'));
+  this.classList.add('on');
+  const v = this.dataset.view;
+  document.getElementById('view-plan').style.display = v==='plan'?'block':'none';
+  document.getElementById('view-task').style.display = v==='task'?'block':'none';
+  if (v==='task') renderTasks('dispatched');
+}));
+
+// Equipment smart/sensor
+document.querySelectorAll('#pg-equipment .subtab').forEach(b=>b.addEventListener('click', function(){
+  document.querySelectorAll('#pg-equipment .subtab').forEach(s=>s.classList.remove('on'));
+  this.classList.add('on');
+  const v = this.dataset.eqtab;
+  document.getElementById('smartDevices').style.display = v==='smart'?'block':'none';
+  document.getElementById('sensorDevices').style.display = v==='sensor'?'block':'none';
+}));
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+function init() {
+  renderBarChart();
+  renderPlans();
+  renderTasks('dispatched');
+  renderPiles();
+  renderDevices();
+  renderSensors();
+  gsap.from('.card', {y:24, opacity:0, duration:.35, stagger:.06, ease:'power2.out'});
+}
+init();
+</script>
+</body>
+</html>

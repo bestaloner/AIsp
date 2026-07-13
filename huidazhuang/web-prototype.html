@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>慧打桩 - Web管理端原型</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+/* ═══════════════════════════════════════════
+   慧打桩 Web端 — 基于 ynlk-pit-web 源码设计规范
+   Primary: #2962FF | Light BG: #F0F6FF
+   ═══════════════════════════════════════════ */
+:root {
+  --p: #2962FF; --pl: #F0F6FF; --pd: #1D4ED8;
+  --s: #16A34A; --sl: #F0FDF4;
+  --w: #EB5E12; --wl: #FFF2EB;
+  --d: #DC2626;
+  --g1: #F8FAFC; --g2: #F1F5F9; --g3: #E2E8F0; --g4: #94A3B8; --g5: #64748B; --g6: #475569; --g7: #334155; --g8: #1E293B;
+  --r: 8px; --rl: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-lg: 0 4px 14px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.04);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #E8ECF1; color: var(--g8); -webkit-font-smoothing: antialiased;
+  display: flex; justify-content: center; align-items: center; min-height: 100vh;
+}
+
+/* ── App Shell ── */
+.app { width:100%; max-width:1440px; height:96vh; background:#fff; border-radius:12px; overflow:hidden; display:flex; box-shadow: 0 20px 60px rgba(0,0,0,.12); }
+
+/* ── Sidebar ── */
+.sidebar { width:240px; background: #fff; border-right:1px solid var(--g3); display:flex; flex-direction:column; flex-shrink:0; }
+.side-logo { padding:16px 18px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--g2); }
+.side-logo .logo-icon { width:34px; height:34px; background: var(--p); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:16px; }
+.side-logo .logo-text { font-weight:700; font-size:15px; color: var(--g8); }
+.side-menu { flex:1; overflow-y:auto; padding:8px; }
+.side-menu::-webkit-scrollbar { width:0; }
+.menu-group { margin-bottom:2px; }
+.menu-group-title { font-size:10px; color:var(--g4); padding:8px 10px 4px; text-transform:uppercase; letter-spacing:.5px; font-weight:600; }
+.menu-item {
+  display:flex; align-items:center; gap:8px; padding:9px 10px; border-radius:6px;
+  cursor:pointer; font-size:13px; color:var(--g6); font-weight:500; transition:all .15s;
+  text-decoration:none; margin-bottom:1px;
+}
+.menu-item:hover { background:var(--g2); color:var(--g8); }
+.menu-item.active { background:var(--pl); color:var(--p); font-weight:600; }
+.menu-item .mi-icon { font-size:16px; width:20px; text-align:center; flex-shrink:0; }
+.side-footer { padding:12px; border-top:1px solid var(--g2); }
+.side-user { display:flex; align-items:center; gap:8px; padding:6px; border-radius:8px; cursor:pointer; font-size:12px; }
+.side-user .avatar { width:30px; height:30px; border-radius:50%; background:var(--pl); color:var(--p); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; }
+
+/* ── Main ── */
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.topbar {
+  padding:0 20px; height:48px; border-bottom:1px solid var(--g2); display:flex;
+  align-items:center; justify-content:space-between; background:#fff; flex-shrink:0;
+}
+.topbar .breadcrumb { font-size:13px; color:var(--g5); }
+.topbar .breadcrumb span { color:var(--g8); font-weight:600; }
+.topbar .proj-tag { font-size:11px; color:var(--p); background:var(--pl); padding:3px 10px; border-radius:12px; font-weight:600; }
+.content { flex:1; overflow-y:auto; background:var(--g1); }
+.content::-webkit-scrollbar { width:6px; }
+.content::-webkit-scrollbar-thumb { background:var(--g3); border-radius:3px; }
+.page { display:none; padding:16px 20px; }
+.page.on { display:block; animation: fadeIn .2s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── Cards ── */
+.card { background:#fff; border-radius:var(--rl); padding:16px; box-shadow:var(--shadow); margin-bottom:12px; }
+.card-hd { font-size:15px; font-weight:600; color:var(--g8); margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+.card-hd .dot { width:5px; height:5px; border-radius:50%; background:var(--p); }
+
+/* ── Stats Grid ── */
+.stats-row { display:grid; grid-template-columns: repeat(4,1fr); gap:10px; margin-bottom:12px; }
+.stat-box { background:var(--pl); border-radius:var(--r); padding:14px; }
+.stat-box .sl { font-size:11px; color:var(--g5); margin-bottom:4px; }
+.stat-box .sv { font-size:28px; font-weight:800; color:var(--p); line-height:1; }
+.stat-box .ss { font-size:10px; color:var(--g4); margin-top:3px; }
+.stat-box.warn .sv { color:var(--w); }
+.stat-box.ok .sv { color:var(--s); }
+.stat-box.muted .sv { color:var(--g4); }
+
+/* ── Info Block (source pattern) ── */
+.info-block { background:var(--pl); border-radius:var(--r); padding:10px 14px; }
+.info-row { display:flex; margin-bottom:5px; }
+.info-row:last-child { margin-bottom:0; }
+.info-cell { flex:1; display:flex; align-items:center; }
+.info-lbl { width:90px; font-size:12px; color:var(--g5); flex-shrink:0; }
+.info-val { font-size:13px; font-weight:700; color:var(--p); }
+
+/* ── Grid 2-col ── */
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+
+/* ── Table ── */
+.tbl-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:12px; }
+table th { background:var(--g1); padding:9px 12px; text-align:left; font-weight:600; color:var(--g6); border-bottom:1.5px solid var(--g3); white-space:nowrap; font-size:11px; }
+table td { padding:9px 12px; border-bottom:1px solid var(--g2); color:var(--g7); white-space:nowrap; }
+table tr:hover td { background:#FAFBFC; }
+
+/* ── Tags ── */
+.tag { font-size:10px; padding:2px 8px; border-radius:10px; font-weight:600; white-space:nowrap; }
+.tag.on { background:var(--wl); color:var(--w); border:1px solid var(--w); }
+.tag.ok { background:var(--sl); color:var(--s); }
+.tag.gray { background:var(--g2); color:var(--g5); }
+.tag.red { background:#FEF2F2; color:var(--d); }
+
+/* ── Buttons ── */
+.btn { padding:6px 14px; border-radius:6px; font-size:12px; border:none; cursor:pointer; font-weight:600; transition:all .15s; display:inline-flex; align-items:center; gap:4px; }
+.btn:active { transform:scale(.96); }
+.btn-p { background:var(--p); color:#fff; }
+.btn-o { background:#fff; color:var(--p); border:1.5px solid var(--p); }
+.btn-s { padding:3px 10px; font-size:11px; border-radius:5px; }
+.btn-d { background:#fff; color:var(--d); border:1.5px solid var(--d); }
+.toolbar { display:flex; gap:8px; margin-bottom:12px; align-items:center; flex-wrap:wrap; }
+.toolbar .spacer { flex:1; }
+
+/* ── Filter bar ── */
+.fbar { display:flex; gap:8px; margin-bottom:12px; align-items:center; flex-wrap:wrap; }
+.fbar input, .fbar select { padding:6px 10px; border:1.5px solid var(--g3); border-radius:6px; font-size:12px; color:var(--g8); background:#fff; }
+.fbar input:focus, .fbar select:focus { outline:none; border-color:var(--p); }
+
+/* ── Tabs ── */
+.tabs { display:flex; gap:0; margin-bottom:14px; border-bottom:1.5px solid var(--g3); }
+.tab { padding:8px 16px; font-size:12px; font-weight:600; border:none; background:none; color:var(--g5); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1.5px; transition:all .15s; }
+.tab.active { color:var(--p); border-bottom-color:var(--p); }
+.tab .cnt { font-size:10px; background:var(--g2); padding:1px 6px; border-radius:8px; margin-left:4px; }
+.tab.active .cnt { background:var(--pl); color:var(--p); }
+
+/* ── Switch Tabs (RadioGroup style) ── */
+.swtabs { display:inline-flex; border-radius:6px; overflow:hidden; border:1px solid var(--g3); }
+.swtab { padding:5px 14px; font-size:11px; font-weight:600; border:none; background:#fff; color:var(--g5); cursor:pointer; transition:all .15s; }
+.swtab.active { background:var(--p); color:#fff; }
+.swtab + .swtab { border-left:1px solid var(--g3); }
+
+/* ── Progress Bar ── */
+.pbar { height:5px; background:var(--g2); border-radius:3px; overflow:hidden; margin-top:4px; }
+.pbar-fill { height:100%; border-radius:3px; background:var(--p); }
+.pbar-fill.full { background:var(--s); }
+
+/* ── Modal ── */
+.modal-mask { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:100; display:none; align-items:center; justify-content:center; }
+.modal-mask.open { display:flex; }
+.modal { background:#fff; border-radius:var(--rl); width:90%; max-width:600px; max-height:80vh; overflow-y:auto; box-shadow:var(--shadow-lg); }
+.modal.wide { max-width:900px; }
+.modal-hd { padding:14px 18px; border-bottom:1px solid var(--g2); font-weight:700; font-size:15px; display:flex; justify-content:space-between; align-items:center; }
+.modal-bd { padding:18px; }
+.modal-ft { padding:12px 18px; border-top:1px solid var(--g2); display:flex; justify-content:flex-end; gap:8px; }
+
+/* ── Form ── */
+.f-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:10px; }
+.f-field { }
+.f-field label { display:block; font-size:11px; color:var(--g5); margin-bottom:3px; font-weight:500; }
+.f-field input, .f-field select, .f-field textarea { width:100%; padding:7px 10px; border:1.5px solid var(--g3); border-radius:6px; font-size:12px; color:var(--g8); }
+.f-field input:focus, .f-field select:focus, .f-field textarea:focus { outline:none; border-color:var(--p); }
+
+/* ── Steps (for construction process) ── */
+.steps-row { display:flex; gap:0; margin-bottom:16px; overflow-x:auto; }
+.step-dot-item { display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:16px; font-size:11px; font-weight:600; white-space:nowrap; flex-shrink:0; }
+.step-dot-item .sd { width:18px; height:18px; border-radius:50%; border:2px solid var(--g3); display:flex; align-items:center; justify-content:center; font-size:9px; background:#fff; color:var(--g4); }
+.step-dot-item.done .sd { border-color:var(--s); background:var(--s); color:#fff; }
+.step-dot-item.cur .sd { border-color:var(--w); background:#fff; color:var(--w); }
+.step-dot-item::after { content:'›'; color:var(--g3); margin-left:4px; font-size:14px; }
+.step-dot-item:last-child::after { display:none; }
+
+/* ── Mini Stat Cards ── */
+.mini-stats { display:flex; gap:8px; }
+.mini-stat { flex:1; text-align:center; padding:10px; background:var(--pl); border-radius:var(--r); }
+.mini-stat .ms-v { font-size:18px; font-weight:700; }
+.mini-stat .ms-l { font-size:10px; color:var(--g5); margin-top:2px; }
+.mini-stat.g .ms-v { color:var(--s); }
+.mini-stat.r .ms-v { color:var(--d); }
+.mini-stat.y .ms-v { color:var(--w); }
+
+/* ── Chart placeholder ── */
+.chart-area { background:var(--g1); border-radius:var(--r); height:200px; display:flex; align-items:center; justify-content:center; color:var(--g4); font-size:13px; }
+.chart-area canvas { width:100%; height:100%; }
+
+/* ── Empty State ── */
+.empty { text-align:center; padding:40px; color:var(--g4); font-size:13px; }
+
+/* ── Toast ── */
+.toast { position:fixed; top:24px; left:50%; transform:translateX(-50%); background:var(--g8); color:#fff; padding:8px 20px; border-radius:20px; font-size:12px; z-index:200; pointer-events:none; opacity:0; transition:opacity .3s; }
+.toast.show { opacity:1; }
+
+/* ── Responsive ── */
+@media (max-width:1024px) { .sidebar { width:60px; } .side-logo .logo-text, .menu-item span:not(.mi-icon), .menu-group-title, .side-user span { display:none; } .menu-item { justify-content:center; } }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ═══════ SIDEBAR ═══════ -->
+  <aside class="sidebar">
+    <div class="side-logo"><div class="logo-icon">桩</div><span class="logo-text">慧打桩</span></div>
+    <nav class="side-menu">
+      <div class="menu-group"><div class="menu-group-title">工作平台</div>
+        <div class="menu-item active" data-page="workspace"><span class="mi-icon">🏠</span><span>平台首页</span></div>
+        <div class="menu-item" data-page="survey"><span class="mi-icon">🔍</span><span>勘察</span></div>
+        <div class="menu-item" data-page="pattern"><span class="mi-icon">🏗️</span><span>图模</span></div>
+      </div>
+      <div class="menu-group"><div class="menu-group-title">施工管理</div>
+        <div class="menu-item" data-page="period"><span class="mi-icon">📅</span><span>工期</span></div>
+        <div class="menu-item" data-page="construction"><span class="mi-icon">🔧</span><span>施工</span></div>
+        <div class="menu-item" data-page="data"><span class="mi-icon">📄</span><span>资料</span></div>
+      </div>
+      <div class="menu-group"><div class="menu-group-title">系统配置</div>
+        <div class="menu-item" data-page="equipment"><span class="mi-icon">⚙️</span><span>设备</span></div>
+        <div class="menu-item" data-page="setting"><span class="mi-icon">⚡</span><span>设置</span></div>
+      </div>
+    </nav>
+    <div class="side-footer">
+      <div class="side-user"><div class="avatar">张</div><span>张建国 · 项目经理</span></div>
+    </div>
+  </aside>
+
+  <!-- ═══════ MAIN ═══════ -->
+  <div class="main">
+    <header class="topbar">
+      <div class="breadcrumb">慧打桩 / <span id="breadcrumb">平台首页</span></div>
+      <span class="proj-tag">📍 临港科技城项目</span>
+    </header>
+    <div class="content" id="content">
+
+      <!-- ═══════════ PAGE: 平台首页 ═══════════ -->
+      <div class="page on" id="pg-workspace">
+        <!-- Stats Row -->
+        <div class="stats-row">
+          <div class="stat-box"><div class="sl">📌 桩总数</div><div class="sv">1,286</div><div class="ss">支护桩486 | 工程桩800</div></div>
+          <div class="stat-box warn"><div class="sl">🔄 进行中</div><div class="sv">342</div><div class="ss">今日新增 12 根</div></div>
+          <div class="stat-box ok"><div class="sl">✅ 已完成</div><div class="sv">856</div><div class="ss">完成度 66.6%</div></div>
+          <div class="stat-box muted"><div class="sl">⏳ 未开始</div><div class="sv">88</div><div class="ss">剩余工期 24 天</div></div>
+        </div>
+
+        <div class="grid2">
+          <!-- 桩基工程概况 -->
+          <div class="card">
+            <div class="card-hd"><span class="dot"></span>桩基工程概况
+              <div class="swtabs" style="margin-left:12px;">
+                <button class="swtab active" onclick="switchPileTabW('support',this)">支护桩</button>
+                <button class="swtab" onclick="switchPileTabW('engineering',this)">工程桩</button>
+              </div>
+            </div>
+            <div class="info-block" id="pileInfoW">
+              <div class="info-row"><div class="info-cell"><span class="info-lbl">总桩数</span><span class="info-val">486</span></div><div class="info-cell"><span class="info-lbl">已完成桩数</span><span class="info-val">342</span></div></div>
+              <div class="info-row"><div class="info-cell"><span class="info-lbl">待完成桩数</span><span class="info-val">144</span></div><div class="info-cell"><span class="info-lbl">完成度</span><span class="info-val">70.37%</span></div></div>
+              <div class="info-row"><div class="info-cell"><span class="info-lbl">计划完工日期</span><span class="info-val">2026-08-03</span></div><div class="info-cell"><span class="info-lbl">剩余工期</span><span class="info-val">24天</span></div></div>
+              <div class="info-row"><div class="info-cell"><span class="info-lbl">已检测桩数</span><span class="info-val">298</span></div><div class="info-cell"><span class="info-lbl">待检测桩数</span><span class="info-val">188</span></div></div>
+            </div>
+          </div>
+
+          <!-- 今日计划 -->
+          <div class="card">
+            <div class="card-hd"><span class="dot"></span>今日计划完成情况</div>
+            <div style="display:flex;align-items:center;gap:20px;">
+              <svg width="90" height="90"><circle cx="45" cy="45" r="36" fill="none" stroke="var(--g3)" stroke-width="8"/><circle cx="45" cy="45" r="36" fill="none" stroke="#2962FF" stroke-width="8" stroke-dasharray="226.2" stroke-dashoffset="65.6" stroke-linecap="round" transform="rotate(-90 45 45)"/><text x="45" y="44" text-anchor="middle" font-size="20" font-weight="800" fill="#2962FF">71%</text><text x="45" y="55" text-anchor="middle" font-size="9" fill="var(--g4)">完成率</text></svg>
+              <div style="font-size:12px;color:var(--g5);line-height:1.8;">
+                <div>📋 计划打桩：<b style="color:var(--g8)">45</b> 根</div>
+                <div>✅ 已完成：<b style="color:var(--g8)">32</b> 根</div>
+                <div>🔄 进行中：<b style="color:var(--g8)">8</b> 根</div>
+                <div>⏳ 待施工：<b style="color:var(--g8)">5</b> 根</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <!-- 设备统计 -->
+          <div class="card">
+            <div class="card-hd"><span class="dot"></span>设备统计</div>
+            <div class="mini-stats">
+              <div class="mini-stat g"><div class="ms-v">12</div><div class="ms-l">🟢 在线</div></div>
+              <div class="mini-stat r"><div class="ms-v">3</div><div class="ms-l">🔴 离线</div></div>
+              <div class="mini-stat y"><div class="ms-v">8</div><div class="ms-l">🟡 工作中</div></div>
+            </div>
+            <div style="margin-top:10px;padding:8px 10px;border:1px dashed var(--g3);border-radius:6px;display:flex;justify-content:space-between;align-items:center;font-size:11px;">
+              <span style="color:var(--g5);">超期维修设备</span>
+              <span style="color:var(--d);font-weight:700;">2</span>
+              <span style="color:var(--g4);">/ 15 台 (13.3%)</span>
+            </div>
+          </div>
+
+          <!-- 待办消息 -->
+          <div class="card">
+            <div class="card-hd"><span class="dot"></span>待办事项</div>
+            <div style="display:flex;gap:12px;">
+              <div style="flex:1;background:#FDFBF8;border-radius:var(--r);padding:12px;text-align:center;">
+                <div style="font-size:22px;font-weight:700;color:var(--p);">12</div>
+                <div style="font-size:11px;color:var(--g5);">待办事项</div>
+              </div>
+              <div style="flex:1;background:#F8FAFD;border-radius:var(--r);padding:12px;text-align:center;">
+                <div style="font-size:22px;font-weight:700;color:var(--p);">48</div>
+                <div style="font-size:11px;color:var(--g5);">已办事项</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 待办消息列表 -->
+        <div class="card">
+          <div class="card-hd"><span class="dot"></span>待办消息 <span style="font-size:10px;margin-left:6px;background:var(--wl);color:var(--w);padding:1px 6px;border-radius:8px;">3条未处理</span></div>
+          <table><thead><tr><th>类型</th><th>内容</th><th>时间</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td><span class="tag red">未处理</span></td><td>ZH-001 成孔施工已完成，请及时验收</td><td>2026-07-10 09:30</td><td><span class="tag red">待处理</span></td></tr>
+            <tr><td><span class="tag red">未处理</span></td><td>旋挖机#3 维保日期已超期，请安排检查</td><td>2026-07-10 08:15</td><td><span class="tag red">待处理</span></td></tr>
+            <tr><td><span class="tag gray">已处理</span></td><td>A区日计划已创建（7月10日），共15根桩</td><td>2026-07-09 16:45</td><td><span class="tag ok">已处理</span></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+
+      <!-- ═══════════ PAGE: 勘察 ═══════════ -->
+      <div class="page" id="pg-survey">
+        <div class="toolbar">
+          <button class="btn btn-p" onclick="openModal('surveyModal')">+ 新增勘察数据</button>
+          <div class="spacer"></div>
+          <input type="text" placeholder="搜索桩点编号..." style="width:200px;">
+          <button class="btn btn-o btn-s">🔍 搜索</button>
+        </div>
+        <div class="card">
+          <div class="tbl-wrap">
+            <table><thead><tr><th>序号</th><th>桩点编号</th><th>施工分区</th><th>桩类型</th><th>X坐标</th><th>Y坐标</th><th>高程(m)</th><th>勘察日期</th><th>操作</th></tr></thead>
+            <tbody id="surveyTable"></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════ PAGE: 图模 ═══════════ -->
+      <div class="page" id="pg-pattern">
+        <div class="tabs" id="patternTabs">
+          <button class="tab active" data-ptab="model">📦 模型管理</button>
+          <button class="tab" data-ptab="drawing">📐 图纸管理</button>
+          <button class="tab" data-ptab="compare">🔍 图模对照</button>
+          <button class="tab" data-ptab="component">📋 构件信息</button>
+        </div>
+
+        <!-- 模型管理 -->
+        <div id="ptab-model">
+          <div class="toolbar"><button class="btn btn-p">+ 导入BIM模型</button><span class="spacer"></span></div>
+          <div class="card"><div class="tbl-wrap">
+            <table><thead><tr><th>序号</th><th>模型名称</th><th>文件格式</th><th>上传时间</th><th>关联图纸</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>临港科技城-支护结构BIM</td><td>.rvt</td><td>2026-06-15</td><td>基坑支护图纸_V2</td><td><span class="tag ok">启用</span></td><td><button class="btn btn-o btn-s">预览</button> <button class="btn btn-o btn-s">关联</button> <button class="btn btn-o btn-s">禁用</button> <button class="btn btn-d btn-s">废弃</button></td></tr>
+              <tr><td>2</td><td>临港科技城-工程桩BIM</td><td>.ifc</td><td>2026-06-20</td><td>主体工程桩图纸</td><td><span class="tag ok">启用</span></td><td><button class="btn btn-o btn-s">预览</button> <button class="btn btn-o btn-s">关联</button> <button class="btn btn-o btn-s">禁用</button> <button class="btn btn-d btn-s">废弃</button></td></tr>
+              <tr><td>3</td><td>临港科技城-围护桩BIM</td><td>.rvt</td><td>2026-05-10</td><td>-</td><td><span class="tag gray">已废弃</span></td><td><button class="btn btn-o btn-s">恢复</button> <button class="btn btn-o btn-s">下载</button></td></tr>
+            </tbody>
+          </table></div></div>
+        </div>
+
+        <!-- 图纸管理 -->
+        <div id="ptab-drawing" style="display:none;">
+          <div class="toolbar"><button class="btn btn-p">+ 导入图纸</button><span class="spacer"></span></div>
+          <div class="card"><div class="tbl-wrap">
+            <table><thead><tr><th>序号</th><th>图纸名称</th><th>图纸类型</th><th>上传时间</th><th>关联模型</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>基坑支护图纸_V2</td><td>支护结构图</td><td>2026-06-10</td><td>支护结构BIM</td><td><span class="tag ok">启用</span></td><td><button class="btn btn-o btn-s">预览</button> <button class="btn btn-d btn-s">废弃</button></td></tr>
+              <tr><td>2</td><td>主体工程桩图纸</td><td>桩位平面图</td><td>2026-06-18</td><td>工程桩BIM</td><td><span class="tag ok">启用</span></td><td><button class="btn btn-o btn-s">预览</button> <button class="btn btn-d btn-s">废弃</button></td></tr>
+            </tbody>
+          </table></div></div>
+        </div>
+
+        <!-- 图模对照 -->
+        <div id="ptab-compare" style="display:none;">
+          <div class="card"><div class="chart-area" style="height:300px;">
+            <div style="text-align:center;">🖼️ BIM模型 + 图纸叠加对照视图区域<br><small>选择模型和图纸后进行对比分析</small></div>
+          </div></div>
+        </div>
+
+        <!-- 构件信息 -->
+        <div id="ptab-component" style="display:none;">
+          <div class="toolbar">
+            <button class="btn btn-p" onclick="showToast('已生成构件信息列表')">生成构件信息</button>
+            <button class="btn btn-o">导出Excel</button>
+            <button class="btn btn-o">导入Excel</button>
+          </div>
+          <div class="card"><div class="tbl-wrap">
+            <table><thead><tr><th>序号</th><th>构件ID</th><th>桩编号</th><th>桩长mm</th><th>底部标高mm</th><th>顶部标高mm</th><th>体积m³</th><th>桩径mm</th><th>施工工法</th><th>承载性质</th><th>混凝土强度</th><th>操作</th></tr></thead>
+            <tbody id="componentTable"></tbody></table></div></div>
+        </div>
+      </div>
+
+      <!-- ═══════════ PAGE: 工期 ═══════════ -->
+      <div class="page" id="pg-period">
+        <div class="toolbar">
+          <button class="btn btn-p" onclick="openModal('planModal')">+ 新增日计划</button>
+          <button class="btn btn-o">变更计划</button>
+          <button class="btn btn-o">📤 作业下发</button>
+          <div class="spacer"></div>
+          <select><option>全部版本</option><option>v3 - 2026-07-08</option><option>v2 - 2026-06-20</option></select>
+        </div>
+        <div class="card">
+          <div class="card-hd"><span class="dot"></span>日计划列表</div>
+          <div class="tbl-wrap"><table><thead><tr><th>日期</th><th>施工分区</th><th>计划打桩数</th><th>已完成</th><th>完成度</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody id="planTable"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- ═══════════ PAGE: 施工 ═══════════ -->
+      <div class="page" id="pg-construction">
+        <div class="tabs" id="conTabs">
+          <button class="tab active" data-ctab="live">📡 施工实况</button>
+          <button class="tab" data-ctab="craft">⚙️ 工艺管理</button>
+        </div>
+
+        <!-- 施工实况 -->
+        <div id="ctab-live">
+          <div class="fbar">
+            <select><option>全部分区</option><option>A区-基坑支护</option><option>B区-主体工程桩</option><option>C区-围护桩</option></select>
+            <select><option>全部状态</option><option>未开始</option><option>填报中</option><option>已完成</option></select>
+            <div class="spacer"></div>
+            <button class="btn btn-p btn-s" onclick="openModal('dispatchModal')">📤 任务下发</button>
+            <span style="font-size:11px;color:var(--g5);">共 1,286 根</span>
+          </div>
+
+          <!-- 施工实况统计 -->
+          <div class="grid3 mb-12">
+            <div class="stat-box"><div class="sl">未开始</div><div class="sv muted">88</div></div>
+            <div class="stat-box warn"><div class="sl">进行中</div><div class="sv">342</div></div>
+            <div class="stat-box ok"><div class="sl">已完成</div><div class="sv">856</div></div>
+          </div>
+
+          <div class="card"><div class="tbl-wrap">
+            <table><thead><tr><th>桩编号</th><th>施工分区</th><th>桩类型</th><th>施工设备</th><th>当前工序</th><th>工艺进度</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody id="constructionTable"></tbody></table></div></div>
+        </div>
+
+        <!-- 工艺管理 -->
+        <div id="ctab-craft" style="display:none;">
+          <div class="fbar">
+            <select><option>支护灌注桩</option><option>工程桩-旋挖灌注桩</option><option>围护桩</option></select>
+            <span class="spacer"></span>
+            <button class="btn btn-p btn-s">保存配置</button>
+          </div>
+          <div class="card">
+            <div class="card-hd"><span class="dot"></span>工艺步骤配置</div>
+            <div class="tbl-wrap"><table><thead><tr><th>序号</th><th>工艺步骤</th><th>参数名称</th><th>单位</th><th>告警范围</th><th>是否启用</th><th>是否必填</th><th>监测设置</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>桩点定位</td><td>X坐标 / Y坐标 / 高程 / 垂直度</td><td>mm / mm / m / %</td><td>-</td><td>✅</td><td>✅</td><td>-</td></tr>
+              <tr><td>2</td><td>钢护筒埋设</td><td>护筒直径 / 埋设深度</td><td>mm / m</td><td>-</td><td>✅</td><td>✅</td><td>-</td></tr>
+              <tr><td>3</td><td>钻进成孔</td><td>泥浆密度 / 含砂率 / 粘度</td><td>g/cm³ / % / s</td><td>&gt;1.25 / &gt;8% / &lt;18s</td><td>✅</td><td>✅</td><td>-</td></tr>
+              <tr><td>4</td><td>成孔检查</td><td>孔深 / 孔径</td><td>m / mm</td><td>-</td><td>✅</td><td>✅</td><td>-</td></tr>
+              <tr><td>5</td><td>清孔</td><td>沉渣厚度</td><td>mm</td><td>&gt;50mm</td><td>✅</td><td>✅</td><td>-</td></tr>
+              <tr><td>6</td><td>超声孔壁探测</td><td>孔深 / 孔径 / 沉渣 / 垂直度 / 方量</td><td>m / mm / mm / % / m³</td><td>-</td><td>✅</td><td>✅</td><td>🟢 自动采集</td></tr>
+            </tbody></table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════ PAGE: 资料 ═══════════ -->
+      <div class="page" id="pg-data">
+        <div class="tabs" id="dataTabs">
+          <button class="tab active" data-dtab="record">📝 施工记录</button>
+          <button class="tab" data-dtab="report">📊 施工报告</button>
+        </div>
+
+        <!-- 施工记录 -->
+        <div id="dtab-record">
+          <div class="fbar">
+            <input type="text" placeholder="搜索桩编号...">
+            <input type="date">
+            <select><option>全部设备</option><option>旋挖机#1</option><option>旋挖机#2</option></select>
+            <button class="btn btn-o btn-s">🔍 查询</button>
+          </div>
+          <div class="card"><div class="tbl-wrap">
+            <table><thead><tr><th>序号</th><th>桩编号</th><th>施工完成日期</th><th>X偏移量</th><th>Y偏移量</th><th>成孔深度m</th><th>设计桩径mm</th><th>充盈系数</th><th>沉渣厚度mm</th><th>混凝土强度</th><th>设备编号</th><th>操作</th></tr></thead>
+            <tbody id="recordTable"></tbody></table></div></div>
+        </div>
+
+        <!-- 施工报告 -->
+        <div id="dtab-report" style="display:none;">
+          <div class="fbar">
+            <input type="text" placeholder="搜索桩编号..." style="width:160px;">
+            <select><option>全部报告类型</option><option>灌注桩施工记录</option><option>隐蔽验收记录</option></select>
+            <input type="date"> ~ <input type="date">
+            <button class="btn btn-o btn-s">🔍 筛选</button>
+            <div class="spacer"></div>
+            <button class="btn btn-p btn-s">📥 批量导出</button>
+          </div>
+          <div class="card"><div class="tbl-wrap">
+            <table><thead><tr><th>桩编号</th><th>报告类型</th><th>生成日期</th><th>完成情况</th><th>操作</th></tr></thead>
+            <tbody>
+              <tr><td>ZH-001</td><td>泥浆护壁成孔灌注桩施工记录</td><td>2026-07-08</td><td><span class="tag ok">已完成</span></td><td><button class="btn btn-o btn-s">查看</button> <button class="btn btn-o btn-s">下载</button></td></tr>
+              <tr><td>ZH-001</td><td>灌注桩钢筋笼安装隐蔽验收记录</td><td>2026-07-09</td><td><span class="tag ok">已完成</span></td><td><button class="btn btn-o btn-s">查看</button> <button class="btn btn-o btn-s">下载</button></td></tr>
+              <tr><td>ZH-002</td><td>护壁泥浆质量检查记录</td><td>2026-07-10</td><td><span class="tag on">进行中</span></td><td><button class="btn btn-o btn-s">查看</button></td></tr>
+              <tr><td>A区整体</td><td>灌注桩施工资料汇总表</td><td>2026-07-10</td><td>-</td><td><button class="btn btn-p btn-s">生成</button></td></tr>
+            </tbody>
+          </table></div></div>
+        </div>
+      </div>
+
+      <!-- ═══════════ PAGE: 设备 ═══════════ -->
+      <div class="page" id="pg-equipment">
+        <div class="toolbar">
+          <button class="btn btn-p" onclick="openModal('deviceModal')">+ 新增设备</button>
+          <div class="spacer"></div>
+          <select><option>全部类型</option><option>旋挖机</option><option>超声孔壁检测仪</option></select>
+        </div>
+        <div class="card"><div class="tbl-wrap">
+          <table><thead><tr><th>序号</th><th>设备编号</th><th>设备名称</th><th>类型</th><th>规格型号</th><th>终端编号</th><th>状态</th><th>维保状态</th><th>计划进场</th><th>计划退场</th><th>操作</th></tr></thead>
+          <tbody id="equipmentTable"></tbody></table></div></div>
+      </div>
+
+      <!-- ═══════════ PAGE: 设置 ═══════════ -->
+      <div class="page" id="pg-setting">
+        <div class="tabs" id="setTabs">
+          <button class="tab active" data-stab="overview">📋 工程概况</button>
+          <button class="tab" data-stab="scope">📍 施工范围</button>
+          <button class="tab" data-stab="unit">👥 参建单位</button>
+          <button class="tab" data-stab="photo">📷 图形图像</button>
+          <button class="tab" data-stab="zone">🗂️ 施工分区</button>
+        </div>
+
+        <!-- 工程概况 -->
+        <div id="stab-overview">
+          <div class="card">
+            <div class="f-row">
+              <div class="f-field"><label>项目名称</label><input value="临港科技城项目"></div>
+              <div class="f-field"><label>项目简称</label><input value="临港科技城"></div>
+              <div class="f-field"><label>工程类别</label><select><option>房屋建筑工程</option></select></div>
+              <div class="f-field"><label>建设单位</label><input value="上海临港建设集团"></div>
+              <div class="f-field"><label>监理单位</label><input value="上海建科监理"></div>
+              <div class="f-field"><label>勘察单位</label><input value="上海勘察设计院"></div>
+              <div class="f-field"><label>设计单位</label><input value="华东建筑设计院"></div>
+              <div class="f-field"><label>施工单位</label><input value="中建八局"></div>
+              <div class="f-field"><label>所属区域</label><input value="上海市浦东新区"></div>
+              <div class="f-field"><label>项目地址</label><input value="临港新片区海港大道"></div>
+            </div>
+            <div class="f-field" style="margin-top:8px;"><label>项目概况</label><textarea rows="2">临港科技城项目位于上海市浦东新区临港新片区，总建筑面积约15万平方米，桩基工程包括支护桩486根、工程桩800根。</textarea></div>
+            <div style="margin-top:12px;"><button class="btn btn-p">保存</button></div>
+          </div>
+        </div>
+
+        <!-- 施工范围 -->
+        <div id="stab-scope" style="display:none;">
+          <div class="card"><div class="tbl-wrap">
+            <table><thead><tr><th>分部工程</th><th>分项工程</th><th>操作</th></tr></thead>
+            <tbody>
+              <tr><td>土方工程</td><td>土方大开挖</td><td><button class="btn btn-d btn-s">删除</button></td></tr>
+              <tr><td>土方工程</td><td>二次土方开挖</td><td><button class="btn btn-d btn-s">删除</button></td></tr>
+              <tr><td>支护工程</td><td>支护灌注桩</td><td><button class="btn btn-d btn-s">删除</button></td></tr>
+              <tr><td>支护工程</td><td>止水帷幕</td><td><button class="btn btn-d btn-s">删除</button></td></tr>
+              <tr><td>支护工程</td><td>冠梁腰梁</td><td><button class="btn btn-d btn-s">删除</button></td></tr>
+              <tr><td>支护工程</td><td>预应力锚索</td><td><button class="btn btn-d btn-s">删除</button></td></tr>
+              <tr><td>工程桩</td><td>旋挖灌注桩</td><td><button class="btn btn-d btn-s">删除</button></td></tr>
+            </tbody>
+          </table></div>
+            <div style="margin-top:10px;"><button class="btn btn-p btn-s">+ 添加分项</button></div>
+          </div>
+        </div>
+
+        <!-- 参建单位 -->
+        <div id="stab-unit" style="display:none;">
+          <div class="toolbar"><button class="btn btn-p btn-s">+ 添加单位</button></div>
+          <div class="card"><div class="tbl-wrap">
+            <table><thead><tr><th>参建单位类型</th><th>单位名称</th><th>岗位类型</th><th>姓名</th><th>联系电话</th><th>操作</th></tr></thead>
+            <tbody>
+              <tr><td>建设单位</td><td>上海临港建设集团</td><td>项目负责人</td><td>王建国</td><td>138****6789</td><td><button class="btn btn-o btn-s">编辑</button> <button class="btn btn-d btn-s">删除</button></td></tr>
+              <tr><td>施工单位</td><td>中建八局</td><td>项目经理</td><td>张建国</td><td>138****8888</td><td><button class="btn btn-o btn-s">编辑</button> <button class="btn btn-d btn-s">删除</button></td></tr>
+              <tr><td>监理单位</td><td>上海建科监理</td><td>总监</td><td>李明</td><td>139****5678</td><td><button class="btn btn-o btn-s">编辑</button> <button class="btn btn-d btn-s">删除</button></td></tr>
+            </tbody>
+          </table></div></div>
+        </div>
+
+        <!-- 图形图像 -->
+        <div id="stab-photo" style="display:none;">
+          <div class="card"><div class="tbl-wrap">
+            <table><thead><tr><th>分部工程</th><th>已上传照片数</th><th>最近上传</th><th>操作</th></tr></thead>
+            <tbody>
+              <tr><td>支护工程</td><td>24</td><td>2026-07-09</td><td><button class="btn btn-o btn-s">查看</button> <button class="btn btn-p btn-s">上传</button></td></tr>
+              <tr><td>工程桩</td><td>35</td><td>2026-07-10</td><td><button class="btn btn-o btn-s">查看</button> <button class="btn btn-p btn-s">上传</button></td></tr>
+              <tr><td>土方工程</td><td>12</td><td>2026-07-05</td><td><button class="btn btn-o btn-s">查看</button> <button class="btn btn-p btn-s">上传</button></td></tr>
+            </tbody>
+          </table></div></div>
+        </div>
+
+        <!-- 施工分区 -->
+        <div id="stab-zone" style="display:none;">
+          <div class="toolbar"><button class="btn btn-p btn-s">+ 创建分区</button></div>
+          <div class="card"><div class="tbl-wrap">
+            <table><thead><tr><th>分区名称</th><th>关联模型</th><th>桩点数量</th><th>创建时间</th><th>操作</th></tr></thead>
+            <tbody>
+              <tr><td>A区-基坑支护</td><td>支护结构BIM</td><td>486</td><td>2026-05-20</td><td><button class="btn btn-o btn-s">编辑</button> <button class="btn btn-o btn-s">关联模型</button> <button class="btn btn-d btn-s">删除</button></td></tr>
+              <tr><td>B区-主体工程桩</td><td>工程桩BIM</td><td>500</td><td>2026-05-20</td><td><button class="btn btn-o btn-s">编辑</button> <button class="btn btn-o btn-s">关联模型</button> <button class="btn btn-d btn-s">删除</button></td></tr>
+              <tr><td>C区-围护桩</td><td>围护桩BIM</td><td>300</td><td>2026-06-01</td><td><button class="btn btn-o btn-s">编辑</button> <button class="btn btn-o btn-s">关联模型</button> <button class="btn btn-d btn-s">删除</button></td></tr>
+            </tbody>
+          </table></div></div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ═══════ MODALS ═══════ -->
+<!-- 新增勘察数据 -->
+<div class="modal-mask" id="surveyModal"><div class="modal">
+  <div class="modal-hd">🔍 新增勘察数据 <button class="btn btn-s btn-o" onclick="closeModal('surveyModal')">✕</button></div>
+  <div class="modal-bd">
+    <div class="f-row"><div class="f-field"><label>桩点编号 *</label><input placeholder="如 ZH-100"></div><div class="f-field"><label>施工分区 *</label><select><option>A区-基坑支护</option><option>B区-主体工程桩</option><option>C区-围护桩</option></select></div></div>
+    <div class="f-row"><div class="f-field"><label>X坐标 *</label><input placeholder="图纸X坐标"></div><div class="f-field"><label>Y坐标 *</label><input placeholder="图纸Y坐标"></div></div>
+    <div class="f-row"><div class="f-field"><label>高程(m)</label><input placeholder="桩顶标高"></div><div class="f-field"><label>桩类型</label><select><option>支护灌注桩</option><option>工程桩</option><option>围护桩</option></select></div></div>
+  </div>
+  <div class="modal-ft"><button class="btn btn-o" onclick="closeModal('surveyModal')">取消</button><button class="btn btn-p" onclick="closeModal('surveyModal');showToast('✅ 勘察数据已保存')">确认</button></div>
+</div></div>
+
+<!-- 新增设备 -->
+<div class="modal-mask" id="deviceModal"><div class="modal">
+  <div class="modal-hd">⚙️ 新增设备 <button class="btn btn-s btn-o" onclick="closeModal('deviceModal')">✕</button></div>
+  <div class="modal-bd">
+    <div class="f-row"><div class="f-field"><label>设备编号 *</label><input placeholder="如 XWJ-004"></div><div class="f-field"><label>设备名称 *</label><input placeholder="如 旋挖机#4"></div></div>
+    <div class="f-row"><div class="f-field"><label>设备类型 *</label><select><option>旋挖机</option><option>超声孔壁检测仪</option></select></div><div class="f-field"><label>规格型号</label><input placeholder="如 XR360"></div></div>
+    <div class="f-row"><div class="f-field"><label>终端编号</label><input placeholder="平板终端编号"></div><div class="f-field"><label>状态</label><select><option>启用</option><option>禁用</option></select></div></div>
+    <div class="f-row"><div class="f-field"><label>计划进场</label><input type="date"></div><div class="f-field"><label>计划退场</label><input type="date"></div></div>
+    <div style="font-weight:600;font-size:13px;margin:8px 0;">设备维保信息</div>
+    <div class="f-row"><div class="f-field"><label>生产厂商</label><input></div><div class="f-field"><label>安装单位</label><input></div></div>
+    <div class="f-row"><div class="f-field"><label>维保单位</label><input></div><div class="f-field"><label>维保状态</label><select><option>正常</option><option>待维修</option></select></div></div>
+  </div>
+  <div class="modal-ft"><button class="btn btn-o" onclick="closeModal('deviceModal')">取消</button><button class="btn btn-p" onclick="closeModal('deviceModal');showToast('✅ 设备已添加')">确认</button></div>
+</div></div>
+
+<!-- 任务下发 -->
+<div class="modal-mask" id="dispatchModal"><div class="modal wide">
+  <div class="modal-hd">📤 施工任务下发 <button class="btn btn-s btn-o" onclick="closeModal('dispatchModal')">✕</button></div>
+  <div class="modal-bd">
+    <div class="fbar"><select><option>A区-基坑支护</option><option>B区-主体工程桩</option></select><span>选择下发日期：</span><input type="date" value="2026-07-11"><span class="spacer"></span><span style="font-size:11px;color:var(--g5);">可选桩点：12 根</span></div>
+    <div class="tbl-wrap"><table><thead><tr><th><input type="checkbox"></th><th>桩编号</th><th>施工分区</th><th>桩类型</th><th>桩长mm</th><th>桩径mm</th><th>目标设备</th></tr></thead>
+    <tbody>
+      <tr><td><input type="checkbox" checked></td><td>ZH-087</td><td>A区</td><td>支护灌注桩</td><td>25000</td><td>800</td><td><select><option>旋挖机#1</option><option>旋挖机#3</option></select></td></tr>
+      <tr><td><input type="checkbox" checked></td><td>ZH-088</td><td>A区</td><td>支护灌注桩</td><td>25000</td><td>800</td><td><select><option>旋挖机#1</option><option>旋挖机#3</option></select></td></tr>
+      <tr><td><input type="checkbox"></td><td>ZH-089</td><td>A区</td><td>支护灌注桩</td><td>22000</td><td>600</td><td><select><option>旋挖机#2</option></select></td></tr>
+    </tbody></table></div>
+  </div>
+  <div class="modal-ft"><button class="btn btn-o" onclick="closeModal('dispatchModal')">取消</button><button class="btn btn-p" onclick="closeModal('dispatchModal');showToast('✅ 已下发 2 个桩点任务至平板')">确认下发</button></div>
+</div></div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════
+const surveyRows = [
+  ['ZH-001','A区-基坑支护','支护灌注桩','35482156.32','3456123.45','4.50','2026-05-20'],
+  ['ZH-002','A区-基坑支护','支护灌注桩','35482160.18','3456127.80','4.48','2026-05-20'],
+  ['ZH-003','B区-主体','工程桩','35482200.55','3456200.12','5.10','2026-05-25'],
+  ['ZH-005','B区-主体','工程桩','35482205.30','3456205.60','5.08','2026-05-25'],
+  ['ZH-008','C区-围护桩','围护桩','35482300.78','3456300.40','3.80','2026-06-01'],
+];
+
+const planRows = [
+  ['2026-07-10','A区-基坑支护','15','12','80%','进行中'],
+  ['2026-07-10','B区-主体工程桩','20','8','40%','进行中'],
+  ['2026-07-09','A区-基坑支护','18','18','100%','已完成'],
+  ['2026-07-09','C区-围护桩','10','10','100%','已完成'],
+  ['2026-07-08','B区-主体工程桩','22','22','100%','已完成'],
+];
+
+const equipRows = [
+  ['旋挖机#1','旋挖机','XR360','T-001','启用','正常','2026-05-01','2026-09-30'],
+  ['旋挖机#2','旋挖机','XR320D','T-002','启用','正常','2026-05-10','2026-09-30'],
+  ['旋挖机#3','旋挖机','SR285','T-003','启用','待维修','2026-05-15','2026-08-30'],
+  ['超声检测仪#1','超声孔壁检测仪','JL-IUDS(B)','T-101','启用','正常','2026-05-20','2026-10-15'],
+];
+
+// ═══════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════
+function renderAll() {
+  document.getElementById('surveyTable').innerHTML = surveyRows.map((r,i)=>`<tr><td>${i+1}</td><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td><td><button class="btn btn-o btn-s">详情</button> <button class="btn btn-o btn-s">编辑</button> <button class="btn btn-d btn-s">删除</button></td></tr>`).join('');
+
+  document.getElementById('planTable').innerHTML = planRows.map(r=>{
+    const st = r[4]==='进行中'?'on':r[4]==='已完成'?'ok':'gray';
+    return `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td><div style="display:flex;align-items:center;gap:8px;"><div class="pbar" style="flex:1;max-width:100px;"><div class="pbar-fill ${r[3]===r[2]?'full':''}" style="width:${r[4]}"></div></div>${r[4]}</div></td><td><span class="tag ${st}">${r[5]}</span></td><td><button class="btn btn-o btn-s">查看</button> <button class="btn btn-o btn-s">变更</button></td></tr>`;
+  }).join('');
+
+  document.getElementById('equipmentTable').innerHTML = equipRows.map((r,i)=>`<tr><td>${i+1}</td><td>${r[0]}</td><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td><span class="tag ok">${r[4]}</span></td><td><span class="tag ${r[5]==='待维修'?'red':'ok'}">${r[5]}</span></td><td>${r[6]}</td><td>${r[7]}</td><td><button class="btn btn-o btn-s">编辑</button> <button class="btn btn-o btn-s">配置</button> <button class="btn btn-d btn-s">删除</button></td></tr>`).join('');
+
+  document.getElementById('componentTable').innerHTML = [
+    ['C001','ZH-001','25000','-45.00','-20.00','12.57','800','旋挖成孔灌注桩','摩擦桩','C35'],
+    ['C002','ZH-002','25000','-44.80','-19.80','12.57','800','旋挖成孔灌注桩','摩擦桩','C35'],
+    ['C003','ZH-003','30000','-50.10','-20.10','15.08','1000','旋挖成孔灌注桩','端承桩','C40'],
+  ].map((r,i)=>`<tr><td>${i+1}</td><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td><td>${r[7]}</td><td>${r[8]}</td><td>${r[9]}</td><td><button class="btn btn-o btn-s">编辑</button></td></tr>`).join('');
+
+  document.getElementById('constructionTable').innerHTML = [
+    ['ZH-001','A区','支护灌注桩','旋挖机#3','成孔施工','<div class="pbar" style="width:80px;"><div class="pbar-fill" style="width:33%"></div></div> 2/6','填报中'],
+    ['ZH-002','A区','支护灌注桩','旋挖机#1','钢筋笼安装','<div class="pbar" style="width:80px;"><div class="pbar-fill" style="width:67%"></div></div> 4/6','填报中'],
+    ['ZH-005','B区','工程桩','旋挖机#2','成桩验收','<div class="pbar" style="width:80px;"><div class="pbar-fill full" style="width:100%"></div></div> 6/6','已完成'],
+  ].map(r=>{
+    const st = r[6]==='填报中'?'on':'ok';
+    return `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td><span class="tag ${st}">${r[6]}</span></td><td><button class="btn btn-o btn-s">详情</button> <button class="btn btn-p btn-s">填报</button></td></tr>`;
+  }).join('');
+
+  document.getElementById('recordTable').innerHTML = [
+    ['ZH-001','2026-07-08','2mm','1mm','25.00','800','1.05','15','C35','旋挖机#3'],
+    ['ZH-002','2026-07-10','3mm','2mm','24.80','800','1.08','12','C35','旋挖机#1'],
+    ['ZH-005','2026-07-10','1mm','2mm','30.10','1000','1.03','10','C40','旋挖机#2'],
+  ].map((r,i)=>`<tr><td>${i+1}</td><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td><td>${r[7]}</td><td>${r[8]}</td><td>${r[9]}</td><td><button class="btn btn-o btn-s">详情</button></td></tr>`).join('');
+}
+
+// ═══════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════
+let curPage = 'workspace';
+const pageTitles = {workspace:'平台首页',survey:'勘察',pattern:'图模',period:'工期',construction:'施工',data:'资料',equipment:'设备',setting:'设置'};
+
+document.querySelectorAll('.menu-item').forEach(item => {
+  item.addEventListener('click', function() {
+    const pg = this.dataset.page;
+    if (curPage === pg) return;
+    document.querySelectorAll('.menu-item').forEach(m=>m.classList.remove('active'));
+    this.classList.add('active');
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+    const target = document.getElementById('pg-'+pg);
+    if (target) { target.classList.add('on'); }
+    document.getElementById('breadcrumb').textContent = pageTitles[pg]||pg;
+    document.getElementById('content').scrollTop = 0;
+    curPage = pg;
+    gsap.from(target, {opacity:0, y:12, duration:.25, ease:'power2.out'});
+  });
+});
+
+// ═══════════════════════════════════════════
+//  SUB-TABS: 图模
+// ═══════════════════════════════════════════
+document.querySelectorAll('#patternTabs .tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('#patternTabs .tab').forEach(t=>t.classList.remove('active'));
+    this.classList.add('active');
+    ['model','drawing','compare','component'].forEach(k=>{
+      document.getElementById('ptab-'+k).style.display = k===this.dataset.ptab?'block':'none';
+    });
+  });
+});
+
+// ═══════════════════════════════════════════
+//  SUB-TABS: 施工
+// ═══════════════════════════════════════════
+document.querySelectorAll('#conTabs .tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('#conTabs .tab').forEach(t=>t.classList.remove('active'));
+    this.classList.add('active');
+    ['live','craft'].forEach(k=>{
+      document.getElementById('ctab-'+k).style.display = k===this.dataset.ctab?'block':'none';
+    });
+  });
+});
+
+// ═══════════════════════════════════════════
+//  SUB-TABS: 资料
+// ═══════════════════════════════════════════
+document.querySelectorAll('#dataTabs .tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('#dataTabs .tab').forEach(t=>t.classList.remove('active'));
+    this.classList.add('active');
+    ['record','report'].forEach(k=>{
+      document.getElementById('dtab-'+k).style.display = k===this.dataset.dtab?'block':'none';
+    });
+  });
+});
+
+// ═══════════════════════════════════════════
+//  SUB-TABS: 设置
+// ═══════════════════════════════════════════
+document.querySelectorAll('#setTabs .tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('#setTabs .tab').forEach(t=>t.classList.remove('active'));
+    this.classList.add('active');
+    ['overview','scope','unit','photo','zone'].forEach(k=>{
+      document.getElementById('stab-'+k).style.display = k===this.dataset.stab?'block':'none';
+    });
+  });
+});
+
+// ═══════════════════════════════════════════
+//  PILE TAB SWITCH
+// ═══════════════════════════════════════════
+function switchPileTabW(type, btn) {
+  btn.parentElement.querySelectorAll('.swtab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const data = type==='support'
+    ? {total:486,completed:342,pending:144,rate:'70.37%',inspected:298,uninspected:188,date:'2026-08-03',remain:24}
+    : {total:800,completed:514,pending:286,rate:'64.25%',inspected:420,uninspected:380,date:'2026-08-15',remain:36};
+  document.getElementById('pileInfoW').innerHTML = `
+    <div class="info-row"><div class="info-cell"><span class="info-lbl">总桩数</span><span class="info-val">${data.total}</span></div><div class="info-cell"><span class="info-lbl">已完成桩数</span><span class="info-val">${data.completed}</span></div></div>
+    <div class="info-row"><div class="info-cell"><span class="info-lbl">待完成桩数</span><span class="info-val">${data.pending}</span></div><div class="info-cell"><span class="info-lbl">完成度</span><span class="info-val">${data.rate}</span></div></div>
+    <div class="info-row"><div class="info-cell"><span class="info-lbl">计划完工日期</span><span class="info-val">${data.date}</span></div><div class="info-cell"><span class="info-lbl">剩余工期</span><span class="info-val">${data.remain}天</span></div></div>
+    <div class="info-row"><div class="info-cell"><span class="info-lbl">已检测桩数</span><span class="info-val">${data.inspected}</span></div><div class="info-cell"><span class="info-lbl">待检测桩数</span><span class="info-val">${data.uninspected}</span></div></div>
+  `;
+}
+
+// ═══════════════════════════════════════════
+//  MODALS
+// ═══════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ═══════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════
+let tt;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(tt); tt = setTimeout(()=>t.classList.remove('show'), 1500);
+}
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+renderAll();
+gsap.from('.stat-box', {y:24, opacity:0, duration:.35, stagger:.07, ease:'power2.out'});
+</script>
+</body>
+</html>

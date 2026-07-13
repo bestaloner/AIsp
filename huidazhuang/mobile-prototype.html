@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>慧打桩 - 移动端原型</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+:root {
+  --primary: #2563EB;
+  --primary-light: #EFF6FF;
+  --primary-dark: #1D4ED8;
+  --success: #16A34A;
+  --success-light: #F0FDF4;
+  --warning: #EA580C;
+  --warning-light: #FFF7ED;
+  --danger: #DC2626;
+  --gray-50: #F8FAFC;
+  --gray-100: #F1F5F9;
+  --gray-200: #E2E8F0;
+  --gray-300: #CBD5E1;
+  --gray-400: #94A3B8;
+  --gray-500: #64748B;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1E293B;
+  --gray-900: #0F172A;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.06);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,.1), 0 4px 6px rgba(0,0,0,.05);
+  --font-xs: 12px;
+  --font-sm: 13px;
+  --font-base: 14px;
+  --font-lg: 16px;
+  --font-xl: 18px;
+  --font-2xl: 22px;
+  --font-3xl: 28px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #E8ECF1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  color: var(--gray-800);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Device Frame ── */
+.app-frame {
+  width: 100%;
+  max-width: 420px;
+  height: 92vh;
+  max-height: 900px;
+  background: var(--gray-50);
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px rgba(0,0,0,.15), 0 0 0 2px #1e293b;
+  position: relative;
+}
+
+/* ── Status Bar ── */
+.status-bar {
+  background: #fff;
+  padding: 8px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-xs);
+  color: var(--gray-500);
+  border-bottom: 1px solid var(--gray-100);
+}
+.status-bar .time { font-weight:600; color: var(--gray-800); }
+.status-icons { display:flex; gap:6px; align-items:center; }
+.status-icons span { font-size:11px; }
+
+/* ── Header ── */
+.app-header {
+  background: #fff;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--gray-100);
+  min-height: 48px;
+}
+.app-header .title {
+  font-size: var(--font-lg);
+  font-weight: 700;
+  color: var(--gray-900);
+}
+.app-header .back-btn {
+  width: 32px; height: 32px;
+  display: flex; align-items:center; justify-content:center;
+  border:none; background:none; cursor:pointer;
+  font-size:18px; color: var(--gray-600);
+  border-radius: 8px; transition: background .2s;
+}
+.app-header .back-btn:hover { background: var(--gray-100); }
+.app-header .project-badge {
+  font-size: var(--font-xs);
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+/* ── Content ── */
+.content-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+.content-area::-webkit-scrollbar { width: 0; }
+.page {
+  display: none;
+  padding: 16px;
+  padding-bottom: 24px;
+  animation: fadeIn .25s ease;
+}
+.page.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity:0; transform: translateY(8px); }
+  to { opacity:1; transform: translateY(0); }
+}
+
+/* ── Bottom Nav ── */
+.bottom-nav {
+  background: #fff;
+  display: flex;
+  border-top: 1px solid var(--gray-200);
+  padding: 4px 0;
+  padding-bottom: max(4px, env(safe-area-inset-bottom));
+}
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--gray-400);
+  transition: color .2s;
+  gap: 2px;
+  position: relative;
+}
+.nav-item .nav-icon { font-size: 22px; line-height: 1; }
+.nav-item .nav-label { font-size: 10px; font-weight: 500; }
+.nav-item.active { color: var(--primary); }
+.nav-item.active::before {
+  content: '';
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 24px; height: 3px; background: var(--primary); border-radius: 0 0 3px 3px;
+}
+
+/* ── Stat Cards ── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.stat-card {
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: var(--shadow);
+  border-left: 3px solid var(--primary);
+}
+.stat-card.type-warning { border-left-color: var(--warning); }
+.stat-card.type-success { border-left-color: var(--success); }
+.stat-card.type-gray { border-left-color: var(--gray-300); }
+.stat-card .stat-label { font-size: var(--font-xs); color: var(--gray-500); margin-bottom: 4px; }
+.stat-card .stat-value { font-size: var(--font-3xl); font-weight: 800; color: var(--gray-900); line-height: 1; }
+.stat-card .stat-sub { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
+
+/* ── Section Card ── */
+.section-card {
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+  margin-bottom: 12px;
+}
+.section-card .section-title {
+  font-size: var(--font-base);
+  font-weight: 600;
+  color: var(--gray-800);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.section-card .section-title .dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--primary);
+}
+
+/* ── Progress Ring ── */
+.progress-ring-wrap {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.progress-ring {
+  position: relative;
+  width: 88px; height: 88px;
+  flex-shrink: 0;
+}
+.progress-ring svg { transform: rotate(-90deg); }
+.progress-ring .ring-value {
+  position: absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+}
+.progress-ring .ring-value .pct { font-size: var(--font-2xl); font-weight:800; color: var(--primary); }
+.progress-ring .ring-value .lbl { font-size: 10px; color: var(--gray-400); }
+.progress-detail { font-size: var(--font-sm); color: var(--gray-500); line-height:1.8; }
+.progress-detail strong { color: var(--gray-800); }
+
+/* ── Equipment Mini Cards ── */
+.equip-row {
+  display: flex;
+  gap: 8px;
+}
+.equip-mini {
+  flex:1;
+  text-align:center;
+  padding:12px 8px;
+  background: var(--gray-50);
+  border-radius: var(--radius-sm);
+}
+.equip-mini .equip-val { font-size: var(--font-xl); font-weight:700; }
+.equip-mini .equip-lbl { font-size:10px; color:var(--gray-400); margin-top:2px; }
+.equip-mini.online .equip-val { color: var(--success); }
+.equip-mini.offline .equip-val { color: var(--danger); }
+.equip-mini.working .equip-val { color: var(--warning); }
+
+/* ── Bar Chart ── */
+.bar-chart { display:flex; align-items:flex-end; gap:8px; height:130px; padding-top:8px; }
+.bar-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; height:100%; justify-content:flex-end; }
+.bar-col .bar { width:100%; max-width:40px; border-radius:6px 6px 2px 2px; background: var(--primary); transition:height .3s; min-height:4px; }
+.bar-col .bar-label { font-size:10px; color: var(--gray-400); }
+.bar-col .bar-val { font-size:10px; color: var(--gray-600); font-weight:600; }
+
+/* ── Sub Tabs ── */
+.sub-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 14px;
+  background: var(--gray-100);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+}
+.sub-tab {
+  flex: 1;
+  padding: 8px 0;
+  text-align: center;
+  font-size: var(--font-sm);
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  color: var(--gray-500);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all .2s;
+}
+.sub-tab.active {
+  background: #fff;
+  color: var(--primary);
+  box-shadow: var(--shadow);
+}
+
+/* ── Filter Chips ── */
+.filter-chips {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.filter-chip {
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: var(--font-xs);
+  border: 1px solid var(--gray-200);
+  background: #fff;
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: all .2s;
+  font-weight: 500;
+}
+.filter-chip.active {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+/* ── List Items ── */
+.plan-card, .task-card, .pile-card, .device-card {
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: var(--shadow);
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.plan-card:active, .task-card:active, .pile-card:active, .device-card:active {
+  transform: scale(.98);
+  background: var(--gray-50);
+}
+
+.plan-card .plan-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
+}
+.plan-card .plan-date { font-weight:600; font-size:var(--font-base); color: var(--gray-800); }
+.status-tag {
+  font-size: 10px; padding: 3px 8px; border-radius: 10px; font-weight:600;
+}
+.status-tag.pending { background: var(--gray-100); color: var(--gray-500); }
+.status-tag.ongoing { background: var(--warning-light); color: var(--warning); }
+.status-tag.done { background: var(--success-light); color: var(--success); }
+.status-tag.todo { background: #FEF2F2; color: var(--danger); }
+
+.progress-bar-wrap {
+  height: 6px; background: var(--gray-100); border-radius: 3px; overflow:hidden; margin-top: 8px;
+}
+.progress-bar-fill {
+  height: 100%; border-radius: 3px; background: var(--primary); transition: width .6s;
+}
+
+.plan-info, .task-info {
+  font-size: var(--font-sm); color: var(--gray-500);
+  display: flex; gap: 16px; margin-top: 4px;
+}
+
+.task-card .task-header {
+  display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;
+}
+.task-card .pile-id { font-weight:700; font-size:var(--font-base); color: var(--gray-900); }
+.task-card .pile-part { font-size:11px; color:var(--gray-400); }
+.pile-card .pile-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 6px;
+}
+.status-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
+.status-dot.ongoing { background: var(--warning); box-shadow: 0 0 0 3px var(--warning-light); }
+.status-dot.done { background: var(--success); box-shadow: 0 0 0 3px var(--success-light); }
+.status-dot.pending { background: var(--gray-300); box-shadow: 0 0 0 3px var(--gray-100); }
+.pile-card .process-steps {
+  display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap;
+}
+.process-step-tag {
+  font-size: 10px; padding: 3px 8px; border-radius: 4px; background: var(--gray-100); color: var(--gray-500);
+}
+.process-step-tag.active-step { background: var(--warning-light); color: var(--warning); font-weight:600; }
+.process-step-tag.done-step { background: var(--success-light); color: var(--success); }
+
+/* ── Action Buttons ── */
+.btn {
+  padding: 8px 16px; border-radius: var(--radius-sm); font-size: var(--font-sm);
+  border: none; cursor: pointer; font-weight: 600; transition: all .2s;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.btn:active { transform: scale(.96); }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-outline { background: #fff; color: var(--primary); border: 1.5px solid var(--primary); }
+.btn-sm { padding: 5px 12px; font-size: 11px; border-radius: 6px; }
+.btn-block { width: 100%; justify-content: center; padding: 12px; font-size: var(--font-base); }
+
+/* ── Detail View (slide overlay) ── */
+.detail-panel {
+  position: absolute; inset: 0;
+  background: var(--gray-50);
+  z-index: 10;
+  transform: translateX(100%);
+  display: flex; flex-direction: column;
+}
+.detail-panel.open { transform: translateX(0); }
+.detail-header {
+  background: #fff; padding: 10px 16px; display: flex; align-items: center;
+  gap: 12px; border-bottom: 1px solid var(--gray-100);
+}
+.detail-header .back-btn { font-size:18px; }
+.detail-header .detail-title { font-weight:700; font-size:var(--font-base); }
+.detail-body { flex:1; overflow-y:auto; padding:16px; }
+
+/* ── Vertical Stepper ── */
+.stepper { position: relative; padding-left: 24px; }
+.stepper::before {
+  content: ''; position:absolute; left: 11px; top: 8px; bottom: 8px;
+  width: 2px; background: var(--gray-200);
+}
+.step-item {
+  position: relative; padding-bottom: 20px;
+}
+.step-item:last-child { padding-bottom: 0; }
+.step-dot {
+  position:absolute; left: -24px; top: 2px;
+  width: 22px; height: 22px; border-radius: 50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size: 11px; border: 2px solid var(--gray-200);
+  background: #fff; color: var(--gray-400); z-index: 1;
+}
+.step-item.done .step-dot { border-color: var(--success); background: var(--success); color: #fff; }
+.step-item.active .step-dot { border-color: var(--warning); background: var(--warning); color: #fff; }
+.step-label { font-weight:600; font-size: var(--font-sm); color: var(--gray-800); margin-bottom: 4px; }
+.step-item.done .step-label { color: var(--success); }
+.step-item.active .step-label { color: var(--warning); }
+.step-fields { display: none; margin-top: 8px; }
+.step-item.active .step-fields { display: block; }
+
+/* ── Form Fields ── */
+.form-field { margin-bottom: 12px; }
+.form-field label { display:block; font-size:var(--font-xs); color:var(--gray-500); margin-bottom:4px; font-weight:500; }
+.form-field input, .form-field select {
+  width: 100%; padding: 10px 12px; border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm); font-size: var(--font-base);
+  color: var(--gray-800); background: #fff; transition: border .2s;
+}
+.form-field input:focus, .form-field select:focus {
+  outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light);
+}
+.form-field input::placeholder { color: var(--gray-300); }
+.form-field .unit { font-size:11px; color:var(--gray-400); margin-top:2px; }
+
+/* ── Task Tabs ── */
+.task-tabs { display:flex; gap:0; margin-bottom:12px; }
+.task-tab {
+  flex:1; padding:10px 0; text-align:center; font-size:var(--font-sm); font-weight:600;
+  border:none; background:transparent; color:var(--gray-400);
+  border-bottom: 2px solid transparent; cursor:pointer; transition:all .2s;
+}
+.task-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+/* ── Date Picker Row ── */
+.date-row {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+}
+.date-pill {
+  padding: 6px 12px; border-radius: 20px; font-size: var(--font-sm); font-weight:600;
+  background: #fff; border: 1.5px solid var(--gray-200); color: var(--gray-700);
+  cursor: pointer;
+}
+.date-pill.today { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+
+/* ── Profile ── */
+.profile-card {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border-radius: var(--radius); padding: 20px; color: #fff; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 14px;
+}
+.avatar {
+  width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; flex-shrink: 0;
+}
+.profile-info .name { font-size:var(--font-xl); font-weight:700; }
+.profile-info .role { font-size:var(--font-sm); opacity:.8; margin-top:2px; }
+.profile-info .phone { font-size:var(--font-xs); opacity:.6; margin-top:2px; }
+
+.setting-list { background:#fff; border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); }
+.setting-item {
+  padding: 14px 16px; display:flex; align-items:center; justify-content:space-between;
+  border-bottom: 1px solid var(--gray-100); cursor:pointer; transition:background .15s;
+  font-size: var(--font-base);
+}
+.setting-item:last-child { border-bottom: none; }
+.setting-item:active { background: var(--gray-50); }
+.setting-item .setting-left { display:flex; align-items:center; gap:10px; }
+.setting-item .setting-icon { font-size:18px; width:24px; text-align:center; }
+.setting-item .arrow { color:var(--gray-300); }
+
+/* ── Modal ── */
+.modal-overlay {
+  position:absolute; inset:0; background:rgba(0,0,0,.4);
+  z-index:20; display:none; align-items:center; justify-content:center;
+}
+.modal-overlay.open { display:flex; }
+.modal-box {
+  background:#fff; border-radius:var(--radius); padding:20px; width:85%; max-width:340px;
+}
+.modal-box .modal-title { font-weight:700; font-size:var(--font-lg); margin-bottom:16px; }
+.modal-actions { display:flex; gap:8px; margin-top:16px; justify-content:flex-end; }
+
+/* ── FAB ── */
+.fab {
+  position: absolute; bottom: 80px; right: 20px;
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--primary); color: #fff; border: none;
+  font-size: 24px; cursor: pointer;
+  box-shadow: var(--shadow-lg);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 5; transition: transform .2s;
+}
+.fab:active { transform: scale(.9); }
+
+/* ── Empty State ── */
+.empty-state {
+  text-align: center; padding: 40px 20px; color: var(--gray-400);
+}
+.empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state .empty-text { font-size: var(--font-sm); }
+
+/* ── Toast ── */
+.toast {
+  position: absolute; top: 60px; left: 50%; transform: translateX(-50%);
+  background: var(--gray-900); color: #fff; padding: 10px 20px;
+  border-radius: 20px; font-size: var(--font-sm); z-index: 30;
+  pointer-events: none; opacity: 0; transition: opacity .3s;
+}
+.toast.show { opacity: 1; }
+
+/* ── Utility ── */
+.mt-8 { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-12 { margin-bottom: 12px; }
+.mb-16 { margin-bottom: 16px; }
+.text-center { text-align: center; }
+.text-sm { font-size: var(--font-sm); }
+.text-xs { font-size: var(--font-xs); }
+.text-gray { color: var(--gray-500); }
+.flex-between { display:flex; justify-content:space-between; align-items:center; }
+.gap-8 { gap:8px; }
+</style>
+</head>
+<body>
+
+<div class="app-frame" id="appFrame">
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span class="time">9:41</span>
+    <span class="status-icons">
+      <span>📶</span><span>📡</span><span>🔋 85%</span>
+    </span>
+  </div>
+
+  <!-- Header -->
+  <div class="app-header" id="appHeader">
+    <span class="title" id="headerTitle">🏗️ 慧打桩</span>
+    <span class="project-badge" id="headerBadge">临港科技城项目</span>
+    <button class="back-btn" id="headerBack" style="display:none;">←</button>
+  </div>
+
+  <!-- Content -->
+  <div class="content-area" id="contentArea">
+
+    <!-- ═══════════ PAGE: 首页 ═══════════ -->
+    <div class="page active" id="page-home">
+      <!-- 日期天气栏 -->
+      <div class="section-card" style="padding:10px 14px;">
+        <div class="flex-between">
+          <span style="font-weight:600;font-size:var(--font-base);">📅 2026年7月10日 星期三</span>
+          <span style="color:var(--warning);font-weight:500;">☀️ 晴 18°~28°</span>
+        </div>
+      </div>
+
+      <!-- 四维统计卡片 -->
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">📌 桩总数</div>
+          <div class="stat-value">1,286</div>
+          <div class="stat-sub">支护桩 486 | 工程桩 800</div>
+        </div>
+        <div class="stat-card type-warning">
+          <div class="stat-label">🔄 进行中</div>
+          <div class="stat-value">342</div>
+          <div class="stat-sub">今日新增 12 根</div>
+        </div>
+        <div class="stat-card type-success">
+          <div class="stat-label">✅ 已完成</div>
+          <div class="stat-value">856</div>
+          <div class="stat-sub">完成度 66.6%</div>
+        </div>
+        <div class="stat-card type-gray">
+          <div class="stat-label">⏳ 未开始</div>
+          <div class="stat-value">88</div>
+          <div class="stat-sub">剩余工期 24 天</div>
+        </div>
+      </div>
+
+      <!-- 今日计划完成情况 -->
+      <div class="section-card">
+        <div class="section-title"><span class="dot"></span>今日计划完成情况</div>
+        <div class="progress-ring-wrap">
+          <div class="progress-ring">
+            <svg width="88" height="88" viewBox="0 0 88 88">
+              <circle cx="44" cy="44" r="38" fill="none" stroke="var(--gray-100)" stroke-width="8"/>
+              <circle cx="44" cy="44" r="38" fill="none" stroke="var(--primary)" stroke-width="8"
+                stroke-dasharray="238.76" stroke-dashoffset="69.24" stroke-linecap="round"/>
+            </svg>
+            <div class="ring-value">
+              <span class="pct">71%</span>
+              <span class="lbl">完成率</span>
+            </div>
+          </div>
+          <div class="progress-detail">
+            <div>📋 计划打桩：<strong>45</strong> 根</div>
+            <div>✅ 已完成：<strong>32</strong> 根</div>
+            <div>🔄 进行中：<strong>8</strong> 根</div>
+            <div>⏳ 待施工：<strong>5</strong> 根</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 设备状态概览 -->
+      <div class="section-card">
+        <div class="section-title"><span class="dot"></span>设备状态概览</div>
+        <div class="equip-row">
+          <div class="equip-mini online">
+            <div class="equip-val">12</div>
+            <div class="equip-lbl">🟢 在线设备</div>
+          </div>
+          <div class="equip-mini offline">
+            <div class="equip-val">3</div>
+            <div class="equip-lbl">🔴 离线设备</div>
+          </div>
+          <div class="equip-mini working">
+            <div class="equip-val">8</div>
+            <div class="equip-lbl">🟡 工作中</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 近7日打桩趋势 -->
+      <div class="section-card">
+        <div class="section-title"><span class="dot"></span>近7日打桩趋势（根）</div>
+        <div class="bar-chart" id="barChart">
+          <!-- filled by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ PAGE: 进度 ═══════════ -->
+    <div class="page" id="page-progress">
+      <!-- 子Tab：施工计划 / 施工任务 -->
+      <div class="sub-tabs">
+        <button class="sub-tab active" data-subtab="plan">📋 施工计划</button>
+        <button class="sub-tab" data-subtab="task">📝 施工任务</button>
+      </div>
+
+      <!-- 施工计划视图 -->
+      <div id="view-plan">
+        <div class="date-row">
+          <span class="date-pill today">📅 7月10日 今天</span>
+          <span class="date-pill">7月9日</span>
+          <span class="date-pill">7月8日</span>
+          <button class="btn btn-primary btn-sm" style="margin-left:auto;" onclick="showPlanModal()">+ 新建计划</button>
+        </div>
+        <div class="filter-chips">
+          <span class="filter-chip active" data-filter="all">全部</span>
+          <span class="filter-chip" data-filter="pending">未开始</span>
+          <span class="filter-chip" data-filter="ongoing">进行中</span>
+          <span class="filter-chip" data-filter="done">已完成</span>
+        </div>
+        <div id="planList">
+          <!-- filled by JS -->
+        </div>
+      </div>
+
+      <!-- 施工任务视图 -->
+      <div id="view-task" style="display:none;">
+        <div class="task-tabs">
+          <button class="task-tab active" data-tasktab="dispatched">✅ 已下发 (12)</button>
+          <button class="task-tab" data-tasktab="undispatched">📤 未下发 (8)</button>
+        </div>
+        <div id="taskList">
+          <!-- filled by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ PAGE: 施工 ═══════════ -->
+    <div class="page" id="page-construction">
+      <div class="flex-between mb-12">
+        <select style="padding:8px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:var(--font-sm);background:#fff;">
+          <option>全部分区</option><option>A区-基坑支护</option><option>B区-主体工程桩</option><option>C区-围护桩</option>
+        </select>
+        <select style="padding:8px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:var(--font-sm);background:#fff;">
+          <option>全部状态</option><option>未开始</option><option>填报中</option><option>已完成</option>
+        </select>
+        <span style="font-size:var(--font-sm);color:var(--gray-500);">共 1286 根</span>
+      </div>
+      <div id="pileList">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+    <!-- ═══════════ PAGE: 设备 ═══════════ -->
+    <div class="page" id="page-equipment">
+      <div class="sub-tabs">
+        <button class="sub-tab active" data-equiptab="smart">🚜 智能设备</button>
+        <button class="sub-tab" data-equiptab="sensor">📡 传感器</button>
+      </div>
+      <div id="deviceList">
+        <!-- filled by JS -->
+      </div>
+      <div id="sensorList" style="display:none;">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+    <!-- ═══════════ PAGE: 我的 ═══════════ -->
+    <div class="page" id="page-profile">
+      <div class="profile-card">
+        <div class="avatar">👷</div>
+        <div class="profile-info">
+          <div class="name">张建国</div>
+          <div class="role">项目经理 | 临港科技城项目部</div>
+          <div class="phone">📱 138****8888</div>
+        </div>
+      </div>
+      <div class="setting-list">
+        <div class="setting-item" onclick="showEditProfile()">
+          <span class="setting-left"><span class="setting-icon">👤</span>修改个人信息</span>
+          <span class="arrow">›</span>
+        </div>
+        <div class="setting-item" onclick="showPwdModal()">
+          <span class="setting-left"><span class="setting-icon">🔒</span>修改登录密码</span>
+          <span class="arrow">›</span>
+        </div>
+        <div class="setting-item">
+          <span class="setting-left"><span class="setting-icon">🔔</span>消息通知设置</span>
+          <span class="arrow">›</span>
+        </div>
+        <div class="setting-item">
+          <span class="setting-left"><span class="setting-icon">📖</span>关于慧打桩</span>
+          <span style="font-size:11px;color:var(--gray-400);">v2.1.0</span>
+        </div>
+        <div class="setting-item" style="color:var(--danger);">
+          <span class="setting-left"><span class="setting-icon">🚪</span>退出登录</span>
+          <span class="arrow" style="color:var(--danger);">›</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ Detail Panel: 施工填报 ═══════════ -->
+    <div class="detail-panel" id="detailPanel">
+      <div class="detail-header">
+        <button class="back-btn" onclick="closeDetail()">←</button>
+        <span class="detail-title" id="detailTitle">桩点施工填报</span>
+      </div>
+      <div class="detail-body" id="detailBody">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Modal: 修改密码 -->
+  <div class="modal-overlay" id="pwdModal">
+    <div class="modal-box">
+      <div class="modal-title">🔒 修改登录密码</div>
+      <div class="form-field">
+        <label>原密码</label>
+        <input type="password" placeholder="请输入原密码">
+      </div>
+      <div class="form-field">
+        <label>新密码</label>
+        <input type="password" placeholder="请输入新密码（8-20位）">
+      </div>
+      <div class="form-field">
+        <label>确认新密码</label>
+        <input type="password" placeholder="请再次输入新密码">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline btn-sm" onclick="closePwdModal()">取消</button>
+        <button class="btn btn-primary btn-sm" onclick="savePwd()">确认修改</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: 新建计划 -->
+  <div class="modal-overlay" id="planModal">
+    <div class="modal-box">
+      <div class="modal-title">📋 新建日计划</div>
+      <div class="form-field">
+        <label>计划日期</label>
+        <input type="date" value="2026-07-11">
+      </div>
+      <div class="form-field">
+        <label>施工分区</label>
+        <select><option>A区-基坑支护</option><option>B区-主体工程桩</option><option>C区-围护桩</option></select>
+      </div>
+      <div class="form-field">
+        <label>计划打桩数量</label>
+        <input type="number" placeholder="请输入数量" value="20">
+      </div>
+      <div class="form-field">
+        <label>选择桩点</label>
+        <select multiple style="height:80px;"><option>ZH-087 ~ ZH-106 (20根，未开始)</option>
+        <option>ZH-107 ~ ZH-126 (20根，未开始)</option></select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline btn-sm" onclick="closePlanModal()">取消</button>
+        <button class="btn btn-primary btn-sm" onclick="createPlan()">创建计划</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <div class="bottom-nav">
+    <button class="nav-item active" data-page="home">
+      <span class="nav-icon">🏠</span><span class="nav-label">首页</span>
+    </button>
+    <button class="nav-item" data-page="progress">
+      <span class="nav-icon">📋</span><span class="nav-label">进度</span>
+    </button>
+    <button class="nav-item" data-page="construction">
+      <span class="nav-icon">🔧</span><span class="nav-label">施工</span>
+    </button>
+    <button class="nav-item" data-page="equipment">
+      <span class="nav-icon">⚙️</span><span class="nav-label">设备</span>
+    </button>
+    <button class="nav-item" data-page="profile">
+      <span class="nav-icon">👤</span><span class="nav-label">我的</span>
+    </button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════
+const planData = [
+  { date:'7月10日', zone:'A区-基坑支护', planned:15, done:12, status:'ongoing', pct:80 },
+  { date:'7月10日', zone:'B区-主体工程桩', planned:20, done:8, status:'ongoing', pct:40 },
+  { date:'7月9日', zone:'A区-基坑支护', planned:18, done:18, status:'done', pct:100 },
+  { date:'7月9日', zone:'C区-围护桩', planned:10, done:10, status:'done', pct:100 },
+  { date:'7月8日', zone:'B区-主体工程桩', planned:22, done:22, status:'done', pct:100 },
+  { date:'7月8日', zone:'A区-基坑支护', planned:15, done:0, status:'pending', pct:0 },
+];
+
+const taskData = {
+  dispatched: [
+    { id:'ZH-001', part:'A区-基坑支护', type:'支护灌注桩', status:'ongoing', equip:'旋挖机#3', steps:['定位放线','成孔施工','清孔验收','钢筋笼安装','混凝土浇筑'], curStep:1 },
+    { id:'ZH-002', part:'A区-基坑支护', type:'支护灌注桩', status:'ongoing', equip:'旋挖机#1', steps:['定位放线','成孔施工','清孔验收','钢筋笼安装','混凝土浇筑'], curStep:3 },
+    { id:'ZH-015', part:'B区-主体', type:'工程桩', status:'ongoing', equip:'旋挖机#2', steps:['定位放线','成孔施工','清孔验收','钢筋笼安装','混凝土浇筑'], curStep:0 },
+    { id:'ZH-023', part:'A区-基坑支护', type:'支护灌注桩', status:'done', equip:'旋挖机#3', steps:['定位放线','成孔施工','清孔验收','钢筋笼安装','混凝土浇筑'], curStep:4 },
+  ],
+  undispatched: [
+    { id:'ZH-088', part:'A区-基坑支护', type:'支护灌注桩', status:'todo' },
+    { id:'ZH-089', part:'A区-基坑支护', type:'支护灌注桩', status:'todo' },
+    { id:'ZH-090', part:'B区-主体', type:'工程桩', status:'todo' },
+    { id:'ZH-091', part:'B区-主体', type:'工程桩', status:'todo' },
+    { id:'ZH-092', part:'C区-围护桩', type:'围护桩', status:'todo' },
+  ]
+};
+
+const pileData = [
+  { id:'ZH-001', part:'A区-基坑支护', type:'支护灌注桩', status:'ongoing', equip:'旋挖机#3', stepNames:['定位放线','成孔施工','清孔验收','钢筋笼安装','混凝土浇筑','成桩验收'], curStep:1 },
+  { id:'ZH-002', part:'A区-基坑支护', type:'支护灌注桩', status:'ongoing', equip:'旋挖机#1', stepNames:['定位放线','成孔施工','清孔验收','钢筋笼安装','混凝土浇筑','成桩验收'], curStep:3 },
+  { id:'ZH-003', part:'A区-基坑支护', type:'支护灌注桩', status:'pending', equip:'-', stepNames:['定位放线','成孔施工','清孔验收','钢筋笼安装','混凝土浇筑','成桩验收'], curStep:-1 },
+  { id:'ZH-005', part:'B区-主体', type:'工程桩', status:'done', equip:'旋挖机#2', stepNames:['定位放线','成孔施工','清孔验收','钢筋笼安装','混凝土浇筑','成桩验收'], curStep:5 },
+  { id:'ZH-008', part:'B区-主体', type:'工程桩', status:'ongoing', equip:'旋挖机#3', stepNames:['定位放线','成孔施工','清孔验收','钢筋笼安装','混凝土浇筑','成桩验收'], curStep:2 },
+  { id:'ZH-012', part:'C区-围护桩', type:'围护桩', status:'done', equip:'旋挖机#1', stepNames:['定位放线','成孔施工','清孔验收','钢筋笼安装','混凝土浇筑','成桩验收'], curStep:5 },
+  { id:'ZH-015', part:'B区-主体', type:'工程桩', status:'pending', equip:'-', stepNames:['定位放线','成孔施工','清孔验收','钢筋笼安装','混凝土浇筑','成桩验收'], curStep:-1 },
+  { id:'ZH-020', part:'C区-围护桩', type:'围护桩', status:'ongoing', equip:'旋挖机#2', stepNames:['定位放线','成孔施工','清孔验收','钢筋笼安装','混凝土浇筑','成桩验收'], curStep:0 },
+];
+
+const deviceData = [
+  { id:'旋挖机#1', type:'旋挖机', status:'online', position:'ZH-002施工区', coord:'30.9042, 121.9074', working:true, planned:15, done:8 },
+  { id:'旋挖机#2', type:'旋挖机', status:'online', position:'ZH-020施工区', coord:'30.9051, 121.9080', working:true, planned:12, done:5 },
+  { id:'旋挖机#3', type:'旋挖机', status:'offline', position:'-', coord:'-', working:false, planned:10, done:3 },
+  { id:'超声检测仪#1', type:'超声孔壁检测仪', status:'online', position:'待命', coord:'-', working:false, planned:0, done:0 },
+];
+
+const sensorData = [
+  { id:'S01', name:'测斜传感器', location:'A区基坑南侧', status:'online', lastData:'倾斜度 0.02°' },
+  { id:'S02', name:'测斜传感器', location:'A区基坑北侧', status:'online', lastData:'倾斜度 0.01°' },
+  { id:'S03', name:'水位传感器', location:'B区降水井#1', status:'online', lastData:'水位 -5.2m' },
+  { id:'S04', name:'沉降传感器', location:'C区围护桩顶', status:'offline', lastData:'- (离线)' },
+];
+
+const weekData = [
+  { day:'7/4', val:38 }, { day:'7/5', val:42 }, { day:'7/6', val:35 },
+  { day:'7/7', val:45 }, { day:'7/8', val:40 }, { day:'7/9', val:48 }, { day:'7/10', val:32 },
+];
+
+// ═══════════════════════════════════════════
+//  RENDER FUNCTIONS
+// ═══════════════════════════════════════════
+function renderBarChart() {
+  const max = Math.max(...weekData.map(d=>d.val));
+  const container = document.getElementById('barChart');
+  container.innerHTML = weekData.map(d => {
+    const h = (d.val / max * 100);
+    return `<div class="bar-col">
+      <div class="bar-val">${d.val}</div>
+      <div class="bar" style="height:${h}%;background:${d.val===max?'var(--primary)':'var(--primary)'};opacity:${d.val===max?1:0.5+(d.val/max)*0.5}"></div>
+      <div class="bar-label">${d.day}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderPlans(filter='all') {
+  let data = planData;
+  if (filter !== 'all') data = planData.filter(p => p.status === filter);
+  const container = document.getElementById('planList');
+  if (!data.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">暂无符合条件的计划</div></div>';
+    return;
+  }
+  container.innerHTML = data.map(p => {
+    const stTag = p.status==='ongoing'?'进行中':p.status==='done'?'已完成':'未开始';
+    const stCls = p.status==='ongoing'?'ongoing':p.status==='done'?'done':'pending';
+    const barColor = p.pct===100?'var(--success)':'var(--primary)';
+    return `<div class="plan-card">
+      <div class="plan-header">
+        <span class="plan-date">📅 ${p.date} · ${p.zone}</span>
+        <span class="status-tag ${stCls}">${stTag}</span>
+      </div>
+      <div class="plan-info">
+        <span>📌 计划：<strong>${p.planned}</strong> 根</span>
+        <span>✅ 完成：<strong>${p.done}</strong> 根</span>
+        <span>📊 ${p.pct}%</span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${p.pct}%;background:${barColor}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderTasks(tab='dispatched') {
+  const container = document.getElementById('taskList');
+  const data = taskData[tab];
+  if (!data.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">暂无任务</div></div>';
+    return;
+  }
+  container.innerHTML = data.map(t => {
+    if (tab === 'dispatched') {
+      const stTag = t.status==='ongoing'?'进行中':t.status==='done'?'已完成':'待下发';
+      const stCls = t.status==='ongoing'?'ongoing':t.status==='done'?'done':'todo';
+      const stepTags = t.steps.map((s,i) => {
+        let cls = '';
+        if (i < t.curStep) cls = 'done-step';
+        else if (i === t.curStep) cls = 'active-step';
+        return `<span class="process-step-tag ${cls}">${s}</span>`;
+      }).join('');
+      return `<div class="task-card">
+        <div class="task-header">
+          <div>
+            <span class="pile-id">🔸 ${t.id}</span>
+            <span class="pile-part"> · ${t.part} · ${t.type}</span>
+          </div>
+          <span class="status-tag ${stCls}">${stTag}</span>
+        </div>
+        <div class="task-info"><span>🚜 ${t.equip}</span></div>
+        <div class="process-steps mt-8">${stepTags}</div>
+        <div style="margin-top:8px;"><button class="btn btn-outline btn-sm" onclick="openPileDetail('${t.id}')">查看详情 →</button></div>
+      </div>`;
+    } else {
+      return `<div class="task-card">
+        <div class="task-header">
+          <div>
+            <span class="pile-id">🔹 ${t.id}</span>
+            <span class="pile-part"> · ${t.part} · ${t.type}</span>
+          </div>
+          <span class="status-tag todo">待下发</span>
+        </div>
+        <div style="margin-top:8px;">
+          <button class="btn btn-outline btn-sm" onclick="dispatchTask('${t.id}', this)">📤 下发任务</button>
+        </div>
+      </div>`;
+    }
+  }).join('');
+}
+
+function renderPiles() {
+  const container = document.getElementById('pileList');
+  container.innerHTML = pileData.map(p => {
+    const stTag = p.status==='ongoing'?'填报中':p.status==='done'?'已完成':'未开始';
+    const stCls = p.status==='ongoing'?'ongoing':p.status==='done'?'done':'pending';
+    const stepTags = p.stepNames.map((s,i) => {
+      let cls = '';
+      if (i < p.curStep) cls = 'done-step';
+      else if (i === p.curStep) cls = 'active-step';
+      return `<span class="process-step-tag ${cls}">${s}</span>`;
+    }).join('');
+    const action = p.status==='ongoing'
+      ? `<button class="btn btn-primary btn-sm" onclick="openPileDetail('${p.id}')">填报 →</button>`
+      : p.status==='done'
+        ? `<button class="btn btn-outline btn-sm" onclick="openPileDetail('${p.id}')">查看</button>`
+        : `<button class="btn btn-outline btn-sm" onclick="openPileDetail('${p.id}')">开始施工</button>`;
+    return `<div class="pile-card">
+      <div class="pile-header">
+        <span class="status-dot ${stCls}"></span>
+        <span style="font-weight:700;font-size:var(--font-base);">${p.id}</span>
+        <span style="font-size:11px;color:var(--gray-400);">${p.part} · ${p.type}</span>
+        <span style="flex:1;"></span>
+        <span class="status-tag ${stCls}">${stTag}</span>
+      </div>
+      <div class="process-steps">${stepTags}</div>
+      ${p.equip !== '-' ? `<div class="text-xs text-gray mt-8">🚜 ${p.equip}</div>` : ''}
+      <div style="margin-top:8px;text-align:right;">${action}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderDevices() {
+  const container = document.getElementById('deviceList');
+  container.innerHTML = deviceData.map(d => {
+    const dot = d.status==='online'?(d.working?'🟡':'🟢'):'🔴';
+    const stLabel = d.status==='online'?(d.working?'工作中':'在线'):'离线';
+    const stColor = d.status==='online'?(d.working?'var(--warning)':'var(--success)'):'var(--danger)';
+    return `<div class="device-card">
+      <div class="flex-between mb-8">
+        <span style="font-weight:700;font-size:var(--font-base);">🚜 ${d.id}</span>
+        <span style="font-size:11px;color:${stColor};font-weight:600;">${dot} ${stLabel}</span>
+      </div>
+      <div class="text-xs text-gray">📍 ${d.position} | 坐标：${d.coord}</div>
+      ${d.working ? `<div class="text-xs text-gray mt-8">📊 计划施工：${d.planned}根 | 已施工：${d.done}根 | 速率：${(d.done/(d.planned||1)*100).toFixed(0)}%</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function renderSensors() {
+  const container = document.getElementById('sensorList');
+  container.innerHTML = sensorData.map(s => {
+    const dot = s.status==='online'?'🟢':'🔴';
+    const stLabel = s.status==='online'?'在线':'离线';
+    return `<div class="device-card">
+      <div class="flex-between mb-8">
+        <span style="font-weight:700;font-size:var(--font-base);">📡 ${s.id} ${s.name}</span>
+        <span style="font-size:11px;color:${s.status==='online'?'var(--success)':'var(--danger)'};font-weight:600;">${dot} ${stLabel}</span>
+      </div>
+      <div class="text-xs text-gray">📍 ${s.location}</div>
+      <div class="text-xs mt-8" style="color:var(--primary);font-weight:500;">📊 最新数据：${s.lastData}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+//  DETAIL PANEL — 施工填报
+// ═══════════════════════════════════════════
+function openPileDetail(pileId) {
+  const pile = pileData.find(p => p.id === pileId);
+  if (!pile) return;
+  document.getElementById('detailTitle').textContent = `🔧 ${pile.id} 施工填报`;
+  const steps = pile.stepNames.map((name, i) => {
+    let cls = '';
+    let check = '';
+    if (i < pile.curStep) { cls = 'done'; check = '✓'; }
+    else if (i === pile.curStep) { cls = 'active'; check = (i+1).toString(); }
+    else { check = (i+1).toString(); }
+
+    const fields = [
+      { label:'成孔深度', unit:'mm', name:'depth' },
+      { label:'成孔垂直度', unit:'%', name:'verticality' },
+      { label:'钻杆电流', unit:'A', name:'current' },
+      { label:'进尺深度', unit:'m', name:'footage' },
+      { label:'底部标高', unit:'mm', name:'bottomElevation' },
+    ];
+
+    let fieldsHTML = '';
+    if (cls === 'active') {
+      fieldsHTML = fields.map(f => `
+        <div class="form-field">
+          <label>${f.label} ${i===1?'*':''}</label>
+          <input type="text" placeholder="请输入${f.label}"><span class="unit">${f.unit}</span>
+        </div>`).join('');
+    }
+
+    return `<div class="step-item ${cls}">
+      <div class="step-dot">${check}</div>
+      <div class="step-label">${name}${cls==='done'?' ✅':cls==='active'?' 🔄':''}</div>
+      <div class="step-fields">${fieldsHTML}</div>
+    </div>`;
+  }).join('');
+
+  const body = `
+    <div class="section-card mb-12">
+      <div class="flex-between">
+        <span style="font-weight:600;">${pile.id} · ${pile.part} · ${pile.type}</span>
+        <span style="font-size:11px;color:var(--gray-400);">🚜 ${pile.equip}</span>
+      </div>
+    </div>
+    <div class="section-card mb-12">
+      <div class="section-title"><span class="dot"></span>工艺流程</div>
+      <div class="stepper">${steps}</div>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="savePileData('${pile.id}')">💾 保存填报数据</button>
+    <button class="btn btn-outline btn-block mt-8" onclick="submitPileData('${pile.id}')">✅ 提交完成</button>
+    <div class="text-xs text-gray text-center mt-12">提交后将自动流转至下一工艺步骤</div>
+  `;
+  document.getElementById('detailBody').innerHTML = body;
+
+  const panel = document.getElementById('detailPanel');
+  panel.classList.add('open');
+  gsap.fromTo(panel, { x: '100%' }, { x: '0%', duration: .3, ease: 'power2.out' });
+}
+
+function closeDetail() {
+  const panel = document.getElementById('detailPanel');
+  gsap.to(panel, { x: '100%', duration: .25, ease: 'power2.in', onComplete: () => {
+    panel.classList.remove('open');
+  }});
+}
+
+function savePileData(id) {
+  showToast('✅ 数据已保存');
+}
+function submitPileData(id) {
+  showToast('✅ 已提交，流转至下一工序');
+  setTimeout(closeDetail, 800);
+}
+
+// ═══════════════════════════════════════════
+//  TASK DISPATCH
+// ═══════════════════════════════════════════
+function dispatchTask(id, btn) {
+  if (btn) btn.textContent = '已下发 ✓';
+  if (btn) btn.disabled = true;
+  if (btn) btn.style.background = 'var(--success-light)';
+  if (btn) btn.style.color = 'var(--success)';
+  if (btn) btn.style.borderColor = 'var(--success)';
+  showToast(`📤 桩点 ${id} 已下发至平板`);
+}
+
+// ═══════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timeout);
+  t._timeout = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+// ═══════════════════════════════════════════
+//  MODALS
+// ═══════════════════════════════════════════
+function showPwdModal() { document.getElementById('pwdModal').classList.add('open'); }
+function closePwdModal() { document.getElementById('pwdModal').classList.remove('open'); }
+function savePwd() { closePwdModal(); showToast('✅ 密码修改成功'); }
+function showEditProfile() { showToast('📝 进入个人信息编辑'); }
+function showPlanModal() { document.getElementById('planModal').classList.add('open'); }
+function closePlanModal() { document.getElementById('planModal').classList.remove('open'); }
+function createPlan() { closePlanModal(); showToast('✅ 日计划创建成功'); }
+
+// ═══════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════
+let currentPage = 'home';
+
+function switchPage(page) {
+  if (currentPage === page) return;
+  // Animate out
+  const oldPage = document.getElementById(`page-${currentPage}`);
+  if (oldPage) {
+    gsap.to(oldPage, { opacity: 0, y: 8, duration: .15, ease: 'power2.in', onComplete: () => {
+      oldPage.classList.remove('active');
+      oldPage.style.opacity = '';
+      oldPage.style.transform = '';
+    }});
+  }
+  // Animate in
+  const newPage = document.getElementById(`page-${page}`);
+  if (newPage) {
+    newPage.classList.add('active');
+    gsap.fromTo(newPage, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: .25, ease: 'power2.out' });
+  }
+  // Nav
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('active');
+  // Header
+  const titles = { home:'🏗️ 慧打桩', progress:'📋 施工进度', construction:'🔧 施工填报', equipment:'⚙️ 设备管理', profile:'👤 我的' };
+  document.getElementById('headerTitle').textContent = titles[page] || '慧打桩';
+  currentPage = page;
+
+  // Scroll to top
+  document.getElementById('contentArea').scrollTop = 0;
+  // Close detail panel if open
+  if (document.getElementById('detailPanel').classList.contains('open')) closeDetail();
+}
+
+// Bottom nav clicks
+document.querySelectorAll('.nav-item').forEach(btn => {
+  btn.addEventListener('click', () => switchPage(btn.dataset.page));
+});
+
+// ═══════════════════════════════════════════
+//  SUB-TABS
+// ═══════════════════════════════════════════
+// Progress sub-tabs
+document.querySelectorAll('#page-progress .sub-tab').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#page-progress .sub-tab').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    const tab = this.dataset.subtab;
+    document.getElementById('view-plan').style.display = tab === 'plan' ? 'block' : 'none';
+    document.getElementById('view-task').style.display = tab === 'task' ? 'block' : 'none';
+    if (tab === 'task') renderTasks('dispatched');
+  });
+});
+
+// Task tabs (已下发/未下发)
+document.querySelectorAll('.task-tab').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.task-tab').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    renderTasks(this.dataset.tasktab);
+  });
+});
+
+// Filter chips
+document.querySelectorAll('.filter-chip').forEach(chip => {
+  chip.addEventListener('click', function() {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    this.classList.add('active');
+    renderPlans(this.dataset.filter);
+  });
+});
+
+// Equipment sub-tabs
+document.querySelectorAll('#page-equipment .sub-tab').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#page-equipment .sub-tab').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    const tab = this.dataset.equiptab;
+    document.getElementById('deviceList').style.display = tab === 'smart' ? 'block' : 'none';
+    document.getElementById('sensorList').style.display = tab === 'sensor' ? 'block' : 'none';
+  });
+});
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+function init() {
+  renderBarChart();
+  renderPlans();
+  renderTasks('dispatched');
+  renderPiles();
+  renderDevices();
+  renderSensors();
+
+  // Entrance animation
+  gsap.from('.stat-card', { y: 30, opacity: 0, duration: .4, stagger: .08, ease: 'power2.out' });
+}
+init();
+</script>
+</body>
+</html>
