@@ -669,6 +669,262 @@
       display: grid;
       gap: 12px;
     }
+    .construction-tabs {
+      display: flex;
+      gap: 28px;
+      height: 44px;
+      align-items: flex-end;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 8px;
+    }
+    .construction-tabs button {
+      border: 0;
+      background: transparent;
+      height: 42px;
+      color: #5d6b7a;
+      font-size: 16px;
+      font-weight: 800;
+      position: relative;
+    }
+    .construction-tabs button.active { color: var(--blue); }
+    .construction-tabs button.active::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 3px;
+      background: var(--blue);
+      border-radius: 999px;
+    }
+    .construction-subtabs {
+      display: flex;
+      gap: 0;
+      align-items: flex-end;
+      height: 52px;
+    }
+    .construction-subtabs button {
+      height: 52px;
+      min-width: 112px;
+      padding: 0 18px;
+      border: 0;
+      background: #eef2f7;
+      color: #8a96a5;
+      font-size: 17px;
+      font-weight: 800;
+    }
+    .construction-subtabs button.active { background: #fff; color: var(--blue); }
+    .construction-subchild {
+      height: 36px;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      color: var(--blue);
+      font-weight: 800;
+    }
+    .construction-live-grid {
+      display: grid;
+      grid-template-columns: minmax(560px, 1fr) 720px;
+      gap: 12px;
+      min-height: 760px;
+    }
+    .site-map-panel {
+      min-height: 760px;
+      background: #e5f8ff;
+      border: 1px solid #d8edf7;
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+    .site-map-legend {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      background: rgba(255,255,255,.92);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: grid;
+      gap: 8px;
+      color: #5d6b7a;
+      font-weight: 700;
+      z-index: 2;
+    }
+    .legend-row { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+    .legend-row span:first-child { display: inline-flex; align-items: center; gap: 7px; }
+    .legend-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      border: 1px solid #d7e0ea;
+      background: #fff;
+    }
+    .legend-dot.doing { background: #1890ff; border-color: #1890ff; }
+    .legend-dot.done { background: #0f172a; border-color: #0f172a; }
+    .legend-dot.plan { background: #ffb020; border-color: #ffb020; box-shadow: 0 0 0 3px rgba(255,176,32,.18); }
+    .site-plan-tip {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      width: 420px;
+      background: rgba(255,255,255,.92);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 18px;
+      z-index: 2;
+    }
+    .site-plan-tip .panel-title { margin-bottom: 10px; }
+    .plan-tip-row {
+      display: grid;
+      grid-template-columns: 74px 1fr;
+      gap: 10px;
+      align-items: center;
+      margin-top: 8px;
+      color: #526274;
+    }
+    .site-zone-legend {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      background: rgba(255,255,255,.92);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: grid;
+      gap: 8px;
+      z-index: 2;
+    }
+    .site-zone-legend span { display: inline-flex; align-items: center; gap: 8px; color: #526274; font-weight: 700; }
+    .zone-line { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+    .zone-a { background: #52c41a; }
+    .zone-b { background: #eb2f96; }
+    .zone-c { background: #fa8c16; }
+    .zone-d { background: #f5222d; }
+    .zone-e { background: #722ed1; }
+    .zone-f { background: #13c2c2; }
+    .pile-site-shape {
+      position: absolute;
+      left: 50%;
+      top: 70px;
+      width: 170px;
+      height: 650px;
+      transform: translateX(-50%);
+    }
+    .site-segment {
+      position: absolute;
+      border-radius: 999px;
+      background: #eb2f96;
+      box-shadow: 0 0 0 2px rgba(255,255,255,.28) inset;
+    }
+    .seg-top { left: 30px; top: 0; width: 110px; height: 14px; background: #f5222d; }
+    .seg-left-1 { left: 20px; top: 8px; width: 14px; height: 110px; background: #f5222d; }
+    .seg-right-1 { right: 20px; top: 8px; width: 14px; height: 110px; background: #f5222d; }
+    .seg-left-2 { left: 34px; top: 104px; width: 14px; height: 230px; background: #eb2f96; }
+    .seg-right-2 { right: 34px; top: 104px; width: 14px; height: 285px; background: #eb2f96; }
+    .seg-left-3 { left: 34px; top: 326px; width: 14px; height: 72px; background: #722ed1; }
+    .seg-left-4 { left: 24px; top: 490px; width: 14px; height: 128px; background: #fa8c16; }
+    .seg-right-4 { right: 24px; top: 490px; width: 14px; height: 128px; background: #13c2c2; }
+    .seg-bottom-l { left: 34px; bottom: 0; width: 56px; height: 14px; background: #fa8c16; }
+    .seg-bottom-r { right: 34px; bottom: 0; width: 56px; height: 14px; background: #13c2c2; }
+    .seg-bottom-mid { left: 76px; bottom: 0; width: 44px; height: 14px; background: #52c41a; }
+    .site-pile-dot {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #1890ff;
+      border: 2px solid rgba(255,255,255,.9);
+      box-shadow: 0 2px 6px rgba(24,144,255,.35);
+    }
+    .site-pile-dot.done { background: #0f172a; }
+    .site-pile-dot.plan { background: #ffb020; box-shadow: 0 0 0 6px rgba(255,176,32,.18), 0 2px 8px rgba(173,104,0,.28); }
+    .construction-side {
+      display: grid;
+      grid-template-rows: 220px 1fr;
+      gap: 10px;
+      min-height: 760px;
+    }
+    .compact-table th,
+    .compact-table td { padding: 10px 12px; }
+    .live-detail {
+      display: grid;
+      grid-template-columns: 1fr 270px;
+      gap: 18px;
+      min-height: 470px;
+    }
+    .soil-card {
+      height: 470px;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 28px;
+    }
+    .soil-stack {
+      width: 240px;
+      height: 380px;
+      display: grid;
+      grid-template-rows: 70px 46px 82px 88px 64px 30px;
+      align-self: flex-end;
+      border-radius: 2px;
+      overflow: hidden;
+      color: #fff;
+      font-weight: 800;
+      font-size: 13px;
+    }
+    .soil-layer { display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+    .soil-1 { background: #8d695d; }
+    .soil-2 { background: #9c5f35; }
+    .soil-3 { background: #cf976f; }
+    .soil-4 { background: #a8755a; }
+    .soil-5 { background: #805719; }
+    .soil-6 { background: #4b262d; }
+    .rig-marker {
+      position: absolute;
+      top: 30px;
+      left: 50%;
+      width: 58px;
+      height: 72px;
+      transform: translateX(-50%);
+      border-bottom: 8px solid #d48806;
+    }
+    .rig-marker::before {
+      content: "";
+      position: absolute;
+      left: 18px;
+      bottom: 8px;
+      width: 10px;
+      height: 58px;
+      background: #f5a623;
+      border-radius: 4px 4px 0 0;
+      transform: skewX(-10deg);
+    }
+    .rig-marker::after {
+      content: "";
+      position: absolute;
+      left: 8px;
+      bottom: 6px;
+      width: 42px;
+      height: 14px;
+      border-radius: 10px 10px 4px 4px;
+      background: #9b6a2f;
+    }
+    .device-info {
+      border-left: 1px solid var(--line);
+      padding-left: 18px;
+      display: grid;
+      align-content: start;
+      gap: 12px;
+      color: #4c5d70;
+      font-weight: 700;
+    }
+    .device-info h4 { margin: 0; color: var(--ink); font-size: 16px; }
+    .device-info-row { display: grid; grid-template-columns: 88px 1fr; gap: 8px; }
+    .device-info-row span:first-child { color: #7c8998; }
     .summary-toggle { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: #fff; }
     .summary-toggle button { height: 30px; min-width: 74px; border: 0; border-right: 1px solid var(--line); background: transparent; color: #5d6b7a; font-weight: 700; }
     .summary-toggle button:last-child { border-right: 0; }
@@ -1133,61 +1389,111 @@
           <div class="tab-panel" id="task-piling" hidden>
             <div class="task-tab-head"><div class="week-picker"><span>2026年7月第2周</span><button class="button">▣</button></div><button class="button primary" data-modal="dayPlanModal">新增日计划</button></div>
             <div class="week-strip"><button>6日<i class="dot-status green"></i></button><button>7日<i class="dot-status green"></i></button><button>8日<i class="dot-status yellow"></i></button><button>9日</button><button class="active">10日<i class="dot-status yellow"></i></button><button>11日<i class="dot-status green"></i></button><button>12日</button></div>
-            <div class="panel"><div class="panel-head"><div class="panel-title">打桩任务列表</div></div><div class="panel-body"><table><thead><tr><th>桩编号</th><th>当前阶段</th><th>计划日期</th><th>设备</th><th>任务状态</th><th>核销来源</th><th>操作</th></tr></thead><tbody><tr><td>D61</td><td>未作业</td><td>2026-07-10</td><td>XR-02</td><td><span class="tag orange">进行中</span></td><td>-</td><td><button class="button ghost">查看</button></td></tr><tr><td>A5</td><td>未作业</td><td>2026-07-10</td><td>XR-01</td><td><span class="tag gray">未开始</span></td><td>-</td><td><button class="button ghost">下发</button></td></tr></tbody></table></div></div>
+            <div class="panel"><div class="panel-head"><div class="panel-title">打桩任务列表</div></div><div class="panel-body"><table><thead><tr><th>桩编号</th><th>当前阶段</th><th>计划日期</th><th>班组</th><th>预分配设备</th><th>任务状态</th><th>核销来源</th><th>操作</th></tr></thead><tbody><tr><td>D61</td><td>未作业</td><td>2026-07-10</td><td>班组一队</td><td>XR-02</td><td><span class="tag orange">进行中</span></td><td>-</td><td><button class="button ghost">查看</button></td></tr><tr><td>A5</td><td>未作业</td><td>2026-07-10</td><td>班组三队</td><td>XR-01</td><td><span class="tag gray">未开始</span></td><td>-</td><td><button class="button ghost">下发</button></td></tr></tbody></table></div></div>
           </div>
           <div class="tab-panel" id="task-check" hidden>
             <div class="task-tab-head"><div class="week-picker"><span>2026年7月第2周</span><button class="button">▣</button></div><button class="button primary" data-modal="dayPlanModal">新增日计划</button></div>
             <div class="week-strip"><button>6日<i class="dot-status green"></i></button><button>7日</button><button>8日<i class="dot-status green"></i></button><button>9日</button><button class="active">10日<i class="dot-status yellow"></i></button><button>11日<i class="dot-status green"></i></button><button>12日</button></div>
-            <div class="panel"><div class="panel-head"><div class="panel-title">检测任务列表</div></div><div class="panel-body"><table><thead><tr><th>桩编号</th><th>当前阶段</th><th>前置要求</th><th>计划日期</th><th>任务状态</th><th>核销来源</th><th>操作</th></tr></thead><tbody><tr><td>D60</td><td>打桩完成</td><td>允许检测</td><td>2026-07-10</td><td><span class="tag green">已完成</span></td><td>施工填报</td><td><button class="button ghost">查看</button></td></tr><tr><td>D61</td><td>打桩施工中</td><td>同日后续计划</td><td>2026-07-10</td><td><span class="tag gray">未开始</span></td><td>-</td><td><button class="button ghost">查看</button></td></tr></tbody></table></div></div>
+            <div class="panel"><div class="panel-head"><div class="panel-title">检测任务列表</div></div><div class="panel-body"><table><thead><tr><th>桩编号</th><th>当前阶段</th><th>前置要求</th><th>计划日期</th><th>班组</th><th>预分配设备</th><th>任务状态</th><th>核销来源</th><th>操作</th></tr></thead><tbody><tr><td>D60</td><td>打桩完成</td><td>允许检测</td><td>2026-07-10</td><td>检测一组</td><td>CK-01</td><td><span class="tag green">已完成</span></td><td>施工填报</td><td><button class="button ghost">查看</button></td></tr><tr><td>D61</td><td>打桩施工中</td><td>同日后续计划</td><td>2026-07-10</td><td>检测一组</td><td>CK-01</td><td><span class="tag gray">未开始</span></td><td>-</td><td><button class="button ghost">查看</button></td></tr></tbody></table></div></div>
           </div>
           <div class="tab-panel" id="task-pour" hidden>
             <div class="task-tab-head"><div class="week-picker"><span>2026年7月第2周</span><button class="button">▣</button></div><button class="button primary" data-modal="dayPlanModal">新增日计划</button></div>
             <div class="week-strip"><button>6日</button><button>7日<i class="dot-status green"></i></button><button>8日</button><button>9日</button><button class="active">10日<i class="dot-status red"></i></button><button>11日</button><button>12日</button></div>
-            <div class="panel"><div class="panel-head"><div class="panel-title">浇筑任务列表</div></div><div class="panel-body"><table><thead><tr><th>桩编号</th><th>当前阶段</th><th>前置要求</th><th>计划日期</th><th>任务状态</th><th>核销来源</th><th>操作</th></tr></thead><tbody><tr><td>D60</td><td>检测完成</td><td>允许浇筑</td><td>2026-07-10</td><td><span class="tag gray">未开始</span></td><td>-</td><td><button class="button ghost">下发</button></td></tr><tr><td>A1</td><td>资料补录完成</td><td>前置自动核销</td><td>2026-07-10</td><td><span class="tag green">已完成</span></td><td>后补计划/填报</td><td><button class="button ghost">查看</button></td></tr></tbody></table></div></div>
+            <div class="panel"><div class="panel-head"><div class="panel-title">浇筑任务列表</div></div><div class="panel-body"><table><thead><tr><th>桩编号</th><th>当前阶段</th><th>前置要求</th><th>计划日期</th><th>班组</th><th>预分配设备</th><th>任务状态</th><th>核销来源</th><th>操作</th></tr></thead><tbody><tr><td>D60</td><td>检测完成</td><td>允许浇筑</td><td>2026-07-10</td><td>班组二队</td><td>PB-01</td><td><span class="tag gray">未开始</span></td><td>-</td><td><button class="button ghost">下发</button></td></tr><tr><td>A1</td><td>资料补录完成</td><td>前置自动核销</td><td>2026-07-10</td><td>班组二队</td><td>PB-01</td><td><span class="tag green">已完成</span></td><td>后补计划/填报</td><td><button class="button ghost">查看</button></td></tr></tbody></table></div></div>
           </div>
         </div>
       </section>
       <section class="page" id="page-construction">
         <div class="construction-layout">
-          <div class="panel">
-            <div class="panel-head">
-              <div><div class="panel-title">施工实况统计</div><div class="panel-subtitle">按总体与今日两个口径查看桩点施工状态</div></div>
-              <div class="summary-toggle"><button class="active">总体</button><button>今日</button></div>
-            </div>
-            <div class="panel-body">
-              <div class="construction-stats">
-                <div class="construction-stat"><span>总任务桩点</span><strong>260</strong><small>支护桩 156 / 工程桩 104</small></div>
-                <div class="construction-stat"><span>未开始</span><strong style="color:#64748b">243</strong><small>包含未下发与未施工</small></div>
-                <div class="construction-stat"><span>进行中</span><strong style="color:var(--orange)">4</strong><small>打桩 2 / 检测 1 / 浇筑 1</small></div>
-                <div class="construction-stat"><span>已完成</span><strong style="color:var(--green)">13</strong><small>完成度 5.00%</small></div>
+          <div class="construction-tabs"><button class="active">施工实况</button><button>工艺管理</button></div>
+          <div class="construction-subtabs"><button class="active">支护工程</button><button>工程桩</button></div>
+          <div class="construction-subchild">支护灌注桩</div>
+          <div class="construction-live-grid">
+            <div class="site-map-panel">
+              <div class="site-map-legend">
+                <div class="legend-row"><span><i class="legend-dot"></i>未开始</span><b>364</b></div>
+                <div class="legend-row"><span><i class="legend-dot doing"></i>进行中</span><b>7</b></div>
+                <div class="legend-row"><span><i class="legend-dot done"></i>已完成</span><b>1</b></div>
+                <div class="legend-row"><span><i class="legend-dot plan"></i>今日计划</span><b>18</b></div>
+              </div>
+              <button class="icon-button" style="position:absolute;right:12px;top:12px;z-index:2">⛶</button>
+              <div class="pile-site-shape" aria-label="施工桩位实况示意">
+                <i class="site-segment seg-top"></i><i class="site-segment seg-left-1"></i><i class="site-segment seg-right-1"></i>
+                <i class="site-segment seg-left-2"></i><i class="site-segment seg-right-2"></i><i class="site-segment seg-left-3"></i>
+                <i class="site-segment seg-left-4"></i><i class="site-segment seg-right-4"></i><i class="site-segment seg-bottom-l"></i><i class="site-segment seg-bottom-r"></i><i class="site-segment seg-bottom-mid"></i>
+                <i class="site-pile-dot doing" style="left:36px;top:92px"></i>
+                <i class="site-pile-dot doing" style="right:34px;top:96px"></i>
+                <i class="site-pile-dot doing" style="right:36px;top:202px"></i>
+                <i class="site-pile-dot doing" style="right:38px;top:298px"></i>
+                <i class="site-pile-dot done" style="right:20px;top:62px"></i>
+                <i class="site-pile-dot plan" style="left:22px;top:118px"></i>
+                <i class="site-pile-dot plan" style="right:22px;top:226px"></i>
+                <i class="site-pile-dot plan" style="left:28px;bottom:94px"></i>
+              </div>
+              <div class="site-plan-tip">
+                <div class="panel-title">今日计划提示</div>
+                <div class="plan-tip-row"><span class="tag green">已处理</span><span>D61 需验收成孔数据，预分配设备 XR-02，班组一队</span></div>
+                <div class="plan-tip-row"><span class="tag orange">进行中</span><span>ZH-008 正在打桩，预分配设备 XR-01，班组三队</span></div>
+                <div class="plan-tip-row"><span class="tag gray">未开始</span><span>D60 待浇筑填报，预分配泵车 PB-01，班组二队</span></div>
+              </div>
+              <div class="site-zone-legend">
+                <span><i class="zone-line zone-a"></i>A段(支护桩)</span>
+                <span><i class="zone-line zone-b"></i>B段(支护桩)</span>
+                <span><i class="zone-line zone-c"></i>C段(支护桩)</span>
+                <span><i class="zone-line zone-d"></i>D段(支护桩)</span>
+                <span><i class="zone-line zone-e"></i>E段(支护桩)</span>
+                <span><i class="zone-line zone-f"></i>F段(支护桩)</span>
               </div>
             </div>
-          </div>
-          <div class="grid-2">
-            <div class="panel">
-              <div class="panel-head"><div class="panel-title">施工实况</div><select class="select"><option>D61 支护灌注桩</option><option>D60 支护灌注桩</option></select></div>
-              <div class="panel-body">
-                <table>
-                  <thead><tr><th>桩编号</th><th>分区</th><th>当前阶段</th><th>设备</th><th>状态</th><th>操作</th></tr></thead>
-                  <tbody>
-                    <tr><td>D61</td><td>D段</td><td>打桩-成孔施工</td><td>XR-02</td><td><span class="tag orange">施工中</span></td><td><button class="button ghost">填报</button></td></tr>
-                    <tr><td>D60</td><td>D段</td><td>检测-成孔验收</td><td>CK-01</td><td><span class="tag green">已完成</span></td><td><button class="button ghost">查看</button></td></tr>
-                    <tr><td>A1</td><td>A区</td><td>浇筑-水下混凝土</td><td>XR-01</td><td><span class="tag orange">待填报</span></td><td><button class="button ghost">填报</button></td></tr>
-                  </tbody>
-                </table>
+            <div class="construction-side">
+              <div class="panel">
+                <div class="panel-head"><div class="panel-title">施工实况统计</div><a class="link" href="#">详情</a></div>
+                <div class="panel-body" style="padding:0">
+                  <table class="compact-table">
+                    <thead><tr><th>施工分段</th><th>未开始</th><th>今日计划</th><th>进行中</th><th>已完成</th><th>完成度</th></tr></thead>
+                    <tbody>
+                      <tr><td>A段(支护桩)</td><td>8</td><td>2</td><td>0</td><td>0</td><td>0%</td></tr>
+                      <tr><td>B段(支护桩)</td><td>203</td><td>9</td><td>3</td><td>0</td><td>0.42%</td></tr>
+                      <tr><td>C段(支护桩)</td><td>31</td><td>4</td><td>0</td><td>0</td><td>0%</td></tr>
+                      <tr><td>D段(支护桩)</td><td>66</td><td>3</td><td>4</td><td>1</td><td>1.41%</td></tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
-            <div class="panel">
-              <div class="panel-head"><div class="panel-title">工艺管理</div><button class="button primary">新增工艺</button></div>
-              <div class="panel-body">
-                <table>
-                  <thead><tr><th>作业阶段</th><th>工艺步骤</th><th>数据来源</th><th>是否必填</th><th>状态</th></tr></thead>
-                  <tbody>
-                    <tr><td>打桩</td><td>桩点定位、成孔施工、清孔</td><td>人工 + 设备</td><td>是</td><td><span class="tag green">启用</span></td></tr>
-                    <tr><td>检测</td><td>成孔深度、垂直度、孔壁质量</td><td>检测仪/人工</td><td>是</td><td><span class="tag green">启用</span></td></tr>
-                    <tr><td>浇筑</td><td>钢筋笼、坍落度、灌注方量</td><td>人工填报</td><td>是</td><td><span class="tag green">启用</span></td></tr>
-                  </tbody>
-                </table>
+              <div class="panel">
+                <div class="panel-head">
+                  <div class="panel-title">施工实况</div>
+                  <select class="select"><option>D61 支护灌注桩</option><option>ZH-008 支护灌注桩</option><option>D60 支护灌注桩</option></select>
+                </div>
+                <div class="panel-body">
+                  <div class="live-detail">
+                    <div class="soil-card">
+                      <div class="rig-marker" aria-label="旋挖设备示意"></div>
+                      <div class="soil-stack">
+                        <div class="soil-layer soil-1"><span>杂填土</span><span>6m</span></div>
+                        <div class="soil-layer soil-2"><span>耕土</span><span>8m</span></div>
+                        <div class="soil-layer soil-3"><span>粉质黏土</span><span>12m</span></div>
+                        <div class="soil-layer soil-4"><span>黏土</span><span>16m</span></div>
+                        <div class="soil-layer soil-5"><span>全风化</span><span>20m</span></div>
+                        <div class="soil-layer soil-6"><span>中风化</span><span>目标位置：23.75m</span></div>
+                      </div>
+                    </div>
+                    <div class="device-info">
+                      <h4>D61 今日计划</h4>
+                      <div class="device-info-row"><span>桩点编号:</span><b>D61</b></div>
+                      <div class="device-info-row"><span>施工分区:</span><b>D段(支护桩)</b></div>
+                      <div class="device-info-row"><span>当前作业:</span><b>打桩-成孔施工</b></div>
+                      <div class="device-info-row"><span>计划状态:</span><b>进行中</b></div>
+                      <div class="device-info-row"><span>班组:</span><b>班组一队</b></div>
+                      <div class="device-info-row"><span>预分配设备:</span><b>XR-02</b></div>
+                      <div class="device-info-row"><span>设备名称:</span><b>三一 SR285R</b></div>
+                      <div class="device-info-row"><span>机手:</span><b>李师傅</b></div>
+                      <div class="device-info-row"><span>作业时长:</span><b>2.5h</b></div>
+                      <div class="device-info-row"><span>历史施工:</span><b>成孔 18.6m / 目标 23.75m</b></div>
+                      <button class="button primary" style="margin-top:8px">进入填报</button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1216,6 +1522,20 @@
       <div class="modal-head"><div class="modal-title">施工记录详情</div><button class="icon-button close-modal">×</button></div>
       <div class="modal-body"><table><tbody><tr><td>桩编号</td><td>D60</td><td>成孔深度</td><td>23.90m</td></tr><tr><td>混凝土强度</td><td>C35</td><td>钢筋笼安装深度</td><td>23.50m</td></tr><tr><td>设备类型</td><td>旋挖机</td><td>设备编号</td><td>XR-02</td></tr></tbody></table></div>
       <div class="modal-foot"><button class="button primary close-modal">关闭</button></div>
+    </div>
+    <div class="modal" id="dayPlanModal" hidden>
+      <div class="modal-head"><div class="modal-title">新增日计划</div><button class="icon-button close-modal">×</button></div>
+      <div class="modal-body field-grid">
+        <div class="field"><label>计划日期</label><input class="input" type="date" value="2026-07-10" /></div>
+        <div class="field"><label>计划类型</label><select class="select"><option>打桩任务</option><option>检测任务</option><option>浇筑任务</option></select></div>
+        <div class="field"><label>选择桩点</label><select class="select"><option>D61 - 当前未作业</option><option>ZH-008 - 打桩进行中</option><option>D60 - 检测完成</option></select></div>
+        <div class="field"><label>系统读取阶段</label><input class="input" value="未作业，只允许创建打桩任务" /></div>
+        <div class="field"><label>预分配班组</label><select class="select"><option>班组一队</option><option>班组二队</option><option>班组三队</option><option>检测一组</option></select></div>
+        <div class="field"><label>预分配设备</label><select class="select"><option>XR-02 / 三一 SR285R</option><option>XR-01 / 徐工 XR360E</option><option>CK-01 / 成孔检测仪</option><option>PB-01 / 混凝土泵车</option></select></div>
+        <div class="field"><label>作业工艺</label><select class="select"><option>成孔施工</option><option>成孔验收</option><option>水下混凝土浇筑</option></select></div>
+        <div class="field"><label>计划说明</label><input class="input" value="保存后同步到施工实况今日计划" /></div>
+      </div>
+      <div class="modal-foot"><button class="button close-modal">取消</button><button class="button primary close-modal">保存并下发</button></div>
     </div>
     <div class="modal" id="equipmentModal" hidden>
       <div class="modal-head"><div class="modal-title">设备基础信息</div><button class="icon-button close-modal">×</button></div>
