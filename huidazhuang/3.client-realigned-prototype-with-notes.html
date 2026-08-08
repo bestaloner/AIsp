@@ -1,0 +1,2073 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>慧打桩 - 客户原型要求版</title>
+  <style>
+    :root {
+      --blue: #1677ff;
+      --blue-weak: #e8f3ff;
+      --green: #12b76a;
+      --orange: #fa8c16;
+      --red: #f5222d;
+      --purple: #7b61ff;
+      --cyan: #13c2c2;
+      --ink: #142033;
+      --muted: #6b7a90;
+      --line: #e6ebf2;
+      --bg: #f3f6fa;
+      --card: #fff;
+      --radius: 8px;
+      --shadow: 0 12px 34px rgba(20, 32, 51, .07);
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-size: 14px; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .app { min-height: 100vh; display: grid; grid-template-columns: 82px 1fr; grid-template-rows: 58px 1fr; }
+    .topbar { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; height: 58px; background: #fff; border-bottom: 1px solid var(--line); padding: 0 20px; }
+    .brand { display: flex; align-items: center; gap: 12px; color: var(--blue); font-size: 20px; font-weight: 900; }
+    .brand-mark { width: 36px; height: 36px; border-radius: 8px; background: var(--blue); color: #fff; display: grid; place-items: center; font-weight: 900; }
+    .workbench { height: 38px; padding: 0 18px; border: 0; border-radius: 8px; background: var(--blue-weak); color: var(--blue); font-weight: 800; }
+    .top-actions { display: flex; align-items: center; gap: 16px; color: #26364b; font-weight: 700; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: #eef2f7; display: grid; place-items: center; }
+    .sidebar { background: #fff; border-right: 1px solid var(--line); padding: 18px 8px; display: grid; align-content: start; gap: 10px; }
+    .nav-item { width: 66px; min-height: 62px; border: 0; border-radius: 10px; background: transparent; color: #2f3b4a; display: grid; place-items: center; gap: 3px; font-weight: 800; }
+    .nav-item.active { background: #dcecff; color: var(--blue); }
+    .nav-icon { width: 24px; height: 24px; display: grid; place-items: center; font-size: 20px; font-weight: 900; }
+    .main { padding: 16px 18px 24px; overflow: auto; }
+    .page { display: none; }
+    .page.active { display: block; }
+    .panel { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    .panel-head { min-height: 52px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); }
+    .panel-title { font-size: 16px; font-weight: 900; color: var(--ink); }
+    .panel-subtitle { margin-top: 3px; color: var(--muted); font-size: 12px; }
+    .panel-body { padding: 16px; }
+    .button { height: 34px; padding: 0 14px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: #314257; font-weight: 800; }
+    .button.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+    .button.ghost { color: var(--blue); background: transparent; border-color: transparent; padding: 0 6px; }
+    .button.danger { color: var(--red); }
+    .input, .select { height: 34px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: #314257; padding: 0 12px; min-width: 150px; }
+    .tag { display: inline-flex; align-items: center; gap: 5px; height: 22px; border-radius: 999px; padding: 0 8px; font-size: 12px; font-weight: 800; }
+    .tag.blue { background: #e6f4ff; color: #0958d9; }
+    .tag.green { background: #e8fff3; color: #079455; }
+    .tag.orange { background: #fff7e6; color: #ad6800; }
+    .tag.red { background: #fff1f0; color: #cf1322; }
+    .tag.gray { background: #f1f5f9; color: #64748b; }
+    .tag.purple { background: #f2efff; color: #6d4aff; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    th, td { border-bottom: 1px solid var(--line); padding: 12px 10px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    th { background: #f7f9fc; color: #526274; font-weight: 900; }
+    td:first-child, th:first-child { text-align: center; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 12px; }
+    .stat-card { min-height: 102px; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 16px; box-shadow: var(--shadow); display: grid; grid-template-columns: 56px 1fr; gap: 14px; align-items: center; }
+    .stat-icon { width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; font-size: 26px; font-weight: 900; }
+    .stat-icon.blue { background: #eaf3ff; color: var(--blue); }
+    .stat-icon.green { background: #e8fff3; color: var(--green); }
+    .stat-icon.orange { background: #fff7e6; color: var(--orange); }
+    .stat-icon.red { background: #fff1f0; color: var(--red); }
+    .stat-card b { display: block; margin: 5px 0; font-size: 30px; color: var(--blue); }
+    .stat-card small { color: var(--muted); font-weight: 700; }
+
+    .home-layout { display: grid; grid-template-columns: 650px 1fr; gap: 12px; }
+    .home-left { display: grid; gap: 12px; }
+    .side-section { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow); }
+    .section-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; font-weight: 900; }
+    .metric-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; color: #526274; }
+    .metric-row b { display: block; color: var(--blue); font-size: 20px; margin-bottom: 3px; }
+    .home-date-card { min-height: 158px; display: grid; gap: 14px; }
+    .date-weather { display: flex; align-items: center; justify-content: space-between; color: #526274; font-size: 16px; font-weight: 900; }
+    .today-completion { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .today-card { min-height: 86px; border-radius: 12px; background: #f8fafc; display: grid; grid-template-columns: 54px 1fr; gap: 10px; align-items: center; padding: 14px; }
+    .today-card .stat-icon { width: 48px; height: 48px; border-radius: 12px; }
+    .today-card b { display: block; color: var(--blue); font-size: 26px; line-height: 1; margin-bottom: 6px; }
+    .segment-tabs { display: inline-flex; height: 30px; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; background: #fff; }
+    .segment-tabs button { min-width: 76px; padding: 0 14px; border: 0; border-right: 1px solid var(--line); background: #fff; color: #7b8794; font-weight: 800; }
+    .segment-tabs button:last-child { border-right: 0; }
+    .segment-tabs button.active { background: var(--blue); color: #fff; }
+    .stage-summary { background: #eaf7ff; border-radius: 6px; padding: 14px; }
+    .stage-top { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px; }
+    .stage-top div, .stage-grid div { color: #24364c; font-weight: 800; }
+    .stage-top b, .stage-grid b { color: var(--blue); margin-left: 12px; }
+    .stage-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 24px; }
+    .data-note { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #cfe5f5; color: #6b7a90; font-size: 12px; line-height: 1.8; }
+    .progress-cards { display: grid; gap: 12px; }
+    .progress-item { display: grid; grid-template-columns: 92px 1fr 56px; gap: 10px; align-items: center; color: #526274; font-weight: 800; }
+    .progress-item b { color: var(--blue); text-align: right; }
+    .progress-meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 16px; margin-top: 12px; color: #314257; font-weight: 800; }
+    .progress-meta b { color: var(--blue); margin-left: 10px; }
+    .device-stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .device-stat { background: #f1f7ff; border-radius: 6px; padding: 12px; color: #6b7a90; font-weight: 800; }
+    .device-stat b { display: block; color: var(--blue); font-size: 22px; margin-top: 8px; }
+    .message-tabs { display: inline-flex; gap: 6px; }
+    .message-tabs button { height: 28px; padding: 0 10px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: #64748b; font-weight: 800; }
+    .message-tabs button.active { border-color: var(--blue); background: var(--blue-weak); color: var(--blue); }
+    .message-panel { display: none; height: 184px; overflow: hidden; position: relative; }
+    .message-panel.active { display: block; }
+    .message-track { display: grid; gap: 8px; animation: messageScroll 14s linear infinite; }
+    .message-panel:hover .message-track { animation-play-state: paused; }
+    .message-item { display: grid; grid-template-columns: 72px 1fr auto; gap: 10px; align-items: center; padding: 8px 0; color: #526274; border-bottom: 1px dashed #edf1f6; }
+    @keyframes messageScroll {
+      0%, 18% { transform: translateY(0); }
+      45%, 63% { transform: translateY(-58px); }
+      82%, 100% { transform: translateY(-116px); }
+    }
+    .progress-line { height: 8px; background: #e9eef6; border-radius: 999px; overflow: hidden; }
+    .progress-line i { display: block; height: 100%; background: var(--blue); border-radius: inherit; }
+    .list-line { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 0; color: #526274; border-bottom: 1px dashed #edf1f6; }
+    .list-line:last-child { border-bottom: 0; }
+    .map-panel { min-height: 694px; position: relative; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    .map-toolbar { position: absolute; top: 14px; right: 14px; z-index: 2; display: flex; gap: 8px; }
+    .pill-tabs { display: inline-flex; align-items: center; gap: 0; border: 1px solid #b8d7ff; border-radius: 6px; overflow: hidden; background: #fff; }
+    .pill-tabs button { height: 32px; min-width: 78px; border: 0; border-right: 1px solid #d6e8ff; background: #fff; color: #4d5f74; font-weight: 800; }
+    .pill-tabs button:last-child { border-right: 0; }
+    .pill-tabs button.active { background: var(--blue-weak); color: var(--blue); }
+    .pile-map-title { position: absolute; top: 16px; left: 16px; z-index: 2; }
+    .linear-drawing { position: absolute; inset: 104px 70px 82px 70px; transform: rotate(-9deg); }
+    .track-line { position: absolute; left: 4%; right: 4%; height: 2px; background: #d8dee8; opacity: .75; }
+    .track-line:nth-child(1) { top: 20%; }
+    .track-line:nth-child(2) { top: 32%; }
+    .track-line:nth-child(3) { top: 44%; }
+    .track-line:nth-child(4) { top: 56%; }
+    .pile-dot { position: absolute; width: 11px; height: 11px; border-radius: 50%; border: 2px solid #fff; background: #c8d0dc; box-shadow: 0 1px 3px rgba(20,32,51,.2); }
+    .pile-dot.support { background: var(--blue); }
+    .pile-dot.project { background: var(--green); }
+    .pile-dot.doing { background: var(--orange); }
+    .pile-dot.error { background: var(--red); }
+    .pile-dot.today-plan {
+      animation: pilePlanBlink 1.3s ease-in-out infinite;
+      outline: 0 solid rgba(22, 119, 255, .34);
+    }
+    .pile-dot.selected {
+      width: 15px;
+      height: 15px;
+      margin-left: -2px;
+      margin-top: -2px;
+      box-shadow: 0 0 0 5px rgba(22,119,255,.18), 0 4px 12px rgba(22,119,255,.32);
+      z-index: 3;
+    }
+    @keyframes pilePlanBlink {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(22,119,255,.42), 0 1px 3px rgba(20,32,51,.2); transform: scale(1); }
+      50% { box-shadow: 0 0 0 8px rgba(22,119,255,0), 0 4px 12px rgba(22,119,255,.28); transform: scale(1.28); }
+    }
+    .pile-status-panel {
+      position: absolute;
+      right: 18px;
+      top: 86px;
+      z-index: 4;
+      width: 286px;
+      border: 1px solid #cfe2ff;
+      border-radius: 8px;
+      background: rgba(255,255,255,.96);
+      box-shadow: 0 14px 36px rgba(20,32,51,.12);
+      padding: 14px;
+    }
+    .pile-status-head { display: flex; align-items: start; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+    .pile-status-head h3 { margin: 0; font-size: 18px; color: var(--ink); }
+    .pile-status-head small { color: var(--muted); font-weight: 800; }
+    .pile-status-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
+    .pile-status-item { min-height: 54px; border: 1px solid #edf1f6; border-radius: 6px; background: #f8fbff; padding: 8px; color: #526274; font-size: 12px; font-weight: 800; }
+    .pile-status-item b { display: block; margin-top: 4px; color: #21334a; font-size: 14px; }
+    .pile-status-tip { margin-top: 10px; padding: 9px 10px; border-radius: 6px; background: #fff7e6; color: #ad6800; font-size: 12px; font-weight: 900; }
+    .map-legend { position: absolute; left: 16px; right: 16px; bottom: 14px; height: 44px; border: 1px solid var(--line); border-radius: 6px; background: rgba(255,255,255,.94); display: flex; align-items: center; gap: 26px; padding: 0 14px; color: #526274; font-weight: 800; }
+    .legend-item { display: inline-flex; align-items: center; gap: 7px; }
+    .legend-swatch { width: 11px; height: 11px; border-radius: 50%; background: #c8d0dc; display: inline-block; }
+    .quick-entry { position: absolute; left: 16px; right: 16px; bottom: 70px; height: 82px; border: 1px solid var(--line); border-radius: 8px; background: #fff; padding: 14px; display: flex; align-items: center; gap: 18px; }
+    .quick-btn { min-width: 112px; height: 46px; border: 0; border-radius: 8px; background: #f4f7fb; color: #314257; font-weight: 900; }
+    .quick-btn i { color: var(--blue); font-style: normal; margin-right: 6px; }
+
+    .model-layout { display: grid; grid-template-columns: 520px 1fr; gap: 12px; margin-bottom: 12px; }
+    .module-tabs { display: flex; gap: 26px; height: 42px; align-items: flex-end; border-bottom: 1px solid var(--line); margin-bottom: 12px; }
+    .module-tabs button { border: 0; background: transparent; height: 40px; color: #64748b; font-size: 16px; font-weight: 900; position: relative; }
+    .module-tabs button.active { color: var(--blue); }
+    .module-tabs button.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 3px; background: var(--blue); border-radius: 999px; }
+    .drawing-tab-panel { display: none; }
+    .drawing-tab-panel.active { display: block; }
+    .drawing-list { display: grid; gap: 12px; }
+    .drawing-card { border: 1px solid var(--line); border-radius: 8px; background: #fff; padding: 14px; display: grid; gap: 10px; }
+    .drawing-card.active-source { border-color: #7bb2ff; background: #f8fbff; box-shadow: inset 3px 0 0 var(--blue); }
+    .drawing-card-head { display: flex; align-items: start; justify-content: space-between; gap: 10px; }
+    .drawing-card h3 { margin: 0; font-size: 16px; }
+    .drawing-meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 12px; color: #526274; font-weight: 800; }
+    .drawing-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .upload-box { height: 84px; border: 1px dashed #7bb2ff; border-radius: 7px; background: #f8fbff; display: grid; place-items: center; text-align: center; color: #526274; font-weight: 800; margin-bottom: 12px; }
+    .cad-view { height: 356px; background: linear-gradient(0deg, rgba(0,0,0,.02), rgba(0,0,0,.02)), #fff; border-radius: 6px; border: 1px solid var(--line); position: relative; overflow: hidden; }
+    .cad-shape { position: absolute; left: 50%; top: 50%; width: 520px; height: 210px; transform: translate(-50%, -50%); border: 2px solid #b9c4d1; clip-path: polygon(4% 24%, 14% 6%, 86% 6%, 96% 24%, 96% 76%, 86% 94%, 14% 94%, 4% 76%); }
+    .cad-grid-line { position: absolute; background: #e3e8ef; }
+    .cad-grid-line.v { width: 1px; height: 100%; top: 0; }
+    .cad-grid-line.h { height: 1px; width: 100%; left: 0; }
+    .parse-dot { position: absolute; width: 10px; height: 10px; border: 2px solid var(--blue); border-radius: 50%; background: #fff; }
+    .parse-dot.wait { border-color: var(--orange); }
+    .parse-dot.bad { border-color: #b7c0cd; }
+    .result-list { display: grid; gap: 10px; color: #526274; font-weight: 800; }
+    .result-list div { display: flex; justify-content: space-between; border-bottom: 1px solid #edf1f6; padding-bottom: 9px; }
+    .active-source-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 12px; }
+    .source-stat { border: 1px solid var(--line); background: #f8fbff; border-radius: 8px; padding: 12px; color: #526274; font-weight: 800; }
+    .source-stat b { display: block; color: var(--blue); font-size: 22px; margin-top: 6px; }
+    .pile-type-tabs { display: grid; gap: 10px; margin-bottom: 14px; }
+    .pile-parent-tabs, .pile-child-tabs { display: inline-flex; width: fit-content; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #fff; }
+    .pile-parent-tabs button, .pile-child-tabs button { height: 34px; min-width: 116px; padding: 0 18px; border: 0; border-right: 1px solid var(--line); background: #fff; color: #6b7280; font-size: 18px; font-weight: 900; }
+    .pile-parent-tabs button:last-child, .pile-child-tabs button:last-child { border-right: 0; }
+    .pile-parent-tabs button.active, .pile-child-tabs button.active { color: var(--blue); background: #f8fbff; outline: 1px solid var(--blue); outline-offset: -1px; }
+    .pile-child-tabs button.disabled { color: #b7c0cd; background: #f7f8fa; cursor: default; }
+    .pile-type-panel { display: none; }
+    .pile-type-panel.active { display: block; }
+    .generation-note { border: 1px solid #b7ebc8; background: #f6ffed; color: #168a43; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; font-weight: 800; display: none; }
+    .generation-note.show { display: block; }
+    .validation-list { display: grid; gap: 10px; margin: 12px 0; }
+    .validation-row { display: grid; grid-template-columns: 88px 1fr auto; gap: 10px; align-items: center; border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+    .conflict-options { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+    .conflict-option { border: 1px solid var(--line); border-radius: 8px; background: #fff; padding: 12px; text-align: left; color: #526274; font-weight: 800; }
+    .conflict-option.active { border-color: var(--blue); background: #f4f9ff; color: var(--blue); }
+    .inline-editing td[data-editable] { background: #fbfdff; }
+    .inline-input { width: 100%; min-width: 86px; height: 30px; border: 1px solid #b8d7ff; border-radius: 6px; padding: 0 8px; color: #314257; }
+    .row-actions { display: inline-flex; gap: 6px; align-items: center; justify-content: center; }
+    .modal-mask { position: fixed; inset: 0; background: rgba(20,32,51,.42); display: none; align-items: center; justify-content: center; z-index: 30; }
+    .modal-mask.show { display: flex; }
+    .modal { width: 820px; max-height: 86vh; overflow: auto; background: #fff; border-radius: 8px; box-shadow: 0 24px 70px rgba(12,23,38,.22); }
+    .modal.small { width: 560px; }
+    .modal-head { height: 54px; padding: 0 18px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+    .modal-title { color: var(--ink); font-size: 16px; font-weight: 900; }
+    .modal-body { padding: 18px; }
+    .modal-foot { border-top: 1px solid var(--line); padding: 12px 18px; display: flex; justify-content: flex-end; gap: 10px; }
+    .icon-button { width: 32px; height: 32px; border: 0; border-radius: 6px; background: #f1f5f9; color: #526274; font-weight: 900; }
+    .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+    .toolbar-left, .toolbar-right { display: flex; align-items: center; gap: 10px; }
+
+    .task-layout { display: grid; grid-template-columns: 1fr 230px; gap: 12px; }
+    .task-main { display: grid; gap: 12px; }
+    .filter-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+    .task-tabs { display: flex; gap: 26px; height: 42px; align-items: flex-end; border-bottom: 1px solid var(--line); margin-bottom: 12px; }
+    .task-tabs button { border: 0; background: transparent; height: 40px; color: #64748b; font-size: 16px; font-weight: 900; position: relative; }
+    .task-tabs button.active { color: var(--blue); }
+    .task-tabs button.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 3px; border-radius: 999px; background: var(--blue); }
+    .task-panel { display: none; }
+    .task-panel.active { display: block; }
+    .calendar { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    .calendar-head { height: 52px; display: flex; align-items: center; justify-content: center; gap: 36px; border-bottom: 1px solid var(--line); font-weight: 900; font-size: 18px; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+    .weekday, .day { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .weekday { height: 34px; display: grid; place-items: center; background: #f7f9fc; color: #526274; font-weight: 900; }
+    .day { min-height: 154px; padding: 8px; color: #26364b; display: flex; flex-direction: column; gap: 6px; }
+    .day.muted { color: #b0bac7; background: #fbfcfe; }
+    .day.selected { outline: 2px solid var(--blue); outline-offset: -2px; background: #f8fbff; }
+    .day b { display: block; margin-bottom: 6px; }
+    .task-chip { display: block; max-width: 100%; margin: 4px 0; height: 20px; line-height: 20px; border-radius: 4px; padding: 0 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 800; }
+    .task-chip.pile { background: #e6f4ff; color: #0958d9; }
+    .task-chip.check { background: #e8fff3; color: #079455; }
+    .task-chip.pour { background: #fff7e6; color: #ad6800; }
+    .task-chip.review { background: #f2efff; color: #6d4aff; }
+    .task-scroll { min-height: 0; max-height: 108px; overflow-y: auto; display: grid; gap: 5px; padding-right: 2px; overscroll-behavior: contain; }
+    .task-scroll::-webkit-scrollbar { width: 5px; }
+    .task-scroll::-webkit-scrollbar-thumb { background: #cfd9e6; border-radius: 999px; }
+    .task-card-mini { border: 1px solid #edf1f6; border-radius: 6px; background: #fbfcfe; padding: 6px; display: grid; gap: 4px; }
+    .task-card-mini strong { font-size: 12px; line-height: 1; color: #24364c; }
+    .task-mini-meta { display: flex; flex-wrap: wrap; gap: 4px; }
+    .mini-label { height: 18px; border-radius: 999px; padding: 0 6px; font-size: 11px; font-weight: 900; line-height: 18px; white-space: nowrap; }
+    .mini-label.new { color: #0958d9; background: #e6f4ff; border: 1px solid #91caff; }
+    .mini-label.roll { color: #ad6800; background: #fff7e6; border: 1px solid #ffd591; }
+    .mini-label.done { color: #168a43; background: #e8fff3; border: 1px solid #b7ebc8; }
+    .mini-label.todo { color: #cf1322; background: #fff1f0; border: 1px solid #ffccc7; }
+    .week-planner { display: grid; gap: 12px; }
+    .week-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .week-picker { height: 40px; min-width: 320px; border: 1px solid var(--line); border-radius: 8px; background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; color: #142033; font-size: 20px; font-weight: 900; }
+    .week-strip { display: grid; grid-template-columns: repeat(7, minmax(86px, 1fr)); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #fff; }
+    .week-strip button { height: 44px; border: 0; border-right: 1px solid var(--line); background: #fff; color: #142033; font-size: 20px; font-weight: 900; position: relative; }
+    .week-strip button:last-child { border-right: 0; }
+    .week-strip button.active { color: var(--blue); outline: 1px solid var(--blue); z-index: 1; }
+    .dot-status { position: absolute; left: 50%; bottom: 4px; width: 7px; height: 7px; border-radius: 50%; transform: translateX(-50%); }
+    .dot-status.green { background: var(--green); }
+    .dot-status.red { background: var(--red); }
+    .dot-status.yellow { background: var(--orange); }
+    .task-rule { border: 1px solid #ffd591; background: #fff7e6; color: #8a5a00; border-radius: 8px; padding: 10px 12px; font-weight: 800; line-height: 1.7; }
+    .task-action-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .task-summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 12px; }
+    .task-summary-card { border: 1px solid var(--line); border-radius: 8px; background: #fff; padding: 14px; box-shadow: var(--shadow); }
+    .task-summary-card span { color: #607086; font-weight: 800; }
+    .task-summary-card b { display: block; margin-top: 6px; color: #142033; font-size: 24px; }
+    .task-summary-card small { color: #8a97a8; }
+    .task-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .task-form-field { display: grid; gap: 6px; }
+    .task-form-field label { color: #526274; font-weight: 900; }
+    .wizard-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+    .wizard-step { height: 38px; border: 1px solid var(--line); border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; color: #6b7a90; font-weight: 900; background: #fff; }
+    .wizard-step.active { border-color: var(--blue); background: #eef6ff; color: var(--blue); }
+    .wizard-panel { display: none; }
+    .wizard-panel.active { display: block; }
+    .pile-select-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+    .pile-select-card { min-height: 72px; border: 1px solid var(--line); border-radius: 8px; padding: 10px; display: grid; gap: 6px; background: #fff; color: #526274; font-weight: 800; cursor: pointer; }
+    .pile-select-card.active { border-color: var(--blue); background: #f4f9ff; color: var(--blue); }
+    .task-leaf-table select { min-width: 112px; }
+    .task-preview { margin-top: 14px; border: 1px solid #cfe6ff; border-radius: 8px; background: #f8fbff; padding: 12px; display: grid; gap: 8px; }
+    .task-preview-title { color: var(--blue); font-weight: 900; }
+    .task-preview-row { display: flex; justify-content: space-between; gap: 10px; align-items: center; border-top: 1px solid #e6f0fb; padding-top: 8px; color: #24364c; font-weight: 800; }
+    .task-result-note { display: none; margin-bottom: 12px; border: 1px solid #b7ebc8; background: #f6ffed; color: #237804; border-radius: 8px; padding: 10px 12px; font-weight: 900; }
+    .task-result-note.show { display: block; }
+    .task-status-legend { display: flex; flex-wrap: wrap; gap: 12px; color: #64748b; font-weight: 800; }
+    .task-status-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .task-status-legend i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .todo-panel { display: grid; gap: 12px; }
+    .todo-card { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 18px; box-shadow: var(--shadow); }
+    .todo-card b { display: block; color: var(--red); font-size: 26px; margin: 6px 0; }
+
+    .construction-tabs { display: flex; gap: 28px; height: 42px; align-items: flex-end; border-bottom: 1px solid var(--line); margin-bottom: 12px; }
+    .construction-tabs button { border: 0; background: transparent; height: 40px; color: #5d6b7a; font-weight: 900; font-size: 16px; position: relative; }
+    .construction-tabs button.active { color: var(--blue); }
+    .construction-tabs button.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 3px; background: var(--blue); }
+    .construction-subtabs { display: flex; gap: 0; height: 48px; align-items: flex-end; }
+    .construction-subtabs button { height: 48px; min-width: 112px; border: 0; background: #eef2f7; color: #8a96a5; font-weight: 900; font-size: 16px; }
+    .construction-subtabs button.active { background: #fff; color: var(--blue); }
+    .construction-live { display: grid; grid-template-columns: minmax(650px, 1fr) 500px; gap: 12px; min-height: 720px; }
+    .site-map { position: relative; min-height: 720px; background: #dff7ff; border: 1px solid #d5edf7; border-radius: 8px; overflow: hidden; }
+    .site-legend { position: absolute; top: 12px; left: 12px; background: rgba(255,255,255,.94); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 8px; color: #526274; font-weight: 800; z-index: 2; }
+    .site-legend div { display: flex; justify-content: space-between; gap: 18px; }
+    .site-legend i { width: 11px; height: 11px; border-radius: 50%; display: inline-block; margin-right: 7px; background: #fff; border: 1px solid #d7e0ea; }
+    .site-legend .doing { background: #1890ff; border-color: #1890ff; }
+    .site-legend .done { background: #0f172a; border-color: #0f172a; }
+    .site-legend .plan { background: #ffb020; border-color: #ffb020; box-shadow: 0 0 0 3px rgba(255,176,32,.18); }
+    .pile-outline { position: absolute; left: 50%; top: 55px; width: 170px; height: 620px; transform: translateX(-50%); }
+    .outline-seg { position: absolute; border-radius: 999px; background: #ffad1f; }
+    .outline-seg.top { left: 30px; top: 0; width: 110px; height: 12px; }
+    .outline-seg.l1 { left: 20px; top: 8px; width: 12px; height: 112px; }
+    .outline-seg.r1 { right: 20px; top: 8px; width: 12px; height: 112px; }
+    .outline-seg.l2 { left: 34px; top: 112px; width: 12px; height: 360px; }
+    .outline-seg.r2 { right: 34px; top: 112px; width: 12px; height: 360px; }
+    .outline-seg.l3 { left: 22px; bottom: 0; width: 12px; height: 108px; }
+    .outline-seg.r3 { right: 22px; bottom: 0; width: 12px; height: 108px; }
+    .outline-seg.bottom { left: 32px; bottom: 0; width: 106px; height: 12px; }
+    .live-dot { position: absolute; width: 12px; height: 12px; border-radius: 50%; background: #0f172a; border: 2px solid #fff; }
+    .live-dot.doing { background: #1890ff; }
+    .live-dot.plan { background: #ffb020; box-shadow: 0 0 0 6px rgba(255,176,32,.18); }
+    .operation-tip { position: absolute; left: 16px; bottom: 16px; width: 430px; background: rgba(255,255,255,.94); border: 1px solid var(--line); border-radius: 8px; padding: 14px 18px; }
+    .live-side { display: grid; grid-template-rows: 250px 1fr; gap: 10px; }
+    .live-stat-tabs { display: inline-flex; height: 30px; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: #fff; }
+    .live-stat-tabs button { border: 0; border-right: 1px solid var(--line); background: #fff; color: #526274; padding: 0 10px; font-weight: 900; }
+    .live-stat-tabs button:last-child { border-right: 0; }
+    .live-stat-tabs button.active { background: #e6f4ff; color: var(--blue); }
+    .live-stat-panel { display: none; height: 100%; overflow: auto; }
+    .live-stat-panel.active { display: block; }
+    .today-plan-tables { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 8px; }
+    .today-plan-table { border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: #fff; }
+    .today-plan-table h4 { margin: 0; padding: 8px 10px; background: #f7f9fc; color: #26364b; font-size: 14px; border-bottom: 1px solid var(--line); }
+    .today-plan-table table th, .today-plan-table table td { padding: 8px 6px; font-size: 12px; }
+    .pile-link { border: 0; background: transparent; color: var(--blue); font-weight: 900; cursor: pointer; padding: 0; }
+    .rig-panel { display: grid; grid-template-columns: 1fr 190px; gap: 14px; min-height: 360px; }
+    .soil-view { height: 360px; border: 1px solid var(--line); background: #fff; display: grid; place-items: end center; padding-bottom: 22px; position: relative; }
+    .rig { position: absolute; top: 30px; width: 46px; height: 76px; border-bottom: 8px solid #c58119; }
+    .rig::before { content: ""; position: absolute; left: 18px; bottom: 8px; width: 9px; height: 58px; border-radius: 4px 4px 0 0; background: #f5a623; transform: skewX(-9deg); }
+    .rig::after { content: ""; position: absolute; left: 7px; bottom: 4px; width: 42px; height: 16px; border-radius: 9px 9px 4px 4px; background: #8a5a2b; }
+    .soil-stack { width: 230px; height: 250px; display: grid; grid-template-rows: 50px 42px 54px 58px 46px; color: #fff; font-weight: 900; overflow: hidden; }
+    .soil-stack div { display: flex; align-items: center; justify-content: space-between; padding: 0 18px; }
+    .soil-stack div:nth-child(1) { background: #8d695d; }
+    .soil-stack div:nth-child(2) { background: #9c5f35; }
+    .soil-stack div:nth-child(3) { background: #cf976f; }
+    .soil-stack div:nth-child(4) { background: #805719; }
+    .soil-stack div:nth-child(5) { background: #4b262d; }
+    .device-info { display: grid; align-content: start; gap: 10px; color: #526274; font-weight: 800; }
+    .device-info div { display: grid; grid-template-columns: 72px 1fr; gap: 8px; }
+    .today-exec { margin-top: 12px; padding: 12px; border: 1px solid #ffd591; background: #fff9ed; border-radius: 8px; color: #7a4b00; font-weight: 800; display: grid; gap: 8px; }
+    .construction-subpage { display: none; }
+    .construction-subpage.active { display: block; }
+    .node-drawer { position: fixed; right: 0; top: 58px; bottom: 0; width: 360px; background: #fff; box-shadow: -10px 0 30px rgba(20,32,51,.14); z-index: 9; transform: translateX(100%); transition: .2s; overflow: auto; }
+    .node-drawer.show { transform: translateX(0); }
+    .drawer-head { height: 52px; padding: 0 16px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; font-weight: 900; }
+    .node-list { padding: 12px 18px 24px; display: grid; gap: 0; }
+    .node-item { position: relative; padding: 0 0 18px 24px; border-left: 1px solid #dbe3ee; }
+    .node-item::before { content: ""; position: absolute; left: -7px; top: 0; width: 13px; height: 13px; border-radius: 50%; background: var(--blue); border: 2px solid #fff; box-shadow: 0 0 0 1px var(--blue); }
+    .node-item.done::before { background: var(--green); box-shadow: 0 0 0 1px var(--green); }
+    .node-item.wait::before { background: #cbd5e1; box-shadow: 0 0 0 1px #cbd5e1; }
+    .node-item h4 { margin: 0 0 6px; color: var(--blue); }
+    .node-card { background: #f6f8fc; border-radius: 6px; padding: 10px; color: #526274; font-size: 12px; line-height: 1.8; }
+    .check-layout { display: grid; grid-template-columns: 1fr 420px; gap: 12px; }
+    .hole-card { min-height: 360px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; display: grid; grid-template-columns: 420px 1fr; gap: 24px; align-items: center; }
+    .hole-visual { height: 300px; background: #eaf8fb; border-radius: 8px; position: relative; overflow: hidden; }
+    .hole-visual::before { content: ""; position: absolute; left: 0; right: 0; top: 38px; height: 42px; background: repeating-linear-gradient(135deg, #e4c186 0, #e4c186 10px, #f0d29b 10px, #f0d29b 20px); }
+    .hole { position: absolute; left: 50%; top: 68px; width: 110px; height: 210px; border: 10px solid #a8c3cf; border-top: 0; border-radius: 0 0 56px 56px; transform: translateX(-50%); background: rgba(255,255,255,.58); }
+    .measure-line { position: absolute; left: 50%; top: 20px; bottom: 35px; width: 2px; background: var(--blue); }
+    .metric-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .metric-box { border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
+    .metric-box b { display: block; margin-top: 6px; color: #079455; font-size: 20px; }
+    .process-flow { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; display: grid; gap: 18px; }
+    .flow-step { display: grid; grid-template-columns: 22px 1fr; gap: 10px; }
+    .flow-step i { width: 18px; height: 18px; border-radius: 50%; background: var(--green); color: #fff; display: grid; place-items: center; font-size: 12px; font-style: normal; }
+    .flow-step.active i { background: var(--blue); }
+    .check-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .check-table-panel { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    .check-actions { display: inline-flex; gap: 6px; align-items: center; justify-content: center; }
+    .check-detail-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 14px; }
+    .check-compare { border: 1px solid #d5dbe6; border-radius: 6px; overflow: hidden; background: #fff; margin-bottom: 12px; }
+    .check-compare h3 { margin: 0; padding: 12px; background: #f1f5fb; border-bottom: 1px solid #d5dbe6; font-size: 16px; }
+    .check-compare-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .check-compare-grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .check-compare-grid div { min-height: 66px; display: grid; place-items: center; border-right: 1px solid #d5dbe6; border-bottom: 1px solid #d5dbe6; color: #23344a; font-size: 15px; font-weight: 900; text-align: center; padding: 8px; }
+    .check-compare-grid div:nth-child(3n), .check-compare-grid.four div:nth-child(4n) { border-right: 0; }
+    .check-compare-grid .value { background: #fbfcfe; font-size: 18px; font-weight: 500; }
+    .check-result-card { border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: #fff; display: grid; gap: 14px; align-content: start; }
+    .result-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #71819a; font-weight: 900; font-size: 16px; }
+    .result-pill { min-width: 136px; text-align: center; border-radius: 999px; padding: 7px 12px; font-weight: 900; }
+    .result-pill.ok { color: #3f8060; background: #e8f8f0; border: 1px solid #b8e8ce; }
+    .result-pill.warn { color: #b96f14; background: #fff7e6; border: 1px solid #ffd591; }
+    .report-header { display: grid; grid-template-columns: minmax(320px, 1fr) auto; gap: 12px; align-items: end; margin-bottom: 12px; }
+    .pile-search-box { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 14px; box-shadow: var(--shadow); display: grid; gap: 10px; }
+    .pile-search-box label { color: #526274; font-weight: 900; }
+    .report-summary { display: grid; grid-template-columns: repeat(4, minmax(130px, 1fr)); gap: 10px; }
+    .report-mini-card { min-height: 78px; background: #fff; border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); padding: 12px; color: #5d6b7a; font-weight: 800; }
+    .report-mini-card b { display: block; margin-top: 7px; color: #142033; font-size: 22px; }
+    .process-board { background: #fff; border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); padding: 14px; margin-bottom: 12px; }
+    .process-status-legend { display: flex; gap: 14px; color: #64748b; font-weight: 800; margin-bottom: 12px; }
+    .process-status-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; background: #cbd5e1; }
+    .status-dot.done { background: var(--green); }
+    .status-dot.active { background: var(--orange); }
+    .process-grid { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 10px; }
+    .process-node-btn { min-height: 58px; border: 1px solid var(--line); border-radius: 8px; background: #f8fafc; color: #65758a; display: grid; grid-template-columns: 28px 1fr; gap: 8px; align-items: center; padding: 8px; text-align: left; font-weight: 900; }
+    .process-node-btn i { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-style: normal; border: 2px solid #cbd5e1; background: #fff; color: #64748b; }
+    .process-node-btn.done { background: #f3fff8; border-color: #b7ebc8; color: #168a43; }
+    .process-node-btn.done i { background: var(--green); border-color: var(--green); color: #fff; }
+    .process-node-btn.active { background: #fff8ec; border-color: #ffd591; color: #ad6800; }
+    .process-node-btn.active i { background: var(--orange); border-color: var(--orange); color: #fff; }
+    .process-node-btn.locked { cursor: not-allowed; opacity: .74; }
+    .report-workspace { display: grid; grid-template-columns: minmax(560px, 1fr) 520px; gap: 12px; }
+    .report-form-table td, .report-form-table th { padding: 10px 8px; }
+    .report-form-table input, .report-form-table select { width: 100%; min-width: 0; }
+    .report-form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 12px; }
+    .process-result-note { display: none; margin-top: 10px; border: 1px solid #b7ebc8; background: #f6ffed; color: #237804; border-radius: 8px; padding: 10px 12px; font-weight: 900; }
+    .process-result-note.show { display: block; }
+    .visual-panel { min-height: 578px; background: #fff; border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); overflow: hidden; }
+    .visual-head { min-height: 52px; border-bottom: 1px solid var(--line); padding: 0 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .visual-body { padding: 16px; display: grid; gap: 14px; }
+    .visual-stage { height: 300px; border: 1px solid #dbe7f4; border-radius: 8px; background: #f8fbff; position: relative; overflow: hidden; }
+    .visual-ground { position: absolute; left: 0; right: 0; bottom: 0; height: 72%; background: linear-gradient(#c99362 0 22%, #e0b080 22% 45%, #9f6a38 45% 70%, #6f4828 70%); }
+    .visual-hole-line { position: absolute; left: 50%; top: 34px; bottom: 20px; width: 92px; transform: translateX(-50%); border: 10px solid #b9d2df; border-top: 0; border-radius: 0 0 45px 45px; background: rgba(255,255,255,.54); }
+    .visual-tool { position: absolute; left: 50%; top: 20px; width: 10px; height: 210px; transform: translateX(-50%); background: var(--blue); border-radius: 999px; }
+    .visual-cage { position: absolute; left: 50%; top: 52px; width: 74px; height: 190px; transform: translateX(-50%); border: 2px solid #64748b; background: repeating-linear-gradient(90deg, transparent 0 12px, #64748b 12px 14px); opacity: .9; }
+    .visual-pour { position: absolute; left: 50%; top: 44px; width: 68px; height: 206px; transform: translateX(-50%); background: linear-gradient(#d7dde7, #aeb8c6); border-radius: 0 0 34px 34px; }
+    .visual-location { position: absolute; left: 42%; top: 42%; width: 74px; height: 74px; border: 3px dashed var(--blue); border-radius: 50%; }
+    .visual-location::after { content: ""; position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; transform: translate(-50%, -50%); background: var(--red); border-radius: 50%; }
+    .visual-metrics { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .visual-metric { border: 1px solid var(--line); border-radius: 8px; padding: 12px; color: #526274; font-weight: 800; }
+    .visual-metric b { display: block; margin-top: 6px; color: #142033; font-size: 18px; }
+    .visual-timeline { display: grid; gap: 8px; }
+    .visual-timeline div { display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px dashed #e6ebf2; padding-bottom: 8px; color: #526274; font-weight: 800; }
+    .grid-bg{position:absolute;inset:0;background-image:linear-gradient(#dce8f5 1px,transparent 1px),linear-gradient(90deg,#dce8f5 1px,transparent 1px);background-size:24px 24px;opacity:.72}.soil{position:absolute;left:0;right:0;bottom:0;height:72%;background:linear-gradient(#c99362 0 22%,#e0b080 22% 46%,#a67543 46% 72%,#705034 72%)}.bearing{position:absolute;left:0;right:0;bottom:0;height:28%;background:repeating-linear-gradient(-30deg,#705034 0 10px,#5c412c 10px 18px);opacity:.9}.ruler{position:absolute;top:28px;bottom:22px;left:34px;width:30px;border-left:2px solid #64748b;color:#64748b;font-size:11px}.ruler span{position:absolute;left:8px}.ruler span:nth-child(1){top:0}.ruler span:nth-child(2){top:45%}.ruler span:nth-child(3){bottom:0}.pile-hole{position:absolute;left:50%;top:58px;width:104px;height:216px;transform:translateX(-50%);border:10px solid #b9d2df;border-top:0;border-radius:0 0 52px 52px;background:rgba(255,255,255,.62);box-shadow:inset 0 0 0 1px rgba(22,119,255,.16)}.centerline{position:absolute;left:50%;top:28px;bottom:22px;border-left:2px dashed #1677ff}.cross-x,.cross-y{position:absolute;background:#1677ff}.cross-x{left:115px;right:115px;top:148px;height:2px}.cross-y{left:50%;top:76px;bottom:60px;width:2px}.ring{position:absolute;left:50%;top:148px;transform:translate(-50%,-50%);border:2px dashed #12b76a;border-radius:50%}.ring.r1{width:74px;height:74px}.ring.r2{width:122px;height:122px;border-color:#fa8c16}.ring.r3{width:170px;height:170px;border-color:#f04438}.marker{position:absolute;left:52%;top:139px;width:12px;height:12px;border-radius:50%;background:#1677ff;box-shadow:0 0 0 6px rgba(22,119,255,.16)}.casing{position:absolute;left:50%;top:48px;width:118px;height:72px;transform:translateX(-50%);border:12px solid #7e8ea3;border-bottom-width:8px;border-radius:8px;background:rgba(255,255,255,.68)}.drill{position:absolute;left:50%;top:26px;width:16px;height:202px;transform:translateX(-50%);background:#1677ff;border-radius:999px}.drill:after{content:"";position:absolute;left:50%;bottom:-28px;transform:translateX(-50%);border-left:20px solid transparent;border-right:20px solid transparent;border-top:34px solid #1677ff}.mud{position:absolute;left:50%;top:108px;width:78px;height:138px;transform:translateX(-50%);background:linear-gradient(rgba(84,160,198,.25),rgba(84,160,198,.08));border-radius:0 0 36px 36px}.sediment{position:absolute;left:50%;bottom:24px;width:86px;height:20px;transform:translateX(-50%);background:#d9b27c;border-radius:0 0 28px 28px}.wave{position:absolute;height:3px;background:#1677ff;left:96px;right:96px;border-radius:999px}.wave.w1{top:88px;box-shadow:0 16px 0 #4aa3ff,0 32px 0 #82c7ff}.wave.w2{top:168px;background:#12b76a;box-shadow:0 16px 0 #65d6a2,0 32px 0 #a4ecc8}.heat{position:absolute;width:42px;height:42px;border-radius:50%;background:radial-gradient(#f04438,#fa8c16 45%,transparent 68%);opacity:.75}.heat.h2{left:236px;top:178px;width:30px;height:30px}.check-panel{position:absolute;right:20px;top:42px;width:116px;background:#fff;border:1px solid #dbe7f4;border-radius:8px;padding:10px;box-shadow:var(--shadow);font-size:12px;color:#64748b;font-weight:800}.bar{height:7px;border-radius:99px;background:#edf2f7;margin-top:8px;overflow:hidden}.bar i{display:block;height:100%;background:#12b76a}.cage{position:absolute;left:50%;top:58px;width:76px;height:208px;transform:translateX(-50%);border:2px solid #475569;background:repeating-linear-gradient(90deg,transparent 0 10px,#64748b 10px 12px),repeating-linear-gradient(0deg,transparent 0 18px,rgba(71,85,105,.8) 18px 20px)}.hook{position:absolute;left:50%;top:18px;width:48px;height:46px;transform:translateX(-50%);border:5px solid #1677ff;border-top:0;border-left-color:transparent;border-radius:0 0 28px 28px}.rope{position:absolute;left:50%;top:0;height:98px;border-left:3px solid #1677ff}.down-arrow{position:absolute;left:calc(50% + 70px);top:70px;width:3px;height:126px;background:#fa8c16}.down-arrow:after{content:"";position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);border-left:9px solid transparent;border-right:9px solid transparent;border-top:14px solid #fa8c16}.pipe{position:absolute;left:50%;top:42px;width:24px;height:210px;transform:translateX(-50%);background:#475569;border-radius:999px}.hopper{position:absolute;left:50%;top:20px;width:94px;height:54px;transform:translateX(-50%);clip-path:polygon(0 0,100% 0,68% 100%,32% 100%);background:#1677ff}.concrete{position:absolute;left:50%;bottom:24px;width:92px;height:148px;transform:translateX(-50%);background:linear-gradient(#9ca3af,#737b86);border-radius:0 0 42px 42px}.volume{position:absolute;right:28px;bottom:30px;width:82px;display:grid;gap:5px;align-items:end}.volume i{display:block;height:12px;border-radius:3px;background:#12b76a}.volume i:nth-child(1){width:54%}.volume i:nth-child(2){width:72%}.volume i:nth-child(3){width:91%}.up-arrow{position:absolute;left:calc(50% + 64px);top:68px;width:3px;height:120px;background:#1677ff}.up-arrow:after{content:"";position:absolute;left:50%;top:-2px;transform:translateX(-50%);border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:14px solid #1677ff}.cap{position:absolute;left:50%;top:64px;width:122px;height:18px;transform:translateX(-50%);border-radius:9px;background:#475569}.seal{position:absolute;left:50%;top:70px;width:102px;height:204px;transform:translateX(-50%);background:linear-gradient(#aeb7c2,#737b86);border-radius:0 0 48px 48px}.stamp{position:absolute;right:24px;top:34px;width:126px;border:2px solid #12b76a;color:#079455;border-radius:8px;padding:12px;text-align:center;font-weight:900;background:#fff}.label{position:absolute;display:inline-flex;align-items:center;gap:6px;height:26px;border-radius:6px;background:#fff;border:1px solid #dbe7f4;padding:0 8px;font-size:12px;color:#526274;font-weight:900;box-shadow:0 8px 20px rgba(20,32,51,.06)}.label.a{left:22px;top:24px}.label.b{right:22px;bottom:28px}.label.c{left:22px;bottom:28px}.chip-dot{width:8px;height:8px;border-radius:50%;background:#12b76a}
+    .q4-page { display: grid; gap: 12px; }
+    .q4-top { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+    .q4-pilebar { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .q4-pilebar label { color: #64748b; font-size: 13px; font-weight: 900; }
+    .q4-pile-chip { height: 34px; min-width: 62px; border: 1px solid #dce2eb; background: #fff; color: #586579; border-radius: 8px; padding: 0 13px; font-weight: 900; cursor: pointer; }
+    .q4-pile-chip.active { color: #fff; border-color: var(--blue); background: var(--blue); box-shadow: 0 5px 12px rgba(22,119,255,.18); }
+    .q4-current { color: #64748b; font-size: 12px; white-space: nowrap; }
+    .q4-node-card, .q4-design-card, .q4-panel { background: #fff; border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); overflow: hidden; }
+    .q4-card-head { min-height: 46px; padding: 0 14px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .q4-section-title { display: flex; align-items: center; gap: 8px; color: #334155; font-weight: 900; }
+    .q4-section-title::before { content: ""; width: 4px; height: 16px; border-radius: 4px; background: var(--blue); }
+    .q4-legend { display: flex; gap: 14px; color: #64748b; font-size: 12px; font-weight: 800; }
+    .q4-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .q4-dot { width: 8px; height: 8px; border-radius: 50%; border: 1px solid #bec8d6; }
+    .q4-dot.done { background: #e6f4ff; border-color: #91b5ff; }
+    .q4-dot.active { background: var(--blue); border-color: var(--blue); }
+    .q4-nodes { padding: 12px; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 9px 10px; }
+    .q4-node { height: 46px; min-width: 0; border: 1px solid #dfe4ec; background: #fff; color: #4e5a6c; border-radius: 8px; display: flex; align-items: center; gap: 8px; padding: 0 10px; cursor: pointer; transition: .18s ease; }
+    .q4-node:hover { border-color: #91b2f6; background: #f8faff; }
+    .q4-node .q4-num { flex: 0 0 auto; width: 25px; height: 25px; border-radius: 50%; display: grid; place-items: center; border: 1.5px solid #c4ccd8; color: #7d899a; font-size: 12px; font-weight: 900; }
+    .q4-node .q4-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; font-weight: 900; }
+    .q4-node.done { border-color: #d6e4ff; background: #fbfdff; }
+    .q4-node.done .q4-num { border-color: #77a0f3; background: #fff; color: var(--blue); }
+    .q4-node.done .q4-num::after { content: "✓"; font-size: 11px; }
+    .q4-node.done .q4-num span { display: none; }
+    .q4-node.active { border-color: var(--blue); background: #e6f4ff; color: #0958d9; box-shadow: 0 0 0 2px rgba(22,119,255,.08); }
+    .q4-node.active .q4-num { border-color: var(--blue); color: #fff; background: var(--blue); }
+    .q4-design-card { padding-bottom: 12px; }
+    .q4-design-head { min-height: 44px; padding: 0 14px; display: flex; align-items: center; justify-content: space-between; }
+    .q4-design-sub { color: #7b8797; font-size: 12px; }
+    .q4-design-grid { margin: 0 14px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border: 1px solid #e9edf3; border-radius: 8px; overflow: hidden; }
+    .q4-design-item { min-width: 0; padding: 9px 12px 10px; border-right: 1px solid #edf0f5; background: #fafbfc; }
+    .q4-design-item:last-child { border-right: 0; }
+    .q4-design-item label { display: block; color: #7b8797; font-size: 11px; margin-bottom: 5px; }
+    .q4-design-item strong { display: block; color: #344154; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .q4-design-item strong.blue { color: var(--blue); }
+    .q4-workspace { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(360px, .75fr); gap: 12px; }
+    .q4-panel-head { min-height: 52px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
+    .q4-stage-badge { font-size: 12px; color: var(--blue); background: #e6f4ff; border: 1px solid #d9e5ff; border-radius: 15px; padding: 4px 9px; font-weight: 900; }
+    .q4-op-body { padding: 14px 16px 15px; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr); gap: 14px; }
+    .q4-monitor { height: 232px; border-radius: 8px; overflow: hidden; background: linear-gradient(145deg,#eef4ff,#f8faff); border: 1px solid #dce6fa; position: relative; }
+    .q4-monitor-top { position: absolute; z-index: 3; left: 14px; right: 14px; top: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .q4-monitor-label { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #53627a; font-weight: 800; }
+    .q4-monitor-label i { width: 7px; height: 7px; background: var(--blue); border-radius: 50%; box-shadow: 0 0 0 3px rgba(22,119,255,.13); }
+    .q4-mode-tag { padding: 3px 7px; border-radius: 10px; background: #fff; border: 1px solid #d8e3f6; color: #5674aa; font-size: 10px; }
+    .q4-monitor-time { font: 12px Consolas, monospace; color: #7c899d; }
+    .q4-diagram { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .q4-diagram text { font-family: "Microsoft YaHei", sans-serif; }
+    .q4-monitor-caption { position: absolute; z-index: 3; left: 14px; bottom: 11px; display: flex; gap: 7px; align-items: center; color: #4d5a6e; font-size: 12px; }
+    .q4-monitor-caption b { color: #23334f; }
+    .q4-metric-list { display: grid; grid-auto-rows: 1fr; gap: 9px; }
+    .q4-metric { background: #fafbfc; border: 1px solid #e9edf3; border-radius: 8px; padding: 11px 13px; display: flex; flex-direction: column; justify-content: center; }
+    .q4-metric label { color: #7b8797; font-size: 11px; margin-bottom: 5px; }
+    .q4-metric-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+    .q4-metric strong { font-size: 20px; letter-spacing: .2px; color: #273650; }
+    .q4-metric small { color: #7b8797; font-size: 11px; }
+    .q4-trend { font-size: 11px; color: #079455; background: #e8fff3; border-radius: 9px; padding: 2px 6px; }
+    .q4-photo-upload { min-height: 46px; border: 1px dashed #8fb0f3; border-radius: 8px; background: #f4f8ff; display: grid; grid-template-columns: 30px minmax(0,1fr) auto; align-items: center; gap: 8px; padding: 5px 8px; }
+    .q4-photo-icon { width: 27px; height: 27px; border-radius: 7px; background: #e3edff; position: relative; }
+    .q4-photo-icon::before { content: ""; position: absolute; left: 6px; top: 9px; width: 15px; height: 10px; border: 2px solid var(--blue); border-radius: 3px; }
+    .q4-photo-icon::after { content: ""; position: absolute; left: 11px; top: 12px; width: 5px; height: 5px; border: 1.5px solid var(--blue); border-radius: 50%; }
+    .q4-photo-copy strong { display: block; color: #3f5680; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+    .q4-photo-copy span { display: block; color: #7b8797; font-size: 9px; white-space: nowrap; }
+    .q4-upload-btn { border: 0; border-radius: 6px; padding: 5px 8px; background: var(--blue); color: #fff; font-size: 9px; cursor: pointer; }
+    .q4-key-data { grid-column: 1 / -1; border: 1px solid #e9edf3; border-radius: 8px; overflow: hidden; }
+    .q4-key-head { height: 33px; padding: 0 12px; display: flex; align-items: center; justify-content: space-between; color: #546176; background: #fafbfc; font-size: 11px; }
+    .q4-key-head span { color: #7b8797; font-size: 10px; }
+    .q4-key-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); }
+    .q4-key-item { min-height: 40px; border-top: 1px solid #eef1f5; border-right: 1px solid #eef1f5; display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 8px; padding: 5px 10px; }
+    .q4-key-item:nth-child(3n) { border-right: 0; }
+    .q4-key-label strong { display: block; color: #526075; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+    .q4-key-label small { display: block; color: #7b8797; font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .q4-key-value { color: #263650; font-size: 12px; font-weight: 900; white-space: nowrap; }
+    .q4-key-value small { color: #7b8797; font-size: 9px; font-weight: 400; margin-left: 2px; }
+    .q4-fill-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .q4-fill-table th, .q4-fill-table td { border-top: 1px solid #eef1f5; padding: 8px 10px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .q4-fill-table th { height: 32px; color: #7b8797; background: #fafbfc; font-size: 11px; font-weight: 900; }
+    .q4-fill-table td { color: #435066; font-size: 12px; font-weight: 800; }
+    .q4-fill-table .q4-fill-value { width: 100%; height: 28px; border: 1px solid #dce2eb; border-radius: 6px; background: #fff; color: #263650; padding: 0 8px; font-weight: 900; }
+    .q4-fill-table .q4-fill-value[readonly] { background: #f8fafc; color: #526274; }
+    .q4-fill-table .q4-attach { display: inline-flex; align-items: center; justify-content: center; min-width: 46px; height: 22px; border-radius: 6px; background: #e6f4ff; color: #0958d9; font-size: 11px; font-weight: 900; }
+    .q4-fill-table .q4-attach.required { background: #fff7e6; color: #ad6800; }
+    .q4-manage-body { padding: 15px 16px 17px; }
+    .q4-progress-box { height: 74px; border-radius: 8px; border: 1px solid #dce7fb; background: linear-gradient(100deg,#f5f8ff,#fbfdff); display: flex; align-items: center; padding: 0 16px; gap: 15px; }
+    .q4-ring { width: 50px; height: 50px; border-radius: 50%; display: grid; place-items: center; position: relative; background: conic-gradient(var(--blue) 0 var(--progress), #dfe8f8 var(--progress) 100%); }
+    .q4-ring::after { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: #f8fbff; }
+    .q4-ring span { position: relative; z-index: 2; color: #0958d9; font-size: 11px; font-weight: 900; }
+    .q4-progress-copy strong { display: block; font-size: 14px; color: #334155; margin-bottom: 5px; }
+    .q4-progress-copy span { display: block; font-size: 11px; color: #7b8797; }
+    .q4-action-table { margin-top: 11px; border: 1px solid #e7ebf1; border-radius: 8px; overflow: hidden; }
+    .q4-action-table-head, .q4-action-row { display: grid; grid-template-columns: minmax(130px,1.05fr) minmax(150px,1.25fr) 64px 48px; align-items: center; column-gap: 7px; }
+    .q4-action-table-head { min-height: 34px; color: #7b8797; background: #fafbfc; font-size: 10px; }
+    .q4-action-table-head > div, .q4-action-row > div { padding: 0 9px; min-width: 0; }
+    .q4-action-row { min-height: 58px; border-top: 1px solid #edf0f4; }
+    .q4-action-name strong { display: block; color: #435066; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+    .q4-action-name span { display: block; color: #7b8797; font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .q4-action-requirement { color: #687488; font-size: 10px; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .q4-state-switch { display: block; width: 38px; height: 21px; border-radius: 12px; background: #cfd5dd; position: relative; box-shadow: inset 0 0 0 1px rgba(0,0,0,.03); }
+    .q4-state-switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 15px; height: 15px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(28,42,68,.22); transition: .2s; }
+    .q4-state-switch.done { background: var(--blue); }
+    .q4-state-switch.done::after { left: 20px; }
+    .q4-state-switch.running { background: #faad14; }
+    .q4-required-mark { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 20px; border-radius: 10px; background: #fff1f1; color: #d55757; font-size: 9px; }
+    .q4-required-mark.optional { background: #f1f3f6; color: #7b8797; }
+    .q4-action-footer { margin-top: 11px; display: flex; align-items: center; justify-content: space-between; }
+    .q4-action-note { color: #7b8797; font-size: 11px; }
+    .record-actions { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 12px; }
+    .document-layout { display: grid; grid-template-columns: 220px 1fr 650px; gap: 0; min-height: 720px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+    .doc-filter { border-right: 1px solid var(--line); padding: 16px; }
+    .doc-mid { border-right: 1px solid var(--line); }
+    .report-preview { padding: 18px; display: grid; align-content: start; justify-items: center; }
+    .report-paper { width: 440px; min-height: 430px; border: 3px solid #111; background: #fff; color: #111; padding: 10px; text-align: center; font-family: SimSun, serif; }
+    .report-paper h2 { margin: 16px 0 20px; font-size: 24px; }
+    .report-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 2px solid #111; border-left: 2px solid #111; }
+    .report-grid span { min-height: 34px; border-right: 2px solid #111; border-bottom: 2px solid #111; display: grid; place-items: center; font-size: 12px; }
+    .equipment-grid { display: grid; grid-template-columns: repeat(3, minmax(260px, 1fr)); gap: 14px; }
+    .device-card { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 18px; box-shadow: var(--shadow); min-height: 210px; display: grid; gap: 14px; }
+    .device-card h3 { margin: 0; font-size: 18px; }
+    .device-badge { width: 46px; height: 46px; border-radius: 10px; background: #eaf3ff; color: var(--blue); display: grid; place-items: center; font-size: 24px; font-weight: 900; }
+    .device-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .device-meta div { background: #f7f9fc; border-radius: 6px; padding: 10px; color: #526274; }
+    .setting-tabs { display: flex; gap: 24px; height: 42px; align-items: flex-end; border-bottom: 1px solid var(--line); margin-bottom: 12px; }
+    .setting-tabs button { border: 0; background: transparent; height: 40px; color: #5d6b7a; font-weight: 900; }
+    .setting-tabs button.active { color: var(--blue); border-bottom: 3px solid var(--blue); }
+    .setting-form { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+    .form-grid { display: grid; gap: 14px; }
+    .field { display: grid; grid-template-columns: 82px 1fr; gap: 12px; align-items: center; color: #526274; font-weight: 800; }
+    .field input, .field textarea { border: 1px solid var(--line); border-radius: 6px; background: #f8fafc; min-height: 34px; padding: 8px 12px; color: #314257; }
+    .survey-card { border: 2px solid #ff4d4f; border-radius: 6px; padding: 12px; background: #fff7f7; }
+    .empty-model { height: 330px; border: 1px solid var(--line); border-radius: 8px; background: linear-gradient(135deg, #d8f5ff, #f7fbff); display: grid; place-items: center; color: #16a1c9; font-weight: 900; }
+    .review-button { height: 32px; border: 1px solid #b8d7ff; border-radius: 999px; background: #f3f8ff; color: var(--blue); padding: 0 14px; font-weight: 900; }
+    .page-note-button { position: fixed; right: 28px; bottom: 28px; z-index: 20; height: 38px; border: 0; border-radius: 999px; background: var(--blue); color: #fff; padding: 0 18px; font-weight: 900; box-shadow: 0 12px 28px rgba(22,119,255,.28); }
+    .review-modal { width: min(1120px, calc(100vw - 64px)); max-height: calc(100vh - 88px); overflow: hidden; display: grid; grid-template-rows: auto 1fr; }
+    .review-body { display: grid; grid-template-columns: 220px 1fr; min-height: 620px; overflow: hidden; }
+    .review-nav { border-right: 1px solid var(--line); background: #f7f9fc; padding: 14px; display: grid; align-content: start; gap: 8px; overflow: auto; }
+    .review-nav button { min-height: 36px; border: 0; border-radius: 6px; background: transparent; text-align: left; color: #526274; font-weight: 900; padding: 0 10px; }
+    .review-nav button.active { background: var(--blue); color: #fff; }
+    .review-content { padding: 18px; overflow: auto; }
+    .review-section { display: none; }
+    .review-section.active { display: block; }
+    .review-section h3 { margin: 0 0 12px; font-size: 20px; }
+    .review-section h4 { margin: 18px 0 8px; font-size: 15px; color: #26364b; }
+    .review-section p { margin: 6px 0; line-height: 1.8; color: #526274; font-weight: 700; }
+    .review-section ul { margin: 8px 0 12px 20px; padding: 0; color: #526274; line-height: 1.8; font-weight: 700; }
+    .review-table { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin: 10px 0 14px; }
+    .review-table div { display: grid; grid-template-columns: 180px 1fr; border-bottom: 1px solid var(--line); }
+    .review-table div:last-child { border-bottom: 0; }
+    .review-table b, .review-table span { padding: 10px 12px; line-height: 1.7; }
+    .review-table b { background: #f7f9fc; color: #26364b; }
+    .review-table span { color: #526274; font-weight: 700; }
+    .note-drawer { position: fixed; top: 58px; right: 0; bottom: 0; z-index: 30; width: 430px; max-width: calc(100vw - 40px); background: #fff; box-shadow: -18px 0 42px rgba(20,32,51,.16); transform: translateX(105%); transition: transform .22s ease; display: grid; grid-template-rows: auto 1fr; }
+    .note-drawer.show { transform: translateX(0); }
+    .note-drawer-head { height: 58px; padding: 0 16px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+    .note-drawer-head h3 { margin: 0; font-size: 18px; }
+    .note-drawer-body { padding: 16px; overflow: auto; }
+    .note-block { border: 1px solid var(--line); border-radius: 8px; padding: 12px; margin-bottom: 12px; background: #fbfcfe; }
+    .note-block h4 { margin: 0 0 8px; font-size: 14px; color: #26364b; }
+    .note-block p, .note-block li { color: #526274; line-height: 1.75; font-weight: 700; }
+    .note-block ul { margin: 0 0 0 18px; padding: 0; }
+    @media (max-width: 1300px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .home-layout, .task-layout, .construction-live, .check-layout, .document-layout, .report-workspace, .report-header { grid-template-columns: 1fr; }
+      .model-layout { grid-template-columns: 1fr; }
+      .equipment-grid { grid-template-columns: repeat(2, 1fr); }
+      .process-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand"><div class="brand-mark">慧</div><span>慧打桩</span><button class="workbench">工作平台</button></div>
+      <div class="top-actions"><button class="review-button" id="openReviewGuide">研发说明</button><span>泉州-测试环境</span><span>⛶</span><div class="avatar">YJ</div></div>
+    </header>
+    <aside class="sidebar">
+      <button class="nav-item active" data-page="home"><span class="nav-icon">▥</span><span>首页</span></button>
+      <button class="nav-item" data-page="model"><span class="nav-icon">▧</span><span>图纸</span></button>
+      <button class="nav-item" data-page="task"><span class="nav-icon">▣</span><span>任务</span></button>
+      <button class="nav-item" data-page="construction"><span class="nav-icon">⟂</span><span>施工</span></button>
+      <button class="nav-item" data-page="document"><span class="nav-icon">▤</span><span>资料</span></button>
+      <button class="nav-item" data-page="equipment"><span class="nav-icon">▦</span><span>设备</span></button>
+      <button class="nav-item" data-page="setting"><span class="nav-icon">⚙</span><span>设置</span></button>
+    </aside>
+    <main class="main">
+      <section class="page active" id="page-home">
+        <div class="home-layout">
+          <div class="home-left">
+            <div class="side-section home-date-card">
+              <div class="date-weather">
+                <span>2026.07.15 星期三</span>
+                <span>小雨 低温 26°C 高温 30°C</span>
+                <span>泉州市-晋江市</span>
+              </div>
+              <div class="section-title" style="margin-bottom:0">今日任务履约情况 <a class="button ghost">查看日计划</a></div>
+              <div class="today-completion">
+                <div class="today-card"><div class="stat-icon blue">日</div><div><b>18</b><span>今日计划任务</span></div></div>
+                <div class="today-card"><div class="stat-icon green">✓</div><div><b>9</b><span>今日已完成</span></div></div>
+                <div class="today-card"><div class="stat-icon orange">…</div><div><b>5</b><span>今日进行中</span></div></div>
+              </div>
+              <div class="data-note">数据来源：任务模块计划下发、施工填报结果、检测任务结果、浇筑记录回传。</div>
+            </div>
+            <div class="side-section">
+              <div class="section-title">
+                <span>桩基工程情况</span>
+                <div class="segment-tabs" data-home-stage-tabs>
+                  <button class="active" data-stage="support">支护桩</button>
+                  <button data-stage="project">工程桩</button>
+                </div>
+              </div>
+              <div class="stage-summary active" data-stage-panel="support">
+                <div class="stage-top">
+                  <div>总桩数 <b>372</b></div>
+                  <div>闭环完成 <b>238</b></div>
+                  <div>完成度 <b>63.98%</b></div>
+                </div>
+                <div class="stage-grid">
+                  <div>待成孔桩孔 <b>134</b></div>
+                  <div>成孔完成桩孔 <b>238</b></div>
+                  <div>待检测桩孔 <b>16</b></div>
+                  <div>已检测桩孔 <b>222</b></div>
+                  <div>待浇筑桩点 <b>12</b></div>
+                  <div>已浇筑桩点 <b>238</b></div>
+                </div>
+                <div class="data-note">口径说明：闭环完成 = 已浇筑且施工记录完成；阶段明细来自施工、检测、浇筑填报。</div>
+              </div>
+              <div class="stage-summary" data-stage-panel="project" style="display:none">
+                <div class="stage-top">
+                  <div>总桩数 <b>260</b></div>
+                  <div>闭环完成 <b>13</b></div>
+                  <div>完成度 <b>5.00%</b></div>
+                </div>
+                <div class="stage-grid">
+                  <div>待成孔桩孔 <b>247</b></div>
+                  <div>成孔完成桩孔 <b>13</b></div>
+                  <div>待检测桩孔 <b>13</b></div>
+                  <div>已检测桩孔 <b>247</b></div>
+                  <div>待浇筑桩点 <b>247</b></div>
+                  <div>已浇筑桩点 <b>13</b></div>
+                </div>
+                <div class="data-note">口径说明：工程桩按当前启用图纸中的工程桩清单统计，检测数据来自成孔检测结果。</div>
+              </div>
+            </div>
+            <div class="side-section">
+              <div class="section-title">施工进度情况 <a class="button ghost">更多</a></div>
+              <div class="progress-cards">
+                <div class="progress-item"><span>整体进度</span><div class="progress-line"><i style="width:63.98%"></i></div><b>63.98%</b></div>
+                <div class="progress-item"><span>成孔进度</span><div class="progress-line"><i style="width:68%"></i></div><b>68%</b></div>
+                <div class="progress-item"><span>检测进度</span><div class="progress-line"><i style="width:59%"></i></div><b>59%</b></div>
+                <div class="progress-item"><span>浇筑进度</span><div class="progress-line"><i style="width:64%"></i></div><b>64%</b></div>
+              </div>
+              <div class="progress-meta">
+                <div>计划完工日期 <b>2026-08-30</b></div>
+                <div>剩余工期 <b>46天</b></div>
+                <div>本周完成量 <b>48孔</b></div>
+                <div>较上周差异 <b style="color:var(--green)">+12孔</b></div>
+              </div>
+              <div class="data-note">数据来源：任务计划日期、施工填报完成时间、周维度统计报表。</div>
+            </div>
+            <div class="side-section">
+              <div class="section-title">设备运行情况 <a class="button ghost">更多</a></div>
+              <div class="device-stat-grid">
+                <div class="device-stat">旋挖机 <b>13 启用</b><small>共 13 台</small></div>
+                <div class="device-stat">成孔检测仪 <b>1 启用</b><small>共 1 台</small></div>
+                <div class="device-stat">需维保设备 <b style="color:var(--orange)">1</b><small>旋挖机 1 台</small></div>
+                <div class="device-stat">离线设备 <b style="color:var(--red)">0</b><small>今日无离线</small></div>
+              </div>
+            </div>
+            <div class="side-section">
+              <div class="section-title">
+                <span>待办消息</span>
+                <div class="message-tabs" data-message-tabs>
+                  <button class="active" data-msg="todo">待办</button>
+                  <button data-msg="plan">今日计划</button>
+                  <button data-msg="notice">消息提醒</button>
+                </div>
+              </div>
+              <div class="message-panel active" data-msg-panel="todo">
+                <div class="message-track">
+                  <div class="message-item"><span class="tag orange">未处理</span><span>D61需采集或录入进尺数据</span><small>2026-07-08 14:15:18</small></div>
+                  <div class="message-item"><span class="tag orange">未处理</span><span>B123需验收成桩数据</span><small>2026-06-02 16:18:25</small></div>
+                  <div class="message-item"><span class="tag orange">未处理</span><span>E26需采集或录入成孔数据</span><small>2026-05-14 11:16:14</small></div>
+                  <div class="message-item"><span class="tag orange">未处理</span><span>B130需采集或录入进尺数据</span><small>2026-05-13 15:54:02</small></div>
+                </div>
+              </div>
+              <div class="message-panel" data-msg-panel="plan">
+                <div class="message-track">
+                  <div class="message-item"><span class="tag gray">未开始</span><span>B39号桩点桩孔施工</span><small>今日 08:00</small></div>
+                  <div class="message-item"><span class="tag green">已完成</span><span>B27号桩点桩孔施工</span><small>今日 10:30</small></div>
+                  <div class="message-item"><span class="tag green">已完成</span><span>C357号桩点混凝土浇筑</span><small>今日 14:20</small></div>
+                  <div class="message-item"><span class="tag blue">进行中</span><span>D61号桩点成孔施工</span><small>今日 15:10</small></div>
+                </div>
+              </div>
+              <div class="message-panel" data-msg-panel="notice">
+                <div class="message-track">
+                  <div class="message-item"><span class="tag purple">待复核</span><span>B27检测任务已提交结果，等待复核确认</span><small>系统提醒</small></div>
+                  <div class="message-item"><span class="tag blue">任务</span><span>B39号桩点计划 08:00 开始成孔施工</span><small>系统提醒</small></div>
+                  <div class="message-item"><span class="tag red">异常</span><span>A65成孔检测结果异常，建议发起复检任务</span><small>系统提醒</small></div>
+                  <div class="message-item"><span class="tag orange">设备</span><span>XR-02今日被分配到3个桩点</span><small>系统提醒</small></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="map-panel">
+            <div class="pile-map-title">
+              <div class="panel-title">桩孔分布与进度概览</div>
+              <div class="pill-tabs" style="margin-top:12px"><button class="active">全部</button><button>支护桩</button><button>工程桩</button></div>
+            </div>
+            <div class="map-toolbar"><select class="select"><option>全部工区</option></select><button class="button">图层</button><button class="button">全屏</button></div>
+            <div class="linear-drawing">
+              <i class="track-line"></i><i class="track-line"></i><i class="track-line"></i><i class="track-line"></i>
+              <script>
+                document.currentScript.insertAdjacentHTML('beforebegin', Array.from({length: 132}, (_, i) => {
+                  const x = 5 + (i % 44) * 2.05;
+                  const y = 20 + Math.floor(i / 44) * 12 + ((i % 7) * .18);
+                  const planned = { 14: 'B39', 39: 'D61', 72: 'B27', 118: 'C357' };
+                  const selected = i === 14;
+                  const cls = planned[i] ? 'today-plan' : i % 41 === 0 ? 'error' : i % 5 === 0 ? 'doing' : i % 2 === 0 ? 'support' : 'project';
+                  const pile = planned[i] || `P${String(i + 1).padStart(3, '0')}`;
+                  return `<i class="pile-dot ${cls}${selected ? ' selected' : ''}" data-home-pile="${pile}" style="left:${x}%;top:${y}%"></i>`;
+                }).join(''));
+              </script>
+            </div>
+            <div class="pile-status-panel" id="homePileStatusPanel">
+              <div class="pile-status-head">
+                <div><h3 id="homePileNo">B39</h3><small id="homePileType">支护工程 · 支护灌注桩</small></div>
+                <span class="tag orange" id="homePilePlanTag">今日计划</span>
+              </div>
+              <div class="pile-status-grid">
+                <div class="pile-status-item">桩点阶段状态<b id="homePileStage">未开始</b></div>
+                <div class="pile-status-item">任务状态<b id="homePileTask">未开始</b></div>
+                <div class="pile-status-item">计划施工时间<b id="homePileTime">今日 08:00</b></div>
+                <div class="pile-status-item">预分配设备<b id="homePileDevice">XR-02</b></div>
+                <div class="pile-status-item">班组<b id="homePileTeam">班组一队</b></div>
+                <div class="pile-status-item">施工分区<b id="homePileZone">B段</b></div>
+              </div>
+              <div class="pile-status-tip" id="homePileTip">该桩点今日已创建任务，地图点位闪烁提示。</div>
+            </div>
+            <div class="map-legend">
+              <span class="legend-item"><i class="legend-swatch"></i>未开始</span>
+              <span class="legend-item"><i class="legend-swatch" style="background:var(--blue)"></i>进行中</span>
+              <span class="legend-item"><i class="legend-swatch" style="background:var(--green)"></i>已完成</span>
+              <span class="legend-item"><i class="legend-swatch" style="background:var(--red)"></i>异常</span>
+              <span class="legend-item"><i class="legend-swatch" style="background:var(--blue);box-shadow:0 0 0 5px rgba(22,119,255,.18)"></i>今日已建任务</span>
+              <span style="margin-left:auto">更新时间：2026-07-14 10:20:30</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-model">
+        <div class="module-tabs" data-drawing-tabs>
+          <button class="active" data-drawing-tab="drawing-manage">图纸管理</button>
+          <button data-drawing-tab="pile-info">桩点信息</button>
+        </div>
+        <div class="drawing-tab-panel active" id="drawing-manage">
+          <div class="model-layout">
+            <div class="panel">
+              <div class="panel-head"><div><div class="panel-title">图纸管理</div><div class="panel-subtitle">上传多张图纸，启用前校验重复桩号、重复坐标和缺失坐标</div></div><button class="button primary">上传图纸</button></div>
+              <div class="panel-body">
+                <div class="upload-box">将 CAD 图纸拖拽到此处，或点击上传<br><small>支持 dwg / dxf；多张图纸可同时启用，启用前进行冲突校验</small></div>
+                <div class="drawing-list">
+                  <div class="drawing-card active-source" data-drawing-card="支护桩平面图.dwg">
+                    <div class="drawing-card-head"><div><h3>支护桩平面图.dwg</h3><small>已加入启用图纸集合 · 上传时间 2026-07-14 09:12 · 图纸版本 V3.2 · 桩点版本 PV-05</small></div><span class="tag blue">已启用</span></div>
+                    <div class="drawing-meta"><span>图纸类型：支护桩平面图</span><span>解析桩点：372根</span><span>坐标完整：372根</span><span>数据用途：支护工程</span></div>
+                    <div class="drawing-actions"><button class="button ghost preview-drawing">预览</button><button class="button ghost" disabled>已启用</button><button class="button ghost danger">删除</button></div>
+                  </div>
+                  <div class="drawing-card" data-drawing-card="工程桩布置图.dwg">
+                    <div class="drawing-card-head"><div><h3>工程桩布置图.dwg</h3><small>上传时间 2026-07-14 09:08 · 图纸版本 V1.0 · 桩点版本 PV-02</small></div><span class="tag green">已解析</span></div>
+                    <div class="drawing-meta"><span>图纸类型：工程桩布置图</span><span>解析桩点：260根</span><span>坐标完整：260根</span><span>数据用途：工程桩</span></div>
+                    <div class="drawing-actions"><button class="button ghost preview-drawing">预览</button><button class="button ghost enable-drawing-check">启用</button><button class="button ghost danger">删除</button></div>
+                  </div>
+                  <div class="drawing-card" data-drawing-card="桩位总平图.dxf">
+                    <div class="drawing-card-head"><div><h3>桩位总平图.dxf</h3><small>上传时间 2026-07-13 16:45 · 图纸版本 V0.9 · 桩点版本 PV-01</small></div><span class="tag green">已解析</span></div>
+                    <div class="drawing-meta"><span>图纸类型：总平图</span><span>解析桩点：125根</span><span>坐标完整：123根</span><span>数据用途：待选择</span></div>
+                    <div class="drawing-actions"><button class="button ghost preview-drawing">预览</button><button class="button ghost enable-drawing-check">启用</button><button class="button ghost danger">删除</button></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><div><div class="panel-title">已启用图纸预览</div><div class="panel-subtitle">数据源：已启用图纸集合；桩点信息由集合内图纸重新解析生成</div></div><button class="button preview-drawing">弹窗预览</button></div>
+              <div class="panel-body">
+                <div class="active-source-strip">
+                  <div class="source-stat">已启用图纸<b id="enabledDrawingCount">1张</b></div>
+                  <div class="source-stat">图纸版本<b>V3.2</b></div>
+                  <div class="source-stat">桩点版本<b>PV-05</b></div>
+                  <div class="source-stat">有效桩点<b>372根</b></div>
+                  <div class="source-stat">坐标完整<b>372根</b></div>
+                  <div class="source-stat">数据状态<b>可使用</b></div>
+                </div>
+                <div class="cad-view" style="height:470px">
+                  <div class="cad-shape"></div>
+                  <i class="cad-grid-line v" style="left:20%"></i><i class="cad-grid-line v" style="left:40%"></i><i class="cad-grid-line v" style="left:60%"></i><i class="cad-grid-line v" style="left:80%"></i>
+                  <i class="cad-grid-line h" style="top:30%"></i><i class="cad-grid-line h" style="top:55%"></i><i class="cad-grid-line h" style="top:72%"></i>
+                  <script>
+                    document.currentScript.insertAdjacentHTML('beforebegin', Array.from({length: 82}, (_, i) => {
+                      const x = 15 + (i % 18) * 4;
+                      const y = 24 + Math.floor(i / 18) * 12;
+                      const cls = i % 23 === 0 ? 'wait' : '';
+                      return `<i class="parse-dot ${cls}" style="left:${x}%;top:${y}%"></i>`;
+                    }).join(''));
+                  </script>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="drawing-tab-panel" id="pile-info">
+            <div class="panel">
+              <div class="panel-head">
+                <div><div class="panel-title">桩点信息</div><div class="panel-subtitle">支持从已启用图纸解析生成，也支持导入外部 Excel；按“谁先生成谁作为基础数据”处理，后续来源需做桩号与坐标比对</div></div>
+              <div class="toolbar-right"><button class="button primary" id="generatePileInfo">生成桩点信息</button><button class="button primary" id="importPileExcel">导入Excel</button><button class="button" id="openPileVersionHistory">版本历史</button><button class="button">导出Excel</button></div>
+              </div>
+              <div class="panel-body">
+              <div class="pile-type-tabs">
+                <div class="pile-parent-tabs" data-pile-parent-tabs>
+                  <button class="active" data-pile-parent="support">支护工程</button>
+                  <button data-pile-parent="project">工程桩</button>
+                </div>
+                <div class="pile-child-tabs active" data-pile-child-group="support">
+                  <button class="active" data-pile-panel-target="support-bored">支护灌注桩</button>
+                  <button class="disabled">止水帷幕</button>
+                  <button class="disabled">冠梁腰梁</button>
+                  <button class="disabled">预应力锚索</button>
+                </div>
+                <div class="pile-child-tabs" data-pile-child-group="project" style="display:none">
+                  <button class="active" data-pile-panel-target="project-bored">旋挖灌注桩</button>
+                  <button class="disabled">预制混凝土管桩</button>
+                </div>
+              </div>
+              <div class="generation-note" id="generationNote">当前基础数据来源：启用图纸解析，版本为 PV-05。后续导入 Excel 或重新解析图纸时，将先与现有桩号、坐标进行比对，再由用户确认覆盖、保留、补充空字段或生成新版本。已施工和已完工桩点默认冻结，不允许直接修改现行版本。</div>
+              <div class="pile-type-panel active" id="support-bored">
+                <table>
+                  <thead><tr><th>序号</th><th>桩号</th><th>桩类型</th><th>图纸来源</th><th>设计桩径(mm)</th><th>设计桩长(m)</th><th>X坐标</th><th>Y坐标</th><th>所属区段</th><th>识别状态</th><th>数据来源</th><th>桩点版本</th><th>状态</th><th>操作</th></tr></thead>
+                  <tbody>
+                    <tr><td>1</td><td class="pile-no">ZH-001</td><td data-editable>支护灌注桩</td><td data-editable>支护桩平面图.dwg</td><td data-editable>1000</td><td data-editable>28.5</td><td data-editable>508588.500</td><td data-editable>2749382.900</td><td data-editable>A区</td><td><span class="tag green">已识别</span></td><td data-editable>启用图纸解析</td><td data-editable>PV-05</td><td><span class="tag blue">现行</span></td><td><span class="row-actions"><button class="button ghost">详情</button><button class="button ghost edit-pile-row">编辑</button></span></td></tr>
+                    <tr><td>2</td><td class="pile-no">ZH-002</td><td data-editable>支护灌注桩</td><td data-editable>支护桩平面图.dwg</td><td data-editable>1000</td><td data-editable>28.5</td><td data-editable>508592.100</td><td data-editable>2749380.400</td><td data-editable>A区</td><td><span class="tag green">已识别</span></td><td data-editable>启用图纸解析</td><td data-editable>PV-05</td><td><span class="tag blue">现行</span></td><td><span class="row-actions"><button class="button ghost">详情</button><button class="button ghost edit-pile-row">编辑</button></span></td></tr>
+                    <tr><td>3</td><td class="pile-no">B39</td><td data-editable>支护灌注桩</td><td data-editable>支护桩平面图.dwg</td><td data-editable>1000</td><td data-editable>21.8</td><td data-editable>508612.300</td><td data-editable>2749365.800</td><td data-editable>B区</td><td><span class="tag green">已识别</span></td><td data-editable>启用图纸解析</td><td data-editable>PV-05</td><td><span class="tag green">冻结</span></td><td><span class="row-actions"><button class="button ghost">详情</button><button class="button ghost edit-pile-row" disabled>编辑</button><button class="button ghost">版本</button></span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="pile-type-panel" id="project-bored">
+                <table>
+                  <thead><tr><th>序号</th><th>桩号</th><th>桩类型</th><th>图纸来源</th><th>设计桩径(mm)</th><th>设计桩长(m)</th><th>X坐标</th><th>Y坐标</th><th>所属区段</th><th>识别状态</th><th>数据来源</th><th>桩点版本</th><th>状态</th><th>操作</th></tr></thead>
+                  <tbody>
+                    <tr><td>1</td><td class="pile-no">GC-015</td><td data-editable>旋挖灌注桩</td><td data-editable>工程桩布置图.dwg</td><td data-editable>1200</td><td data-editable>32.0</td><td data-editable>508604.800</td><td data-editable>2749372.200</td><td data-editable>B区</td><td><span class="tag green">已识别</span></td><td data-editable>启用图纸解析</td><td data-editable>PV-02</td><td><span class="tag blue">现行</span></td><td><span class="row-actions"><button class="button ghost">详情</button><button class="button ghost edit-pile-row">编辑</button><button class="button ghost">版本</button></span></td></tr>
+                    <tr><td>2</td><td class="pile-no">GC-016</td><td data-editable>旋挖灌注桩</td><td data-editable>工程桩布置图.dwg</td><td data-editable>1200</td><td data-editable>32.0</td><td data-editable>508601.300</td><td data-editable>2749369.100</td><td data-editable>B区</td><td><span class="tag green">已识别</span></td><td data-editable>Excel导入</td><td data-editable>PV-01</td><td><span class="tag gray">历史</span></td><td><span class="row-actions"><button class="button ghost">详情</button><button class="button ghost edit-pile-row">编辑</button><button class="button ghost">版本</button></span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-task">
+        <div class="task-tabs" data-task-tabs>
+          <button class="active" data-task-tab="overview">任务总览</button>
+          <button data-task-tab="detail">施工明细</button>
+        </div>
+        <div class="task-panel active" id="task-overview">
+          <div class="task-summary-grid" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+            <div class="task-summary-card"><span>任务总数</span><b>286</b><small>已生成的计划任务</small></div>
+            <div class="task-summary-card"><span>月完成数</span><b>148</b><small>本月已复核完成</small></div>
+            <div class="task-summary-card"><span>进行中数</span><b>36</b><small>当前正在执行</small></div>
+          </div>
+          <div class="task-action-row">
+            <div>
+              <div class="panel-title">任务总览日历</div>
+              <div class="panel-subtitle">按任务计划时间展示打桩、检测、浇筑、复检、整改任务，日期下方用颜色点标记当天完成情况。</div>
+            </div>
+            <div class="task-status-legend">
+              <span><i style="background:var(--green)"></i>全部完成</span>
+              <span><i style="background:var(--red)"></i>全部未开始</span>
+              <span><i style="background:var(--orange)"></i>部分完成</span>
+            </div>
+          </div>
+          <div class="calendar">
+            <div class="calendar-head"><span>‹</span><b>2026年07月</b><span>›</span><button class="button" style="margin-left:auto;margin-right:12px">今天</button></div>
+            <div class="calendar-grid">
+              <div class="weekday">周一</div><div class="weekday">周二</div><div class="weekday">周三</div><div class="weekday">周四</div><div class="weekday">周五</div><div class="weekday">周六</div><div class="weekday">周日</div>
+              <div class="day muted"><b>29</b></div><div class="day muted"><b>30</b></div>
+              <div class="day"><b>1</b><div class="task-scroll"><div class="task-card-mini"><strong>A12 打桩</strong><div class="task-mini-meta"><span class="mini-label done">成孔完成</span><span class="mini-label done">已完成</span></div></div></div></div>
+              <div class="day"><b>2</b><div class="task-scroll"><div class="task-card-mini"><strong>A12 检测</strong><div class="task-mini-meta"><span class="mini-label done">检测完成</span><span class="mini-label done">已完成</span></div></div></div></div>
+              <div class="day"><b>3</b><div class="task-scroll"><div class="task-card-mini"><strong>A12 浇筑</strong><div class="task-mini-meta"><span class="mini-label done">浇筑完成</span><span class="mini-label done">已完成</span></div></div></div></div>
+              <div class="day"><b>4</b></div><div class="day"><b>5</b></div>
+              <div class="day"><b>6</b><div class="task-scroll"><div class="task-card-mini"><strong>B18 打桩</strong><div class="task-mini-meta"><span class="mini-label todo">打桩</span><span class="mini-label todo">未开始</span></div></div><div class="task-card-mini"><strong>B19 打桩</strong><div class="task-mini-meta"><span class="mini-label done">打桩</span><span class="mini-label done">已完成</span></div></div></div></div>
+              <div class="day"><b>7</b><div class="task-scroll"><div class="task-card-mini"><strong>B18 打桩</strong><div class="task-mini-meta"><span class="mini-label todo">成孔阶段</span><span class="mini-label todo">未开始</span></div></div></div></div>
+              <div class="day"><b>8</b><div class="task-scroll"><div class="task-card-mini"><strong>B39 打桩</strong><div class="task-mini-meta"><span class="mini-label new">新计划</span><span class="mini-label todo">未开始</span></div></div></div></div>
+              <div class="day"><b>9</b><div class="task-scroll"><div class="task-card-mini"><strong>B39 打桩</strong><div class="task-mini-meta"><span class="mini-label todo">成孔阶段</span><span class="mini-label todo">未开始</span></div></div><div class="task-card-mini"><strong>B27 打桩</strong><div class="task-mini-meta"><span class="mini-label done">成孔完成</span><span class="mini-label done">已完成</span></div></div></div></div>
+              <div class="day"><b>10</b><div class="task-scroll"><div class="task-card-mini"><strong>B39 打桩</strong><div class="task-mini-meta"><span class="mini-label todo">成孔阶段</span><span class="mini-label todo">未开始</span></div></div><div class="task-card-mini"><strong>D61 成孔</strong><div class="task-mini-meta"><span class="mini-label new">打桩</span><span class="mini-label done">进行中</span></div></div><div class="task-card-mini"><strong>C357 浇筑</strong><div class="task-mini-meta"><span class="mini-label done">浇筑</span><span class="mini-label done">已完成</span></div></div></div></div>
+              <div class="day"><b>11</b><div class="task-scroll"><div class="task-card-mini"><strong>GC-015 复检</strong><div class="task-mini-meta"><span class="mini-label new">检测阶段</span><span class="mini-label todo">未开始</span></div></div></div></div>
+              <div class="day"><b>12</b></div>
+              <div class="day"><b>13</b><div class="task-scroll"><div class="task-card-mini"><strong>A65 打桩</strong><div class="task-mini-meta"><span class="mini-label todo">成孔阶段</span><span class="mini-label todo">未开始</span></div></div></div></div>
+              <div class="day selected"><b>14</b><div class="task-scroll"><div class="task-card-mini"><strong>B39 打桩 / XR-02</strong><div class="task-mini-meta"><span class="mini-label todo">成孔阶段</span><span class="mini-label todo">未开始</span></div></div><div class="task-card-mini"><strong>D61 成孔 / XR-03</strong><div class="task-mini-meta"><span class="mini-label new">打桩</span><span class="mini-label done">进行中</span></div></div><div class="task-card-mini"><strong>C357 浇筑 / PB-01</strong><div class="task-mini-meta"><span class="mini-label done">浇筑</span><span class="mini-label done">已完成</span></div></div><div class="task-card-mini"><strong>B27 检测 / CK-01</strong><div class="task-mini-meta"><span class="mini-label done">检测</span><span class="mini-label done">待复核</span></div></div></div></div>
+              <div class="day"><b>15</b><div class="task-scroll"><div class="task-card-mini"><strong>A65 整改</strong><div class="task-mini-meta"><span class="mini-label new">检测阶段</span><span class="mini-label todo">未开始</span></div></div></div></div>
+              <div class="day"><b>16</b><div class="task-scroll"><div class="task-card-mini"><strong>A65 成孔</strong><div class="task-mini-meta"><span class="mini-label todo">成孔阶段</span><span class="mini-label todo">未开始</span></div></div></div></div>
+              <div class="day"><b>17</b><div class="task-scroll"><div class="task-card-mini"><strong>C357 浇筑</strong><div class="task-mini-meta"><span class="mini-label done">浇筑阶段</span><span class="mini-label done">待复核</span></div></div></div></div>
+              <div class="day"><b>18</b></div><div class="day"><b>19</b></div>
+            </div>
+          </div>
+        </div>
+        <div class="task-panel" id="task-detail">
+          <div class="task-summary-grid">
+            <div class="task-summary-card"><span>今日计划数</span><b>18</b><small>按任务计划时间统计</small></div>
+            <div class="task-summary-card"><span>已完成</span><b>9</b><small>已通过复核确认</small></div>
+            <div class="task-summary-card"><span>未开展</span><b>6</b><small>等待班组开工</small></div>
+            <div class="task-summary-card"><span>进行中</span><b>3</b><small>设备联动 2 项</small></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><div><div class="panel-title">施工明细</div><div class="panel-subtitle">创建任务时按桩点当前状态到目标状态自动拆分；复检任务、整改任务由施工填报异常处置发起后在此列表展示。</div></div><button class="button primary" id="openTaskCreate">创建任务</button></div>
+            <div class="panel-body">
+              <div class="task-result-note" id="taskResultNote">已批量生成 B39、D61 的任务，并按当前状态拆分到最细任务；班组与预分配设备已写入任务明细。</div>
+              <div class="task-rule">规则说明：创建任务只定义一个任务计划时间。任务完成后先进入待复核，复核通过后变为已完成；当前置任务处于待复核但后置任务已经执行时，前置任务可由系统更新为已完成。</div>
+              <div class="filter-bar" style="margin-top:12px">
+                <input class="input" type="date" value="2026-07-14">
+                <select class="select"><option>全部工区</option><option>A区</option><option>B区</option><option>D段</option></select>
+                <select class="select"><option>全部桩型</option><option>支护灌注桩</option><option>止水帷幕</option><option>工程桩</option></select>
+                <select class="select"><option>全部任务类型</option><option>打桩任务</option><option>检测任务</option><option>浇筑任务</option><option>复检任务</option><option>整改任务</option></select>
+                <select class="select"><option>全部任务状态</option><option>未开展</option><option>进行中</option><option>待前置完成</option><option>待复核</option><option>已完成</option></select>
+                <select class="select"><option>全部班组</option><option>班组一队</option><option>检测一组</option><option>浇筑一队</option></select>
+                <select class="select"><option>全部设备</option><option>XR-02</option><option>CK-01</option><option>PB-01</option></select>
+                <input class="input" placeholder="桩号 / 任务编号">
+              </div>
+              <div class="pill-tabs" style="margin:12px 0">
+                <button class="active">全部 18</button><button>未开展 6</button><button>进行中 3</button><button>待前置完成 2</button><button>待复核 4</button><button>已完成 9</button>
+              </div>
+              <table>
+                <thead><tr><th>任务编号</th><th>桩点</th><th>任务类型</th><th>前置要求</th><th>班组</th><th>设备</th><th>任务计划时间</th><th>任务完成时间</th><th>任务状态</th><th>说明</th><th>操作</th></tr></thead>
+                <tbody>
+                  <tr data-task-type="打桩任务" data-pile="B39"><td>RW-0714-001</td><td>B39</td><td><span class="tag blue">打桩任务</span></td><td>无</td><td>班组一队</td><td>XR-02</td><td>2026-07-14 08:00</td><td>-</td><td><span class="tag orange">未开展</span></td><td>等待班组开工</td><td><span class="row-actions"><button class="button ghost">编辑</button><button class="button ghost danger task-delete">删除</button><button class="button ghost task-review">复核</button></span></td></tr>
+                  <tr data-task-type="检测任务" data-pile="B39"><td>RW-0714-002</td><td>B39</td><td><span class="tag green">检测任务</span></td><td>成孔完成</td><td>检测一组</td><td>CK-01</td><td>2026-07-14 08:00</td><td>-</td><td><span class="tag gray">待前置完成</span></td><td>打桩完成后执行</td><td><span class="row-actions"><button class="button ghost">编辑</button><button class="button ghost danger task-delete">删除</button><button class="button ghost task-review">复核</button></span></td></tr>
+                  <tr data-task-type="浇筑任务" data-pile="B39"><td>RW-0714-003</td><td>B39</td><td><span class="tag orange">浇筑任务</span></td><td>检测完成</td><td>浇筑一队</td><td>PB-01</td><td>2026-07-14 08:00</td><td>-</td><td><span class="tag gray">待前置完成</span></td><td>检测完成后执行</td><td><span class="row-actions"><button class="button ghost">编辑</button><button class="button ghost danger task-delete">删除</button><button class="button ghost task-review">复核</button></span></td></tr>
+                  <tr data-task-type="打桩任务" data-pile="B27"><td>RW-0714-004</td><td>B27</td><td><span class="tag blue">打桩任务</span></td><td>无</td><td>班组三队</td><td>XR-05</td><td>2026-07-14 09:30</td><td>2026-07-14 10:30</td><td><span class="tag purple">待复核</span></td><td>成孔记录已提交</td><td><span class="row-actions"><button class="button ghost">编辑</button><button class="button ghost danger task-delete">删除</button><button class="button ghost task-review">复核</button></span></td></tr>
+                  <tr data-task-type="浇筑任务" data-pile="C357"><td>RW-0714-005</td><td>C357</td><td><span class="tag orange">浇筑任务</span></td><td>检测完成</td><td>浇筑一队</td><td>PB-01</td><td>2026-07-14 14:00</td><td>2026-07-14 15:20</td><td><span class="tag green">已完成</span></td><td>已复核确认</td><td><span class="row-actions"><button class="button ghost">编辑</button><button class="button ghost danger task-delete">删除</button><button class="button ghost task-review">复核</button></span></td></tr>
+                  <tr data-task-type="复检任务" data-pile="GC-015"><td>FJ-0714-001</td><td>GC-015</td><td><span class="tag purple">复检任务</span></td><td>检测异常</td><td>检测二组</td><td>CK-02</td><td>2026-07-15 09:00</td><td>-</td><td><span class="tag orange">未开展</span></td><td>来源：施工填报异常处置</td><td><span class="row-actions"><button class="button ghost">编辑</button><button class="button ghost danger task-delete">删除</button><button class="button ghost task-review">复核</button></span></td></tr>
+                  <tr data-task-type="整改任务" data-pile="A65"><td>ZG-0714-001</td><td>A65</td><td><span class="tag red">整改任务</span></td><td>检测异常</td><td>班组二队</td><td>XR-03</td><td>2026-07-15 10:00</td><td>-</td><td><span class="tag blue">进行中</span></td><td>来源：施工填报异常处置</td><td><span class="row-actions"><button class="button ghost">编辑</button><button class="button ghost danger task-delete">删除</button><button class="button ghost task-review">复核</button></span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-construction">
+        <div class="construction-tabs"><button class="active" data-c-tab="live">施工实况</button><button data-c-tab="check">施工填报</button><button data-c-tab="record">施工记录</button></div>
+        <div class="construction-subpage active" id="c-live">
+          <div class="construction-subtabs"><button class="active">支护工程</button><button>工程桩</button></div>
+          <div style="height:36px;display:flex;align-items:center;color:var(--blue);font-weight:900;border-bottom:1px solid var(--line);margin-bottom:12px">支护灌注桩</div>
+          <div class="construction-live">
+            <div class="site-map">
+              <div class="site-legend"><div><span><i></i>未开始</span><b>133</b></div><div><span><i class="doing"></i>进行中</span><b>1</b></div><div><span><i class="done"></i>已完成</span><b>238</b></div><div><span><i class="plan"></i>今日计划</span><b>18</b></div></div>
+              <button class="button" style="position:absolute;right:12px;top:12px;z-index:2">全屏</button>
+              <div class="pile-outline">
+                <i class="outline-seg top"></i><i class="outline-seg l1"></i><i class="outline-seg r1"></i><i class="outline-seg l2"></i><i class="outline-seg r2"></i><i class="outline-seg l3"></i><i class="outline-seg r3"></i><i class="outline-seg bottom"></i>
+                <i class="live-dot doing" style="left:24px;top:120px"></i><i class="live-dot plan" style="right:20px;top:156px"></i><i class="live-dot plan" style="left:32px;bottom:82px"></i><i class="live-dot done" style="right:22px;top:20px"></i>
+              </div>
+              <div class="operation-tip">
+                <div class="section-title">今日任务执行情况 <button class="button ghost" id="openNodes">查看节点</button></div>
+                <div class="list-line"><span>已打：B50、B51、B52</span><span class="tag green">已完成</span></div>
+                <div class="list-line"><span>正在打：D61 / XR-02 / 班组一队</span><span class="tag blue">进行中</span></div>
+                <div class="list-line"><span>待打：B53、B54、B55、ZH-008</span><span class="tag orange">待开始</span></div>
+              </div>
+            </div>
+            <div class="live-side">
+              <div class="panel">
+                <div class="panel-head">
+                  <div class="live-stat-tabs" data-live-stat-tabs>
+                    <button class="active" data-live-stat="summary">施工实况统计</button>
+                    <button data-live-stat="today">今日任务计划</button>
+                  </div>
+                  <a class="button ghost">详情</a>
+                </div>
+                <div class="panel-body" style="padding:0;height:196px">
+                  <div class="live-stat-panel active" id="live-stat-summary">
+                    <table><thead><tr><th>施工分段</th><th>未开始</th><th>进行中</th><th>已完成</th><th>完成度</th></tr></thead><tbody><tr><td>灌注桩</td><td>134</td><td>1</td><td>238</td><td>63.81%</td></tr></tbody></table>
+                  </div>
+                  <div class="live-stat-panel" id="live-stat-today">
+                    <div class="today-plan-tables">
+                      <div class="today-plan-table">
+                        <h4>已完成任务</h4>
+                        <table><thead><tr><th>桩点</th><th>任务</th><th>设备</th></tr></thead><tbody><tr><td>B50</td><td>成孔</td><td>XR-05</td></tr><tr><td>B51</td><td>成孔</td><td>XR-06</td></tr><tr><td>C357</td><td>浇筑</td><td>PB-01</td></tr></tbody></table>
+                      </div>
+                      <div class="today-plan-table">
+                        <h4>未开始任务</h4>
+                        <table><thead><tr><th>桩点</th><th>任务</th><th>设备</th></tr></thead><tbody><tr><td><button class="pile-link open-dispatch-modal" data-pile="B53">B53</button></td><td>成孔</td><td>XR-02</td></tr><tr><td><button class="pile-link open-dispatch-modal" data-pile="B54">B54</button></td><td>成孔</td><td>待分配</td></tr><tr><td><button class="pile-link open-dispatch-modal" data-pile="ZH-008">ZH-008</button></td><td>检测</td><td>CK-01</td></tr></tbody></table>
+                      </div>
+                      <div class="today-plan-table">
+                        <h4>进行中任务</h4>
+                        <table><thead><tr><th>桩点</th><th>任务</th><th>设备</th></tr></thead><tbody><tr><td>D61</td><td>成孔</td><td>XR-02</td></tr><tr><td>B39</td><td>打桩</td><td>XR-03</td></tr><tr><td>B27</td><td>检测</td><td>CK-01</td></tr></tbody></table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="panel">
+                <div class="panel-head"><div class="panel-title">施工实况</div><select class="select"><option>D61 支护灌注桩</option><option>B50 支护灌注桩</option></select></div>
+                <div class="panel-body">
+                  <div class="rig-panel">
+                    <div>
+                      <div class="soil-view"><div class="rig"></div><div class="soil-stack"><div><span>杂填土</span><span>6m</span></div><div><span>耕土</span><span>8m</span></div><div><span>粉质黏土</span><span>12m</span></div><div><span>全风化</span><span>20m</span></div><div><span>中风化</span><span>23.75m</span></div></div></div>
+                      <div class="today-exec"><span>今日计划：D61 成孔施工</span><span>预分配设备：XR-02　班组：班组一队</span><span>进度：18.6m / 23.75m</span></div>
+                    </div>
+                    <div class="device-info"><div><span>设备编号:</span><b>202507291408147058</b></div><div><span>设备名称:</span><b>XR-02</b></div><div><span>状态:</span><b>启用</b></div><div><span>机手:</span><b>李师傅</b></div><div><span>当前作业:</span><b>支护灌注桩-成孔</b></div><div><span>施工分区:</span><b>D段</b></div><div><span>作业桩位:</span><b>D61</b></div><button class="button primary" id="openNodes2">查看单桩节点</button></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="construction-subpage" id="c-check">
+          <div class="q4-page">
+            <div class="q4-top">
+              <div>
+                <div class="panel-subtitle">按单桩查看 16 道工序，填报过程数据、上传必要附件，并完成节点管理动作。</div>
+              </div>
+              <div class="q4-pilebar">
+                <label for="q4PileSelect">桩号选择</label>
+                <select id="q4PileSelect" class="input" style="min-width:180px">
+                  <option value="5">5#桩</option>
+                  <option value="6">6#桩</option>
+                  <option value="11">11#桩</option>
+                </select>
+                <span class="q4-current" id="q4PileCurrent">当前查看：5#桩施工过程</span>
+              </div>
+            </div>
+
+            <section class="q4-design-card">
+              <div class="q4-design-head"><div class="q4-section-title" id="q4DesignHeading">5#桩 · 基本设计信息</div><span class="q4-design-sub" id="q4DesignSub">设计编号：ZHZ-05　｜　图纸版本：V3.2　｜　原型演示数据</span></div>
+              <div class="q4-design-grid" id="q4DesignGrid"></div>
+            </section>
+
+            <section class="q4-node-card">
+              <div class="q4-card-head">
+                <div class="q4-section-title">施工节点</div>
+                <div class="q4-legend"><span><i class="q4-dot done"></i>已完成</span><span><i class="q4-dot active"></i>当前节点</span><span><i class="q4-dot"></i>待开始</span></div>
+              </div>
+              <div id="q4Nodes" class="q4-nodes"></div>
+            </section>
+
+            <section class="q4-workspace">
+              <article class="q4-panel">
+                <div class="q4-panel-head">
+                  <div class="panel-title"><span id="q4OpTitle">过程填报 · 桩点定位</span></div>
+                  <span class="q4-stage-badge" id="q4StageBadge">节点 01 / 16</span>
+                </div>
+                <div class="q4-op-body">
+                  <div class="q4-monitor">
+                    <div class="q4-monitor-top"><span class="q4-monitor-label"><i></i><span id="q4MonitorSource">RTK-05 / 全站仪联机</span><span class="q4-mode-tag" id="q4ModeTag">坐标测量</span></span><span class="q4-monitor-time" id="q4MonitorTime">2026-07-29 14:32:18</span></div>
+                    <svg class="q4-diagram" viewBox="0 0 660 250" preserveAspectRatio="none" aria-label="施工节点示意图">
+                      <defs>
+                        <linearGradient id="q4Sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7faff"/><stop offset="1" stop-color="#eaf1fc"/></linearGradient>
+                        <linearGradient id="q4Soil" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#dfe8f6"/><stop offset=".5" stop-color="#eef3fa"/><stop offset="1" stop-color="#dfe8f6"/></linearGradient>
+                        <pattern id="q4Grid" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M 28 0 L 0 0 0 28" fill="none" stroke="#d8e3f5" stroke-width=".7"/></pattern>
+                      </defs>
+                      <rect width="660" height="250" fill="url(#q4Sky)"/><rect width="660" height="250" fill="url(#q4Grid)" opacity=".65"/>
+                      <path d="M0 88 H660" stroke="#afbdd1" stroke-width="2"/><path d="M0 90 H660 V250 H0Z" fill="url(#q4Soil)" opacity=".62"/>
+                      <g id="q4PileGraphic">
+                        <rect x="297" y="78" width="66" height="157" rx="6" fill="#f8fbff" stroke="#6e93da" stroke-width="3"/>
+                        <rect id="q4PileFill" x="302" y="225" width="56" height="6" rx="3" fill="#4c80ed" opacity=".72"/>
+                        <path d="M310 76 V32 h40 v44" fill="none" stroke="#526d9d" stroke-width="5"/>
+                        <path d="M300 34 H360 M309 45 H351 M309 57 H351" stroke="#7890b7" stroke-width="2"/>
+                        <circle cx="330" cy="76" r="13" fill="#fff" stroke="#1677ff" stroke-width="3"/>
+                        <path d="M323 76h14M330 69v14" stroke="#1677ff" stroke-width="2"/>
+                        <path d="M280 88 270 104h20zM380 88l-10 16h20z" fill="#aab9cf"/>
+                      </g>
+                      <g fill="#60708a" font-size="12"><text x="18" y="80">±0.000 场坪标高</text><text x="373" y="110">Φ1,200 mm</text><text x="373" y="128">设计桩底 -35.800 m</text></g>
+                      <g id="q4StageIcon" transform="translate(78 128)"></g>
+                      <g id="q4VisualLayer" transform="translate(474 145)"></g>
+                    </svg>
+                    <div class="q4-monitor-caption"><span>当前作业：</span><b id="q4MonitorCaption">桩点定位与坐标复核</b></div>
+                  </div>
+                  <div class="q4-metric-list" id="q4Metrics"></div>
+                </div>
+              </article>
+
+              <article class="q4-panel">
+                <div class="q4-panel-head"><div class="panel-title">节点关键数据</div><span class="q4-stage-badge" id="q4OwnerBadge">责任人 · 测量员</span></div>
+                <div class="q4-manage-body" style="overflow:auto; max-height: 620px;">
+                  <div class="q4-key-data" id="q4KeyData"></div>
+                </div>
+              </article>
+            </section>
+          </div>
+        </div>
+        <div class="construction-subpage" id="c-record">
+          <div class="record-actions"><input class="input" placeholder="请输入桩编号"><button class="button primary">搜索</button><button class="button primary">导出</button></div>
+          <div class="panel"><div class="panel-body" style="padding:0"><table><thead><tr><th>序号</th><th>桩编号</th><th>施工完成日期</th><th>X偏移量</th><th>Y偏移量</th><th>成孔深度</th><th>设计桩径</th><th>设计桩顶标高</th><th>完成桩顶标高</th><th>进入持力层深度(m)</th><th>充盈系数</th><th>沉渣厚度</th><th>成孔垂直度</th><th>设备类型</th><th>操作</th></tr></thead><tbody><tr><td>1</td><td>C29</td><td>2026-04-04 21:41:49</td><td>8mm</td><td>6mm</td><td>21.90</td><td>1000</td><td>3800.0</td><td>3798.5</td><td>2.1</td><td>1.08</td><td>38mm</td><td>0.72%</td><td>旋挖机</td><td><button class="button ghost">详情</button></td></tr><tr><td>2</td><td>B73</td><td>2026-04-04 21:11:34</td><td>5mm</td><td>4mm</td><td>21.81</td><td>1000</td><td>3800.0</td><td>3799.0</td><td>2.0</td><td>1.06</td><td>35mm</td><td>0.69%</td><td>旋挖机</td><td><button class="button ghost">详情</button></td></tr></tbody></table></div></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-document">
+        <div class="document-layout">
+          <div class="doc-filter"><h3>筛选条件</h3><button class="button primary">按分区</button><button class="button" style="margin-left:8px">按桩号</button><h4>桩类型</h4><p><span class="tag blue">支护灌注桩</span></p><h4>施工状态</h4><p>○ 已完成</p><p>○ 施工中</p><p>○ 未开始</p></div>
+          <div class="doc-mid"><div class="panel-head"><div><div class="panel-title">整体汇总</div><div class="panel-subtitle">总桩数372根　已完成238根(63.98%)　施工中3根(0.81%)　未开始131根</div></div></div><div class="panel-body"><table><thead><tr><th>桩编号</th><th>状态</th><th>桩长(m)</th><th>完成时间</th></tr></thead><tbody><tr><td>C29</td><td><span class="tag orange">未开始</span></td><td>21.90</td><td>-</td></tr><tr><td>B23</td><td><span class="tag orange">未开始</span></td><td>21.81</td><td>-</td></tr><tr><td>B50</td><td><span class="tag green">已完成</span></td><td>21.81</td><td>2026-03-16</td></tr></tbody></table></div></div>
+          <div class="report-preview"><div style="margin-bottom:12px"><button class="button primary">施工层基线复核记录</button><button class="button">灌注桩钢筋笼安装隐蔽验收记录</button><button class="button">灌注桩施工资料汇总表</button></div><div class="report-paper"><h2>施工层基线复核记录</h2><div class="report-grid"><span>单位工程</span><span style="grid-column:span 3">泉州至厦门至漳州城际铁路R1线</span><span>工程部位</span><span>C29</span><span>测量仪器</span><span>RTK</span><span style="grid-column:span 4;height:90px">复测示意图及复测结果</span><span>日期</span><span style="grid-column:span 3">年　月　日</span></div></div></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-equipment">
+        <div class="stats"><div class="stat-card"><div class="stat-icon blue">目</div><div><span>设备总数</span><b>9台</b><small>旋挖机 6 · 检测仪 3</small></div></div><div class="stat-card"><div class="stat-icon green">●</div><div><span>在线设备</span><b>8台</b><small>在线率 88.9%</small></div></div><div class="stat-card"><div class="stat-icon blue">⚙</div><div><span>作业中</span><b>6台</b><small>施工 4 · 检测 2</small></div></div><div class="stat-card"><div class="stat-icon red">!</div><div><span>离线 / 维修</span><b>1 / 0</b><small>CK-02 已离线 1.7h</small></div></div></div>
+        <div class="toolbar"><div class="pill-tabs"><button class="active">全部设备</button><button>旋挖钻机</button><button>成孔检测设备</button></div><button class="button primary">添加设备</button></div>
+        <div class="equipment-grid">
+          <div class="device-card"><div class="device-badge">旋</div><h3>XR-360-01 <span class="tag blue">作业中</span></h3><small>旋挖钻机 · 数据接入正常</small><div class="device-meta"><div>当前桩号<br><b>ZK-145</b></div><div>今日工时<br><b>6.4h</b></div></div><a class="button ghost">查看设备详情 →</a></div>
+          <div class="device-card"><div class="device-badge">旋</div><h3>XR-360-02 <span class="tag blue">作业中</span></h3><small>旋挖钻机 · 数据接入正常</small><div class="device-meta"><div>当前桩号<br><b>ZK-137</b></div><div>今日工时<br><b>5.8h</b></div></div><a class="button ghost">查看设备详情 →</a></div>
+          <div class="device-card"><div class="device-badge">检</div><h3>CK-01 <span class="tag blue">检测中</span></h3><small>成孔检测设备 · 数据接入正常</small><div class="device-meta"><div>当前检测桩<br><b>ZK-132</b></div><div>今日检测<br><b>8次</b></div></div><a class="button ghost">查看设备详情 →</a></div>
+          <div class="device-card"><div class="device-badge">检</div><h3>CK-02 <span class="tag red">离线</span></h3><small>成孔检测设备 · 数据接入正常</small><div class="device-meta"><div>最后检测桩<br><b>ZK-108</b></div><div>离线时长<br><b>1.7h</b></div></div><a class="button ghost">查看设备详情 →</a></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-setting">
+        <div class="setting-tabs"><button class="active">工程概况</button><button>施工范围</button><button>施工分区</button><button>参建单位</button><button>勘察数据</button><button>施工工艺</button></div>
+        <div class="panel"><div class="panel-head"><div class="panel-title">基础信息</div><div><button class="button">编辑</button><button class="button primary">保存</button></div></div><div class="panel-body"><div class="setting-form"><div class="form-grid"><div class="field"><label>项目名称:</label><input value="泉州至厦门至漳州城际铁路R1线（泉州段）工程先行开工段（池店站）"></div><div class="field"><label>项目简称:</label><input value="泉州R1线"></div><div class="field"><label>工程类别:</label><input value="铁路"></div><div class="field"><label>建设单位:</label><input value="泉州市轨道交通集团有限公司"></div><div class="field"><label>施工单位:</label><input value="中建三局集团有限公司"></div><div class="field survey-card"><label>勘察数据:</label><input value="地勘孔、土层参数、地下水位、持力层信息"></div><div class="field"><label>项目概况:</label><textarea rows="3">请输入</textarea></div></div><div><div class="panel-title" style="margin-bottom:12px">项目效果图</div><div class="empty-model">项目效果图占位</div></div></div></div></div>
+      </section>
+    </main>
+  </div>
+
+  <button class="page-note-button" id="openPageNote">页面说明</button>
+
+  <div class="note-drawer" id="pageNoteDrawer">
+    <div class="note-drawer-head"><h3 id="pageNoteTitle">页面说明</h3><button class="button ghost" id="closePageNote">关闭</button></div>
+    <div class="note-drawer-body" id="pageNoteBody"></div>
+  </div>
+
+  <div class="modal-mask" id="reviewGuideMask">
+    <div class="modal review-modal">
+      <div class="modal-head"><div class="modal-title">研发说明 · 数据来源与交互口径</div><button class="icon-button" id="closeReviewGuide">×</button></div>
+      <div class="review-body">
+        <div class="review-nav" id="reviewGuideNav">
+          <button class="active" data-guide="overview">整体链路</button>
+          <button data-guide="home">首页</button>
+          <button data-guide="drawing">图纸</button>
+          <button data-guide="task">任务</button>
+          <button data-guide="construction">施工</button>
+          <button data-guide="document">资料</button>
+          <button data-guide="equipment">设备</button>
+          <button data-guide="setting">设置</button>
+        </div>
+        <div class="review-content">
+          <section class="review-section active" data-guide-panel="overview">
+            <h3>整体数据流转</h3>
+            <p>本原型用于研发交底，页面中的数据均为演示数据。正式实现时应以需求规格说明书中的字段、状态、来源和业务规则为准。</p>
+            <div class="review-table">
+              <div><b>主链路</b><span>设置基础配置 → 图纸上传解析 → 桩点信息生成与版本管理 → 任务创建与拆分 → 施工填报 → 异常生成复检/整改任务 → 施工记录 → 资料归档 → 首页统计展示。</span></div>
+              <div><b>核心数据底座</b><span>当前生效桩点版本。任务、施工、资料和首页统计均应引用当前生效版本；历史版本只用于查看和回溯。</span></div>
+              <div><b>状态区分</b><span>桩点阶段状态来源于施工填报；任务状态来源于任务明细；设备状态来源于设备台账和任务预分配记录。</span></div>
+              <div><b>异常入口</b><span>复检任务和整改任务由施工填报异常处置发起，不在普通任务创建入口创建，施工记录只做追溯。</span></div>
+            </div>
+          </section>
+          <section class="review-section" data-guide-panel="home">
+            <h3>首页</h3>
+            <h4>数据来源</h4>
+            <ul><li>今日任务履约情况：任务明细、施工填报结果、任务状态记录。</li><li>项目运行情况：当前生效桩点版本、施工填报、检测任务结果、浇筑记录。</li><li>施工进度情况：任务计划时间、任务完成时间、施工填报完成时间、项目计划配置。</li><li>设备运行情况：设备台账、任务预分配、施工实况下发记录。</li><li>右侧选中桩点状态面板：桩点信息、任务明细、施工填报、设备预分配。</li></ul>
+            <h4>关键说明</h4><p>地图中闪烁点位仅表示该桩点当天已创建任务，不表示实时定位或实时施工状态。鼠标移入或点击桩点时，右侧面板展示当前桩点的阶段状态、任务状态、计划时间、设备、班组和施工分区。</p>
+          </section>
+          <section class="review-section" data-guide-panel="drawing">
+            <h3>图纸</h3>
+            <ul><li>图纸管理数据来源：上传图纸文件、解析服务结果、启用图纸集合。</li><li>启用校验：重复桩号、重复坐标、坐标缺失、同桩号不同坐标、同坐标不同桩号。</li><li>桩点信息来源：已启用图纸解析或外部 Excel 导入。遵循谁先生成谁作为基础数据，后续来源必须先比对。</li><li>桩点版本：生成、导入、覆盖、补充空字段均需要记录版本；已施工或已完工桩点默认冻结。</li></ul>
+          </section>
+          <section class="review-section" data-guide-panel="task">
+            <h3>任务</h3>
+            <ul><li>任务总览按计划施工时间展示任务，不做滚动迁移逻辑。</li><li>施工明细展示五类任务：打桩、检测、浇筑、复检、整改。</li><li>普通创建入口只创建打桩、检测、浇筑任务；复检、整改由施工填报异常处置发起。</li><li>创建任务采用三级级联：选择桩点和计划施工时间 → 读取当前状态并选择目标状态 → 拆分最细任务并分配班组、设备。</li><li>任务状态：未开始、进行中、待前置完成、待复核、已完成。</li></ul>
+          </section>
+          <section class="review-section" data-guide-panel="construction">
+            <h3>施工</h3>
+            <ul><li>施工实况数据来源：当前桩点版本、任务明细、施工填报、设备预分配。</li><li>施工填报数据来源：桩点信息、设置-施工工艺、现场填报、附件上传。</li><li>16个工艺节点必须按顺序填报；节点关键数据由施工工艺配置驱动。</li><li>异常处置：施工填报结果为不合格、需复检或需整改时，可生成复检任务或整改任务。</li><li>施工记录用于查询追溯，不作为任务创建入口。</li></ul>
+          </section>
+          <section class="review-section" data-guide-panel="document"><h3>资料</h3><p>资料模块以单桩为主线汇总桩点信息、施工填报、任务执行、检测、浇筑、复检、整改和附件。导出前应做完整性校验，缺字段、缺附件或异常未闭环时需要提示。</p></section>
+          <section class="review-section" data-guide-panel="equipment"><h3>设备</h3><p>设备模块维护设备台账。任务创建和施工下发引用设备台账，系统根据设备状态、计划施工时间和已有任务判断是否存在分配冲突。设备状态不代表实时定位状态。</p></section>
+          <section class="review-section" data-guide-panel="setting"><h3>设置</h3><ul><li>工程概况：项目基本信息、单位、工期。</li><li>施工范围：工程分类和施工对象类型，例如支护工程、工程桩、支护灌注桩、止水帷幕。</li><li>施工分区：现场施工分段，例如 A段、B段，可关联图纸和工程量。</li><li>参建单位：建设、施工、监理、检测等单位。</li><li>勘察数据：地勘孔、土层、水位、持力层等。</li><li>施工工艺：16个节点、字段、单位、必填、预警范围、附件要求。</li></ul></section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask" id="prototypeModalMask">
+    <div class="modal" id="drawingPreviewModal" hidden>
+      <div class="modal-head"><div class="modal-title">图纸预览</div><button class="icon-button close-prototype-modal">×</button></div>
+      <div class="modal-body">
+        <div class="panel-subtitle" style="margin-bottom:12px">单张图纸弹窗预览：支护桩平面图.dwg。预览只展示图纸内容，不改变当前启用数据源。</div>
+        <div class="cad-view" style="height:560px">
+          <div class="cad-shape"></div>
+          <i class="cad-grid-line v" style="left:20%"></i><i class="cad-grid-line v" style="left:40%"></i><i class="cad-grid-line v" style="left:60%"></i><i class="cad-grid-line v" style="left:80%"></i>
+          <i class="cad-grid-line h" style="top:30%"></i><i class="cad-grid-line h" style="top:55%"></i><i class="cad-grid-line h" style="top:72%"></i>
+          <script>
+            document.currentScript.insertAdjacentHTML('beforebegin', Array.from({length: 72}, (_, i) => {
+              const x = 16 + (i % 18) * 4;
+              const y = 25 + Math.floor(i / 18) * 13;
+              return `<i class="parse-dot" style="left:${x}%;top:${y}%"></i>`;
+            }).join(''));
+          </script>
+        </div>
+      </div>
+      <div class="modal-foot"><button class="button close-prototype-modal">关闭</button></div>
+    </div>
+    <div class="modal" id="enableValidationModal" hidden>
+      <div class="modal-head"><div class="modal-title">启用图纸校验</div><button class="icon-button close-prototype-modal">×</button></div>
+      <div class="modal-body">
+        <div class="panel-subtitle">启用前系统会校验：桩点号重复、坐标重复、坐标缺失。校验通过后，当前图纸会加入已启用图纸集合，作为任务、施工、资料模块的数据来源之一。</div>
+        <div class="validation-list">
+          <div class="validation-row"><span class="tag green">通过</span><span>桩点号唯一性校验：未发现重复桩号</span><b>0项</b></div>
+          <div class="validation-row"><span class="tag orange">提醒</span><span>坐标一致性校验：发现 1 处与当前启用图纸坐标接近，建议人工复核</span><b>1项</b></div>
+          <div class="validation-row"><span class="tag green">通过</span><span>坐标完整性校验：所有桩点均包含 X / Y 坐标</span><b>0项缺失</b></div>
+          <div class="validation-row"><span class="tag blue">版本</span><span>版本冻结校验：已完工桩点仅允许回溯查看，不参与当前覆盖</span><b>已启用</b></div>
+        </div>
+        <table>
+          <thead><tr><th>冲突类型</th><th>桩号</th><th>当前启用坐标</th><th>待启用坐标</th><th>处理建议</th></tr></thead>
+          <tbody><tr><td>坐标接近</td><td>GC-015</td><td>508604.800 / 2749372.200</td><td>508604.820 / 2749372.210</td><td>人工确认后允许启用</td></tr></tbody>
+        </table>
+      </div>
+      <div class="modal-foot"><button class="button close-prototype-modal">取消</button><button class="button primary" id="confirmEnableDrawing">确认启用并刷新数据源</button></div>
+    </div>
+    <div class="modal small" id="generatePileInfoModal" hidden>
+      <div class="modal-head"><div class="modal-title">生成桩点信息</div><button class="icon-button close-prototype-modal">×</button></div>
+      <div class="modal-body">
+        <div class="panel-subtitle">系统将重新读取所有已启用图纸，解析桩号、桩型、坐标、桩径、桩长和所属区段，并生成新的桩点版本。若当前已经存在桩点基础数据，将先进行桩号与坐标比对；已完工桩点默认冻结，不允许直接覆盖，只能形成新版本并保留历史。</div>
+        <div class="validation-list">
+          <div class="validation-row"><span class="tag blue">读取</span><span>已启用图纸：支护桩平面图.dwg</span><b>372根</b></div>
+          <div class="validation-row"><span class="tag green">通过</span><span>X / Y 坐标完整性检查</span><b>0项缺失</b></div>
+          <div class="validation-row"><span class="tag orange">提醒</span><span>与现有基础数据比对：发现 2 个相同桩号，需确认是否覆盖、生成新版本或补充空字段</span><b>2项冲突</b></div>
+        </div>
+        <div class="conflict-options">
+          <button class="conflict-option active">沿用现行版本<br><small>不改变已有基础数据</small></button>
+          <button class="conflict-option">生成新版本<br><small>保留历史并升级当前版本</small></button>
+          <button class="conflict-option">补充空字段<br><small>只写入空缺内容</small></button>
+          <button class="conflict-option">跳过冲突<br><small>仅新增非冲突桩点</small></button>
+        </div>
+      </div>
+      <div class="modal-foot"><button class="button close-prototype-modal">取消</button><button class="button primary" id="confirmGeneratePileInfo">确认生成</button></div>
+    </div>
+    <div class="modal small" id="pileExcelImportModal" hidden>
+      <div class="modal-head"><div class="modal-title">导入Excel桩点信息</div><button class="icon-button close-prototype-modal">×</button></div>
+      <div class="modal-body">
+        <div class="panel-subtitle">外部 Excel 导入会与当前桩点基础数据进行比对。相同桩号或坐标一致时，系统提示是否覆盖或生成新版本；桩号不可被导入数据修改，已施工完成的桩点默认冻结。</div>
+        <div class="upload-box">选择桩点信息 Excel 文件<br><small>必须包含桩号、桩型、X坐标、Y坐标；桩径、桩长、区段可选</small></div>
+        <div class="validation-list">
+          <div class="validation-row"><span class="tag blue">读取</span><span>Excel 共读取 128 条桩点数据</span><b>128条</b></div>
+          <div class="validation-row"><span class="tag orange">冲突</span><span>ZH-001 与当前基础数据桩号相同，坐标略有差异</span><b>1项</b></div>
+          <div class="validation-row"><span class="tag red">缺失</span><span>GC-020 缺少 Y 坐标，不能写入任务与施工链路</span><b>1项</b></div>
+        </div>
+        <div class="conflict-options">
+          <button class="conflict-option active">沿用现行版本</button>
+          <button class="conflict-option">生成新版本</button>
+          <button class="conflict-option">补充空字段</button>
+          <button class="conflict-option">跳过冲突</button>
+        </div>
+      </div>
+      <div class="modal-foot"><button class="button close-prototype-modal">取消</button><button class="button primary" id="confirmImportPileExcel">确认导入</button></div>
+    </div>
+    <div class="modal small" id="pileVersionHistoryModal" hidden>
+      <div class="modal-head"><div class="modal-title">桩点版本历史</div><button class="icon-button close-prototype-modal">×</button></div>
+      <div class="modal-body">
+        <div class="panel-subtitle">桩点版本有回溯能力。当前现行版本用于任务、施工与统计，历史版本仅可查看，不直接覆盖已完工桩点。</div>
+        <table>
+          <thead><tr><th>版本</th><th>来源</th><th>生成时间</th><th>状态</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>PV-05</td><td>支护桩平面图.dwg</td><td>2026-07-14 09:12</td><td><span class="tag blue">现行</span></td><td>当前基础版本，供施工、任务、报表使用</td></tr>
+            <tr><td>PV-04</td><td>Excel 导入</td><td>2026-07-13 16:20</td><td><span class="tag gray">历史</span></td><td>与现行版本存在 2 个同名桩号差异</td></tr>
+            <tr><td>PV-03</td><td>图纸解析</td><td>2026-07-12 11:05</td><td><span class="tag green">冻结</span></td><td>含已完工桩点，禁止直接覆盖</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-foot"><button class="button close-prototype-modal">关闭</button></div>
+    </div>
+    <div class="modal" id="taskCreateModal" hidden>
+      <div class="modal-head"><div class="modal-title">创建任务</div><button class="icon-button close-prototype-modal">×</button></div>
+      <div class="modal-body">
+        <div class="panel-subtitle">一级选择桩点和任务计划时间；二级展示所选桩点当前状态并定义目标状态；三级拆分到最细任务并分配班组与预分配设备。</div>
+        <div class="wizard-steps"><div class="wizard-step active" data-step-indicator="1">1 选择桩点</div><div class="wizard-step" data-step-indicator="2">2 定义目标</div><div class="wizard-step" data-step-indicator="3">3 分配任务</div></div>
+        <div class="wizard-panel active" data-wizard-panel="1">
+          <div class="task-form-grid">
+            <div class="task-form-field"><label>任务计划时间</label><input class="input" id="taskPlanTime" type="datetime-local" value="2026-07-14T08:00"></div>
+            <div class="task-form-field"><label>筛选桩点</label><input class="input" placeholder="桩号 / 区段 / 桩型"></div>
+          </div>
+          <div class="pile-select-grid">
+            <div class="pile-select-card active" data-pile-card="B39"><b>B39</b><span>未开始 · 支护灌注桩 · B区</span></div>
+            <div class="pile-select-card active" data-pile-card="D61"><b>D61</b><span>成孔进行中 · 支护灌注桩 · D段</span></div>
+            <div class="pile-select-card" data-pile-card="C357"><b>C357</b><span>检测完成 · 支护灌注桩 · C区</span></div>
+            <div class="pile-select-card" data-pile-card="A65"><b>A65</b><span>未开始 · 工程桩 · A区</span></div>
+          </div>
+        </div>
+        <div class="wizard-panel" data-wizard-panel="2">
+          <table>
+            <thead><tr><th>桩点</th><th>当前状态</th><th>本次目标状态</th><th>系统拆分说明</th></tr></thead>
+            <tbody id="taskStatusRows"></tbody>
+          </table>
+        </div>
+        <div class="wizard-panel" data-wizard-panel="3">
+          <table class="task-leaf-table">
+            <thead><tr><th>桩点</th><th>拆分任务</th><th>前置要求</th><th>任务计划时间</th><th>班组</th><th>预分配设备</th></tr></thead>
+            <tbody id="taskLeafRows"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-foot"><button class="button close-prototype-modal">取消</button><button class="button" id="prevTaskStep">上一步</button><button class="button primary" id="nextTaskStep">下一步</button><button class="button primary" id="confirmTaskCreate" hidden>确认创建任务</button></div>
+    </div>
+    <div class="modal small" id="taskDeleteModal" hidden>
+      <div class="modal-head"><div class="modal-title">删除任务确认</div><button class="icon-button close-prototype-modal">×</button></div>
+      <div class="modal-body">
+        <div class="task-rule" id="deleteWarningText">删除前置任务时，将同步影响同一桩点的后置任务，请确认。</div>
+      </div>
+      <div class="modal-foot"><button class="button close-prototype-modal">取消</button><button class="button primary" id="confirmTaskDelete">确认删除</button></div>
+    </div>
+    <div class="modal small" id="dispatchModal" hidden>
+      <div class="modal-head"><div class="modal-title">下发作业</div><button class="icon-button close-prototype-modal">×</button></div>
+      <div class="modal-body">
+        <div class="panel-subtitle">未开始桩点可直接在这里下发作业，并调整班组、设备和计划时间。</div>
+        <div class="task-form-grid" style="grid-template-columns:repeat(1,minmax(0,1fr))">
+          <div class="task-form-field"><label>桩点</label><input class="input" id="dispatchPile" readonly></div>
+          <div class="task-form-field"><label>作业类型</label><select class="select"><option>成孔施工</option><option>检测任务</option><option>浇筑任务</option></select></div>
+          <div class="task-form-field"><label>作业设备</label><select class="select"><option>XR-02</option><option>XR-03</option><option>CK-01</option><option>PB-01</option></select></div>
+          <div class="task-form-field"><label>班组</label><select class="select"><option>班组一队</option><option>班组三队</option><option>检测一组</option><option>浇筑一队</option></select></div>
+          <div class="task-form-field"><label>任务计划时间</label><input class="input" type="datetime-local" value="2026-07-16T08:00"></div>
+        </div>
+      </div>
+      <div class="modal-foot"><button class="button close-prototype-modal">取消</button><button class="button primary" id="confirmDispatch">确认下发</button></div>
+    </div>
+  </div>
+
+  <div class="node-drawer" id="nodeDrawer">
+    <div class="drawer-head"><span>过程管控 · D61</span><button class="button ghost" id="closeDrawer">关闭</button></div>
+    <div class="node-list">
+      <div class="node-item done"><h4>桩点定位</h4><div class="node-card">2026-03-16 11:22:07 · 已完成</div></div>
+      <div class="node-item done"><h4>钢护筒埋设</h4><div class="node-card">埋入持力层深度：20m　护筒垂直度：/</div></div>
+      <div class="node-item done"><h4>钻进成孔(土层)</h4><div class="node-card">已进入全风化层，成孔深度 18.6m</div></div>
+      <div class="node-item"><h4>钻进成孔(进入持力层)</h4><div class="node-card">孔深：/　桩径：/　数据自动采集：/</div></div>
+      <div class="node-item wait"><h4>成孔检查</h4><div class="node-card">等待成孔完成后自动生成检测任务</div></div>
+      <div class="node-item wait"><h4>清孔</h4><div class="node-card">待施工</div></div>
+      <div class="node-item wait"><h4>下放钢筋笼</h4><div class="node-card">待施工</div></div>
+      <div class="node-item wait"><h4>混凝土灌注</h4><div class="node-card">待施工</div></div>
+    </div>
+  </div>
+  <script>
+    const pageNotes = {
+      home: {
+        title: '首页说明',
+        blocks: [
+          ['页面用途', '展示项目当日任务履约、项目运行、进度、设备和提醒消息，并通过右侧地图查看选中桩点状态。'],
+          ['数据来源', '今日任务来自任务明细；项目运行来自当前桩点版本和施工填报；设备统计来自设备台账和任务预分配；右侧桩点状态来自桩点信息、任务明细、施工填报、设备预分配。'],
+          ['关键交互', '鼠标移入或点击桩点时刷新右侧面板；当天已创建任务的桩点使用闪烁点位提示。闪烁仅代表当天有任务，不代表实时定位或实时施工状态。']
+        ]
+      },
+      model: {
+        title: '图纸说明',
+        blocks: [
+          ['图纸管理', '上传图纸后解析候选桩点。启用前校验重复桩号、重复坐标、坐标缺失等问题。多张图纸可以同时启用，形成启用图纸集合。'],
+          ['桩点信息', '桩点信息可由启用图纸解析生成，也可由外部 Excel 导入。谁先生成谁作为基础数据，后续来源需要与当前版本比对。'],
+          ['版本与冻结', '桩点版本需要保留历史。已施工或已完工桩点默认冻结，不允许普通覆盖关键字段。']
+        ]
+      },
+      task: {
+        title: '任务说明',
+        blocks: [
+          ['数据来源', '任务总览和施工明细均读取任务明细表，计划施工时间用于日历定位，任务完成时间由施工填报或复核确认写入。'],
+          ['创建规则', '普通创建入口只生成打桩、检测、浇筑任务。创建时按“选桩点和计划时间 → 目标状态 → 最细任务分配班组设备”的三级级联处理。'],
+          ['复检整改', '复检任务、整改任务由施工填报异常处置发起，在施工明细中统一展示，不在普通创建任务入口创建。']
+        ]
+      },
+      construction: {
+        title: '施工说明',
+        blocks: [
+          ['施工实况', '读取当前桩点版本、任务明细、施工填报和设备预分配，展示总体和今日任务计划。未开始任务可下发或调整设备班组。'],
+          ['施工填报', '选择桩号后加载设计信息、16个工艺节点、节点关键数据和可视化区域。节点字段由设置-施工工艺配置驱动。'],
+          ['异常处置', '涉及施工监测填报结果不合格、需复检或需整改时，可生成复检任务或整改任务，并回写任务明细。施工记录只做查询追溯。']
+        ]
+      },
+      document: {
+        title: '资料说明',
+        blocks: [
+          ['数据来源', '资料以单桩为主线，汇总桩点信息、施工填报、任务执行、检测、浇筑、复检、整改和附件。'],
+          ['完整性校验', '导出前检查必填节点、关键字段、附件和异常闭环情况，缺失时提示用户补齐。']
+        ]
+      },
+      equipment: {
+        title: '设备说明',
+        blocks: [
+          ['数据来源', '设备列表来自设备台账；任务预分配和施工下发引用设备台账。'],
+          ['冲突判断', '同一设备在同一计划施工时间被重复分配时，需要提示冲突。设备状态不等同于实时定位状态。']
+        ]
+      },
+      setting: {
+        title: '设置说明',
+        blocks: [
+          ['模块范围', '设置包含工程概况、施工范围、施工分区、参建单位、勘察数据、施工工艺。'],
+          ['施工范围与施工分区', '施工范围描述施工对象是什么，例如支护工程、工程桩、支护灌注桩；施工分区描述在哪里施工，例如 A段、B段，可关联图纸和工程量。'],
+          ['施工工艺', '施工工艺维护16个节点、字段、单位、必填、预警范围和附件要求，是施工填报节点关键数据的来源。']
+        ]
+      }
+    };
+    function currentPageKey() {
+      const active = document.querySelector('.nav-item.active');
+      return active?.dataset.page || 'home';
+    }
+    function renderPageNote(pageKey = currentPageKey()) {
+      const note = pageNotes[pageKey] || pageNotes.home;
+      document.getElementById('pageNoteTitle').textContent = note.title;
+      document.getElementById('pageNoteBody').innerHTML = note.blocks.map(([title, body]) => `<div class="note-block"><h4>${title}</h4><p>${body}</p></div>`).join('');
+    }
+    document.getElementById('openPageNote')?.addEventListener('click', () => {
+      renderPageNote();
+      document.getElementById('pageNoteDrawer').classList.add('show');
+    });
+    document.getElementById('closePageNote')?.addEventListener('click', () => document.getElementById('pageNoteDrawer').classList.remove('show'));
+    document.getElementById('openReviewGuide')?.addEventListener('click', () => document.getElementById('reviewGuideMask').classList.add('show'));
+    document.getElementById('closeReviewGuide')?.addEventListener('click', () => document.getElementById('reviewGuideMask').classList.remove('show'));
+    document.querySelectorAll('#reviewGuideNav button').forEach((button) => {
+      button.addEventListener('click', () => {
+        const key = button.dataset.guide;
+        document.querySelectorAll('#reviewGuideNav button').forEach((b) => b.classList.toggle('active', b === button));
+        document.querySelectorAll('[data-guide-panel]').forEach((panel) => panel.classList.toggle('active', panel.dataset.guidePanel === key));
+      });
+    });
+    renderPageNote('home');
+    document.querySelectorAll('.nav-item').forEach((item) => {
+      item.addEventListener('click', () => {
+        const page = item.dataset.page;
+        document.querySelectorAll('.nav-item').forEach((n) => n.classList.toggle('active', n === item));
+        document.querySelectorAll('.page').forEach((p) => p.classList.toggle('active', p.id === `page-${page}`));
+        renderPageNote(page);
+      });
+    });
+    document.querySelectorAll('[data-c-tab]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const key = button.dataset.cTab;
+        document.querySelectorAll('[data-c-tab]').forEach((b) => b.classList.toggle('active', b === button));
+        document.querySelectorAll('.construction-subpage').forEach((p) => p.classList.toggle('active', p.id === `c-${key}`));
+      });
+    });
+    document.querySelectorAll('[data-home-stage-tabs] button').forEach((button) => {
+      button.addEventListener('click', () => {
+        const key = button.dataset.stage;
+        document.querySelectorAll('[data-home-stage-tabs] button').forEach((b) => b.classList.toggle('active', b === button));
+        document.querySelectorAll('[data-stage-panel]').forEach((panel) => {
+          panel.style.display = panel.dataset.stagePanel === key ? 'block' : 'none';
+        });
+      });
+    });
+    document.querySelectorAll('[data-message-tabs] button').forEach((button) => {
+      button.addEventListener('click', () => {
+        const key = button.dataset.msg;
+        document.querySelectorAll('[data-message-tabs] button').forEach((b) => b.classList.toggle('active', b === button));
+        document.querySelectorAll('[data-msg-panel]').forEach((panel) => panel.classList.toggle('active', panel.dataset.msgPanel === key));
+      });
+    });
+    const processNames = [
+      '桩点定位', '钢护筒埋设', '钻进成孔(土层)', '钻进成孔(入持力层)',
+      '成孔检查', '清孔', '验收成孔(超声孔壁探测)', '钢筋笼准备',
+      '下放钢筋笼', '二次清孔', '二次超声孔壁探测', '二次清孔验收',
+      '安装导管及料斗', '灌注混凝土', '拔出导管及钢护筒', '施工完成'
+    ];
+    const processFields = {
+      '桩点定位': [['桩点编号', '', '/', 'D61', '定位照片'], ['设计桩点X坐标', '', '/', '508612.300', '-'], ['设计桩点Y坐标', '', '/', '2749365.800', '-'], ['实际桩点X坐标', '', '偏差≤5cm', '508612.286', '-'], ['实际桩点Y坐标', '', '偏差≤5cm', '2749365.821', '-'], ['桩机高程', 'm', '/', '3.82', '-']],
+      '钢护筒埋设': [['护筒直径', 'mm', '≥设计桩径', '1200', '-'], ['护筒埋设深度', 'm', '≥1.5m', '2.0', '-'], ['护筒顶标高', 'm', '/', '4.15', '-'], ['护筒垂直度', '°', '≤1%', '0.42', '照片']],
+      '钻进成孔(土层)': [['当前孔深', 'm', '/', '18.60', '-'], ['泥浆比重', '', '1.10-1.25', '1.18', '-'], ['钻进开始时间', '', '/', '2026-07-14 08:20', '-'], ['钻进结束时间', '', '/', '2026-07-14 11:40', '-']],
+      '钻进成孔(入持力层)': [['入岩深度', 'm', '≥设计要求', '2.10', '-'], ['持力层类型', '', '/', '中风化岩', '-'], ['终孔深度', 'm', '/', '23.75', '-'], ['钻进记录照片', '', '上传图片附件', '已上传', '照片']],
+      '成孔检查': [['孔深', 'm', '/', '23.75', '-'], ['桩径', 'mm', '/', '1000', '-'], ['沉渣厚度', 'mm', '端承桩<50mm', '42', '-'], ['成孔垂直度', '°', '≤1%', '0.68', '-'], ['成孔理论方量', 'm³', '/', '18.65', '-'], ['数据采集方式', '', '自动/手动', '手动采集', '-']],
+      '清孔': [['清孔开始时间', '', '/', '2026-07-14 13:00', '-'], ['清孔结束时间', '', '/', '2026-07-14 13:40', '-'], ['泥浆比重', '', '1.03-1.10', '1.06', '-'], ['孔底沉渣', 'mm', '<50mm', '38', '-']],
+      '验收成孔(超声孔壁探测)': [['检测方法', '', '/', '超声波孔壁成像', '-'], ['孔深偏差', 'm', '≤0.5m', '-0.32', '-'], ['孔径情况', '', '/', '局部扩大', '-'], ['孔壁完整性', '', '/', '局部松散', '检测图']],
+      '钢筋笼准备': [['钢筋笼编号', '', '/', 'GJL-D61-01', '-'], ['主筋规格', '', '/', 'HRB400 Φ25', '-'], ['箍筋间距', 'mm', '/', '200', '-'], ['验收照片', '', '上传图片附件', '已上传', '照片']],
+      '下放钢筋笼': [['开始时间', '', '/', '2026-07-14 15:10', '-'], ['结束时间', '', '/', '2026-07-14 15:42', '-'], ['笼顶标高', 'm', '/', '3.78', '-'], ['下放过程照片', '', '上传图片附件', '待上传', '照片']],
+      '二次清孔': [['二清开始时间', '', '/', '2026-07-14 16:00', '-'], ['二清结束时间', '', '/', '2026-07-14 16:20', '-'], ['沉渣厚度', 'mm', '<50mm', '36', '-']],
+      '二次超声孔壁探测': [['复测孔深', 'm', '/', '23.73', '-'], ['复测垂直度', '°', '≤1%', '0.61', '-'], ['孔壁完整性', '', '/', '符合要求', '检测图']],
+      '二次清孔验收': [['验收人员', '', '/', '王工', '-'], ['验收时间', '', '/', '2026-07-14 16:40', '-'], ['验收结论', '', '/', '合格', '-']],
+      '安装导管及料斗': [['导管节数', '节', '/', '7', '-'], ['导管长度', 'm', '/', '24.6', '-'], ['料斗容量', 'm³', '/', '1.5', '-']],
+      '灌注混凝土': [['超灌高度', 'm', '/', '0.8', '-'], ['实际浇筑方量', 'm³', '/', '18.34', '-'], ['设计方量', 'm³', '/', '17.13', '-'], ['混凝土强度', '', '/', 'C35', '-'], ['灌注开始时间', '', '/', '2026-07-14 17:10', '-'], ['灌注结束时间', '', '/', '2026-07-14 18:02', '-']],
+      '拔出导管及钢护筒': [['拔管开始时间', '', '/', '2026-07-14 18:10', '-'], ['拔管结束时间', '', '/', '2026-07-14 18:25', '-'], ['护筒拔出情况', '', '/', '正常', '-']],
+      '施工完成': [['完成时间', '', '/', '2026-07-14 18:35', '-'], ['施工结论', '', '/', '完成', '-'], ['资料完整性', '', '/', '待复核', '-']]
+    };
+    let currentProcessIndex = 16;
+    let selectedProcessIndex = 0;
+    function processStatus(index) {
+      if (index < currentProcessIndex) return 'done';
+      if (index === currentProcessIndex) return 'active';
+      return 'locked';
+    }
+    function renderProcessGrid() {
+      const grid = document.getElementById('processGrid');
+      if (!grid) return;
+      grid.innerHTML = processNames.map((name, index) => {
+        const status = processStatus(index);
+        return `<button class="process-node-btn ${status}" data-process-index="${index}"><i>${index + 1}</i><span>${name}</span></button>`;
+      }).join('');
+      const filled = document.getElementById('filledProcessCount');
+      const current = document.getElementById('currentProcessName');
+      if (filled) filled.textContent = `${currentProcessIndex} / 16`;
+      if (current) current.textContent = processNames[currentProcessIndex] || '施工完成';
+    }
+    function renderProcessForm(index) {
+      if (!document.getElementById('processFormRows')) return;
+      const status = processStatus(index);
+      const name = processNames[index];
+      const isDone = status === 'done';
+      const isActive = status === 'active';
+      document.getElementById('processFormTitle').textContent = `${name}${isActive ? '填报' : '查看'}`;
+      document.getElementById('processFormSubtitle').textContent = isDone ? '该工序已填报，可查看历史填报信息。' : isActive ? '当前可填报工序，保存后下一个工序进入进行中。' : '该工序需等待前序工序完成后才能填报。';
+      const statusTag = document.getElementById('processFormStatus');
+      statusTag.textContent = isDone ? '已填报' : isActive ? '进行中' : '未填报';
+      statusTag.className = `tag ${isDone ? 'green' : isActive ? 'orange' : 'gray'}`;
+      document.getElementById('saveProcessReport').disabled = !isActive;
+      const rows = (processFields[name] || []).map((field, i) => {
+        const disabled = isDone ? 'readonly' : '';
+        return `<tr><td>${i + 1}</td><td>${field[0]}</td><td>${field[1] || '-'}</td><td>${field[2]}</td><td><input class="input" value="${field[3]}" ${disabled}></td><td>${field[4] === '-' ? '-' : `<button class="button ghost">${field[4]}</button>`}</td></tr>`;
+      }).join('');
+      document.getElementById('processFormRows').innerHTML = rows;
+      renderProcessVisual(index);
+    }
+    function renderProcessVisual(index) {
+      const name = processNames[index];
+      const visualStage = document.getElementById('visualStage');
+      const metrics = document.getElementById('visualMetrics');
+      const timeline = document.getElementById('visualTimeline');
+      if (!visualStage) return;
+      document.getElementById('visualTitle').textContent = `${name}可视化`;
+      const commonHole = '<div class="soil"></div><div class="bearing"></div><div class="ruler"><span>0m</span><span>12m</span><span>24m</span></div><div class="pile-hole"></div><div class="centerline"></div>';
+      const specs = [
+        {html:'<div class="grid-bg"></div><div class="ring r3"></div><div class="ring r2"></div><div class="ring r1"></div><div class="cross-x"></div><div class="cross-y"></div><div class="marker"></div><div class="label a"><span class="chip-dot"></span>设计中心</div><div class="label b">实测偏差 21mm</div><div class="label c">控制点 A-03</div>',metrics:[['设计坐标','X 3864.220 / Y 914.580'],['实测坐标','X 3864.237 / Y 914.592'],['定位偏差','21mm'],['判定','合格']],source:'图纸坐标 + 现场复测'},
+        {html:'<div class="soil"></div><div class="centerline"></div><div class="casing"></div><div class="pile-hole" style="height:148px;top:106px"></div><div class="label a">护筒中心复测</div><div class="label b">埋设深度 1.45m</div><div class="label c">筒顶标高 4.10m</div>',metrics:[['护筒直径','1200mm'],['中心偏差','18mm'],['埋设深度','1.45m'],['判定','合格']],source:'现场填报 + 复测记录'},
+        {html:commonHole+'<div class="drill"></div><div class="mud"></div><div class="label a">土层钻进</div><div class="label b">当前孔深 12.60m</div><div class="label c">泥浆护壁稳定</div>',metrics:[['钻进深度','12.60m'],['泥浆比重','1.12'],['孔径控制','1000mm'],['状态','已记录']],source:'设备数据 + 现场填报'},
+        {html:commonHole+'<div class="drill" style="height:238px"></div><div class="mud"></div><div class="label a">进入持力层 1.82m</div><div class="label b">终孔深度 23.75m</div><div class="label c">岩面标高复核</div>',metrics:[['终孔深度','23.75m'],['入持力层','1.82m'],['桩径','1000mm'],['判定','满足设计']],source:'设备数据 + 终孔记录'},
+        {html:commonHole+'<div class="sediment"></div><div class="check-panel">成孔指标<div class="bar"><i style="width:82%"></i></div>孔深合格<div class="bar"><i style="width:76%"></i></div>垂直度合格</div><div class="label a">测绳复核</div><div class="label c">沉渣 42mm</div>',metrics:[['孔深','23.75m'],['垂直度','0.68%'],['沉渣厚度','42mm'],['判定','合格']],source:'现场填报 + 检查记录'},
+        {html:commonHole+'<div class="mud"></div><div class="sediment" style="height:12px"></div><div class="pipe" style="background:#1677ff"></div><div class="down-arrow"></div><div class="label a">循环清孔</div><div class="label b">沉渣降至 38mm</div><div class="label c">含砂率 2.1%</div>',metrics:[['泥浆比重','1.08'],['含砂率','2.1%'],['沉渣厚度','38mm'],['判定','合格']],source:'清孔填报 + 复测记录'},
+        {html:commonHole+'<div class="wave w1"></div><div class="wave w2"></div><div class="check-panel">孔壁探测<div class="bar"><i style="width:95%"></i></div>完整性 95%</div><div class="label a">超声孔壁探测</div><div class="label b">未见明显缩径</div>',metrics:[['孔壁完整性','95%'],['缩径异常','0处'],['检测深度','23.75m'],['结论','通过']],source:'成孔检测设备 + 检测表单'},
+        {html:'<div class="grid-bg"></div><div class="cage" style="height:234px;top:42px"></div><div class="check-panel">钢筋笼验收<div class="bar"><i style="width:100%"></i></div>资料齐套</div><div class="label a">主筋 20C25</div><div class="label b">笼长 22.80m</div><div class="label c">焊接合格</div>',metrics:[['笼长','22.80m'],['主筋规格','20C25'],['焊接验收','合格'],['保护层垫块','齐全']],source:'钢筋笼验收记录'},
+        {html:commonHole+'<div class="rope"></div><div class="hook"></div><div class="cage"></div><div class="down-arrow"></div><div class="label a">吊装下放</div><div class="label b">笼顶标高 3.78m</div><div class="label c">保护层 70mm</div>',metrics:[['笼顶标高','3.78m'],['保护层','70mm'],['下放垂直度','0.55%'],['结论','到位']],source:'吊装填报 + 标高复测'},
+        {html:commonHole+'<div class="pipe" style="background:#1677ff"></div><div class="mud"></div><div class="sediment" style="height:10px"></div><div class="label a">二次清孔</div><div class="label b">沉渣 36mm</div><div class="label c">清孔后等待验收</div>',metrics:[['泥浆比重','1.07'],['沉渣厚度','36mm'],['清孔时长','28min'],['结论','合格']],source:'二清填报 + 沉渣复测'},
+        {html:commonHole+'<div class="wave w1"></div><div class="wave w2"></div><div class="heat h2"></div><div class="check-panel">复测对比<div class="bar"><i style="width:92%"></i></div>稳定</div><div class="label a">二次超声复测</div><div class="label b">轻微波动已记录</div>',metrics:[['完整性','92%'],['异常点','1处轻微'],['复测深度','23.75m'],['结论','可验收']],source:'成孔检测设备 + 复测表单'},
+        {html:commonHole+'<div class="sediment" style="height:8px"></div><div class="check-panel">验收判定<div class="bar"><i style="width:98%"></i></div>通过</div><div class="label a">二次清孔验收</div><div class="label b">沉渣 32mm</div><div class="label c">签认完成</div>',metrics:[['沉渣厚度','32mm'],['垂直度','0.62%'],['验收人','张工'],['结论','通过']],source:'验收签认 + 现场填报'},
+        {html:commonHole+'<div class="pipe"></div><div class="hopper"></div><div class="label a">导管密封检查</div><div class="label b">导管埋深 2.8m</div><div class="label c">料斗容量 1.8m³</div>',metrics:[['导管埋深','2.8m'],['料斗容量','1.8m³'],['密封检查','合格'],['结论','合格']],source:'导管安装记录'},
+        {html:commonHole+'<div class="concrete"></div><div class="pipe"></div><div class="hopper"></div><div class="volume"><i></i><i></i><i></i></div><div class="label a">连续灌注</div><div class="label b">充盈系数 1.07</div><div class="label c">强度 C35</div>',metrics:[['实际方量','18.34m³'],['设计方量','17.13m³'],['充盈系数','1.07'],['强度','C35']],source:'浇筑记录 + 现场填报'},
+        {html:'<div class="soil"></div><div class="seal"></div><div class="pipe"></div><div class="casing" style="top:58px"></div><div class="up-arrow"></div><div class="label a">拔出导管及护筒</div><div class="label b">拔管速度 0.8m/min</div><div class="label c">桩顶余灌 0.62m</div>',metrics:[['拔管速度','0.8m/min'],['余灌高度','0.62m'],['护筒状态','已拔出'],['结论','正常']],source:'收尾填报 + 现场确认'},
+        {html:'<div class="soil"></div><div class="bearing"></div><div class="seal"></div><div class="cap"></div><div class="stamp">施工完成<br>质量合格</div><div class="label a">D61 支护灌注桩</div><div class="label b">资料已归档</div><div class="label c">进入完成状态</div>',metrics:[['最终桩长','23.75m'],['资料完整数','16/16'],['完成时间','2026-07-30 16:42'],['质量结论','合格']],source:'施工填报 + 资料归档'}
+      ];
+      const spec = specs[index];
+      visualStage.innerHTML = spec.html;
+      metrics.innerHTML = spec.metrics.map((item) => `<div class="visual-metric">${item[0]}<b>${item[1]}</b></div>`).join('');
+      timeline.innerHTML = [
+        ['桩号', (document.getElementById('pileReportSearch')?.value || 'D61').split(' ')[0]],
+        ['工序状态', processStatus(index) === 'done' ? '已填报' : processStatus(index) === 'active' ? '进行中' : '未填报'],
+        ['数据来源', spec.source],
+        ['资料去向', '施工记录、资料模块、首页统计']
+      ].map((item) => `<div><span>${item[0]}</span><b>${item[1]}</b></div>`).join('');
+    }
+    document.addEventListener('click', (event) => {
+      const processButton = event.target.closest('.process-node-btn');
+      if (!processButton) return;
+      const index = Number(processButton.dataset.processIndex);
+      if (index > currentProcessIndex) {
+        const note = document.getElementById('processResultNote');
+        note.textContent = `请先完成“${processNames[currentProcessIndex]}”，再填报“${processNames[index]}”。`;
+        note.classList.add('show');
+        return;
+      }
+      selectedProcessIndex = index;
+      document.getElementById('processResultNote').classList.remove('show');
+      renderProcessForm(index);
+    });
+    document.getElementById('saveProcessReport')?.addEventListener('click', () => {
+      if (selectedProcessIndex !== currentProcessIndex) return;
+      currentProcessIndex = Math.min(currentProcessIndex + 1, processNames.length);
+      selectedProcessIndex = Math.min(currentProcessIndex, processNames.length - 1);
+      renderProcessGrid();
+      renderProcessForm(selectedProcessIndex);
+      const note = document.getElementById('processResultNote');
+      note.textContent = '已保存当前工序填报，下一个工序已进入进行中。';
+      note.classList.add('show');
+    });
+    document.getElementById('pileReportSearch')?.addEventListener('change', () => {
+      currentProcessIndex = 16;
+      selectedProcessIndex = 0;
+      renderProcessGrid();
+      renderProcessForm(selectedProcessIndex);
+    });
+    renderProcessGrid();
+    renderProcessForm(selectedProcessIndex);
+    const q4Steps = [
+      {name:'桩点定位', owner:'测量员', caption:'桩点定位与坐标复核', progress:75, metrics:[['X 坐标','324,586.214','m'],['Y 坐标','418,972.653','m'],['中心偏差','4','mm']], actions:['施工坐标与设计图纸核对','全站仪 / RTK 校核记录上传','桩位中心点复测签认','监理旁站确认'], icon:'定位', photo:'桩点定位拍照', params:[['桩点编号','ZHZ-05','','/'],['设计桩点X坐标','324,586.210','m','/'],['实际桩点X坐标','324,586.214','m','> ±5 cm 预警'],['实际桩点Y坐标','418,972.653','m','> ±5 cm 预警'],['桩机高程','+0.120','m','/'],['桩机垂直度','0.18','°','/']]},
+      {name:'钢护筒埋设', owner:'机长', caption:'钢护筒埋设垂直度监控', progress:80, metrics:[['护筒内径','1.32','m'],['护筒埋设标高','+0.320','m'],['护筒长度','2.00','m']], actions:['护筒规格及壁厚验收','护筒中心位置复核','埋深与顶标高测量','周边回填密实度检查'], icon:'护筒', photo:'埋设完毕验收', params:[['护筒内径','1.32','m','/'],['护筒埋设高程','+0.320','m','/'],['护筒长度','2.00','m','/']]},
+      {name:'钻进成孔(土层)', owner:'钻机长', caption:'旋挖钻机土层钻进', progress:60, metrics:[['当前孔深','12.60','m'],['泥浆比重','1.12','g/cm³'],['含砂率','2.4','%']], actions:['钻机水平及钻杆垂直度确认','地层变化记录','泥浆性能抽检','阶段孔深复测'], icon:'钻进', params:[['泥浆比重','1.12','g/cm³','工艺中录入后在施工中回显'],['含砂率','2.4','%','工艺中录入后在施工中回显']]},
+      {name:'钻进成孔(入持力层)', owner:'钻机长', caption:'持力层钻进及岩样判定', progress:60, metrics:[['进入持力层深度','3.45','m'],['持力层性质','中风化','砂岩'],['持续钻进时间','2.18','h']], actions:['持力层岩性联合判定','入岩起始标高记录','代表性岩样留存','终孔条件联合确认'], icon:'入岩', photo:'持力层岩样照片', params:[['进入持力层深度','3.45','m','/'],['持力层性质','中风化','','全风化 / 强风化 / 中风化 / 微风化'],['开始时间','15:40:16','','/'],['结束时间','16:18:52','','/']]},
+      {name:'成孔检查', owner:'质检员', caption:'终孔孔深、孔径与垂直度检测', progress:75, metrics:[['实测孔深','35.86','m'],['实测孔径','1,208','mm'],['垂直度','0.36','%']], actions:['终孔深度复测','孔径检测报告上传','垂直度检测','成孔质量报验'], icon:'检查', photo:'成孔照片留存', params:[['成孔深度','35.86','m','/'],['桩径','1.208','m','/'],['沉渣厚度','42','mm','端承桩＜50 mm；摩擦桩＜100 mm'],['成孔垂直度','0.36','°','≥1% 预警'],['成孔理论方量','42.6','m³','/']]},
+      {name:'清孔', owner:'钻机长', caption:'第一次清孔循环', progress:75, metrics:[['孔底沉渣','42','mm'],['泥浆比重','1.13','g/cm³'],['含砂率','2.2','%']], actions:['循环系统与排渣口检查','泥浆性能检测','孔底沉渣厚度检测','清孔完成确认'], icon:'清孔', photo:'清孔图片留存', params:[]},
+      {name:'验收成孔(超声孔壁探测)', owner:'检测员', caption:'超声成孔质量检测', progress:75, metrics:[['检测深度','35.80','m'],['最大扩径','3.8','%'],['最大倾斜','0.31','%']], actions:['检测设备标定有效性确认','四方位孔壁扫描','异常孔段复测','检测报告签发'], icon:'超声', params:[['孔深','35.86','m','/'],['桩径','1.208','m','/'],['沉渣厚度','42','mm','端承桩＜50 mm；摩擦桩＜100 mm'],['成孔垂直度','0.36','°','≥1% 预警'],['成孔理论方量','42.6','m³','/']]},
+      {name:'钢筋笼准备', owner:'钢筋工长', caption:'钢筋笼节段加工与验收', progress:75, metrics:[['钢筋笼长度','34.20','m'],['主筋数量','24','根'],['加劲箍间距','2.00','m']], actions:['钢筋材质证明核验','主筋接头质量检查','声测管安装密封检查','钢筋笼隐蔽验收'], icon:'钢筋笼', photo:'钢筋笼验收', params:[]},
+      {name:'下放钢筋笼', owner:'起重指挥', caption:'钢筋笼吊装与分节下放', progress:60, metrics:[['已下放深度','22.40','m'],['笼顶标高','+11.80','m'],['吊点偏移','8','mm']], actions:['吊装专项交底','起重设备与吊具检查','节段接头验收','笼顶标高与定位筋固定'], icon:'下笼', photo:'下放完成验收', params:[['钢筋笼安装深度','22.40','m','/']]},
+      {name:'二次清孔', owner:'施工员', caption:'导管安装后二次清孔', progress:75, metrics:[['孔底沉渣','34','mm'],['泥浆比重','1.08','g/cm³'],['黏度','18.2','s']], actions:['导管水密试验记录核验','清孔循环时间记录','泥浆三项指标复测','沉渣厚度最终确认'], icon:'二清', photo:'清孔图片留存', params:[]},
+      {name:'二次超声孔壁探测', owner:'检测员', caption:'钢筋笼下放后孔壁复测', progress:75, metrics:[['复测孔深','35.76','m'],['沉渣厚度','36','mm'],['成孔垂直度','0.34','%']], actions:['声测管通畅性检查','复测数据完整性检查','一次 / 二次结果比对','复测报告确认'], icon:'复测', params:[['沉渣厚度','36','mm','端承桩＜50 mm；摩擦桩＜100 mm'],['成孔理论方量','42.6','m³','/'],['孔深','35.76','m','/'],['桩径','1.204','m','/'],['成孔垂直度','0.34','°','≥1% 预警']]},
+      {name:'二次清孔验收', owner:'监理工程师', caption:'灌注前清孔指标联合验收', progress:75, metrics:[['沉渣厚度','32','mm'],['泥浆比重','1.07','g/cm³'],['含砂率','1.6','%']], actions:['沉渣厚度联合复测','泥浆性能联合抽检','灌注条件检查','清孔验收签认'], icon:'验收', photo:'清孔完毕验收', params:[]},
+      {name:'安装导管及料斗', owner:'施工员', caption:'灌注导管与料斗安装', progress:60, metrics:[['闭水打压试验压力','0.80','MPa'],['导管总长','34.60','m'],['底口距孔底','0.42','m']], actions:['导管规格及外观检查','导管水密承压试验','导管长度与节数记录','料斗容积及连接检查'], icon:'导管', photo:'闭水打压试验', params:[['闭水打压试验试水压力','0.80','Mpa','/']]},
+      {name:'灌注混凝土', owner:'浇筑负责人', caption:'水下混凝土连续灌注', progress:60, metrics:[['实际浇筑方量','28.6','m³'],['设计方量','43.2','m³'],['超灌高度','0.46','m']], actions:['首车配合比与坍落度核验','灌注连续性与方量记录','导管埋深动态控制','桩顶超灌高度确认'], icon:'灌注', params:[['超灌高度','0.46','m','/'],['实际浇筑方量','28.6','m³','/'],['设计方量','43.2','m³','/'],['混凝土强度','C35','','/']]},
+      {name:'拔出导管及钢护筒', owner:'机长', caption:'灌注完成后设备拔除', progress:60, metrics:[['导管剩余','4','节'],['护筒提升','0.80','m'],['桩顶标高','-1.62','m']], actions:['灌注总方量核对','导管节数清点与清洗','钢护筒缓慢拔除','孔口防护与场地清理'], icon:'拔管', params:[]},
+      {name:'施工完成', owner:'项目工程师', caption:'单桩施工资料归档与闭环', progress:100, metrics:[['实际桩长','34.18','m'],['灌注方量','46.8','m³'],['超灌高度','0.83','m']], actions:['施工原始记录复核','影像与检测数据归档','质量验收资料组卷','单桩施工闭环确认'], icon:'完成', photo:'上传举牌照片', params:[['施工完成桩顶高程','-1.620','m','/']]}
+    ];
+    const q4FillFields = [
+      [['桩点编号','','/','ZHZ-05','定位照片'],['设计桩点X坐标','m','图纸解析生成','324,586.210','-'],['设计桩点Y坐标','m','图纸解析生成','418,972.655','-'],['实际桩点X坐标','m','偏差 > ±5cm 预警','324,586.214','-'],['实际桩点Y坐标','m','偏差 > ±5cm 预警','418,972.653','-'],['桩机高程','m','/','+0.120','-'],['桩机垂直度','°','/','0.18','-']],
+      [['护筒内径','m','≥设计桩径','1.32','-'],['护筒埋设高程','m','/','+0.320','-'],['护筒长度','m','≥方案要求','2.00','-'],['护筒中心偏差','mm','≤50','6','-'],['护筒垂直度','%','≤1','0.22','埋设完毕验收']],
+      [['当前孔深','m','/','12.60','-'],['泥浆比重','g/cm³','1.10-1.25','1.12','-'],['含砂率','%','≤4','2.4','-'],['钻进开始时间','','/','2026-07-29 09:18','-'],['地层变化记录','','必填','粉质黏土层','-']],
+      [['进入持力层深度','m','≥设计要求','3.45','岩样照片'],['持力层性质','','全风化/强风化/中风化/微风化','中风化','-'],['入岩起始标高','m','/','-32.350','-'],['开始时间','','/','2026-07-29 15:40:16','-'],['结束时间','','/','2026-07-29 16:18:52','-']],
+      [['成孔深度','m','/','35.86','成孔照片'],['桩径','m','/','1.208','-'],['沉渣厚度','mm','端承桩＜50；摩擦桩＜100','42','-'],['成孔垂直度','%','≤1','0.36','-'],['成孔理论方量','m³','/','42.6','检测报告']],
+      [['清孔开始时间','','/','2026-07-29 10:54','清孔图片'],['清孔结束时间','','/','2026-07-29 11:18','-'],['泥浆比重','g/cm³','1.03-1.10','1.08','-'],['含砂率','%','≤4','2.2','-'],['孔底沉渣','mm','＜50','42','-']],
+      [['检测方法','','/','超声波孔壁成像','检测图'],['检测深度','m','/','35.80','-'],['最大扩径','%','按方案预警','3.8','-'],['最大倾斜','%','≤1','0.31','-'],['孔壁完整性','','/','未见明显缩径','检测报告']],
+      [['钢筋笼编号','','/','GJL-ZHZ-05-01','钢筋笼验收'],['钢筋笼长度','m','/','34.20','-'],['主筋数量','根','按设计','24','-'],['主筋规格','','按设计','C25','-'],['加劲箍间距','m','/','2.00','-'],['声测管密封检查','','必填','合格','照片']],
+      [['钢筋笼安装深度','m','/','22.40','下放完成验收'],['笼顶标高','m','/','+11.80','-'],['吊点偏移','mm','≤50','8','-'],['下放开始时间','','/','2026-07-29 09:52','-'],['下放过程结论','','/','正常','照片']],
+      [['二清开始时间','','/','2026-07-29 12:18','清孔图片'],['二清结束时间','','/','2026-07-29 12:42','-'],['泥浆比重','g/cm³','≤1.10','1.08','-'],['黏度','s','按方案控制','18.2','-'],['孔底沉渣','mm','＜50','34','-']],
+      [['复测孔深','m','/','35.76','检测图'],['沉渣厚度','mm','端承桩＜50；摩擦桩＜100','36','-'],['桩径','m','/','1.204','-'],['成孔垂直度','%','≤1','0.34','-'],['成孔理论方量','m³','/','42.6','复测报告']],
+      [['验收时间','','/','2026-07-29 14:22','清孔完毕验收'],['沉渣厚度','mm','＜50','32','-'],['泥浆比重','g/cm³','≤1.10','1.07','-'],['含砂率','%','≤4','1.6','-'],['验收结论','','必填','合格','签认记录']],
+      [['闭水打压试验压力','MPa','按方案要求','0.80','闭水打压试验'],['导管总长','m','/','34.60','-'],['导管节数','节','/','12','-'],['底口距孔底','m','0.3-0.5','0.42','-'],['料斗容量','m³','/','1.8','照片']],
+      [['超灌高度','m','/','0.46','-'],['实际浇筑方量','m³','/','28.6','-'],['设计方量','m³','/','43.2','-'],['混凝土强度','','/','C35','-'],['导管埋深','m','2-6','3.8','-'],['试件编号','','必填','Z05-02','取样照片']],
+      [['拔管开始时间','','/','2026-07-29 18:02','-'],['拔管结束时间','','/','2026-07-29 18:25','-'],['导管剩余','节','/','4','-'],['护筒提升高度','m','/','0.80','-'],['桩顶标高','m','/','-1.62','收尾照片']],
+      [['施工完成时间','','/','2026-07-29 19:06','上传举牌照片'],['实际桩长','m','/','34.18','-'],['灌注方量','m³','/','46.8','-'],['超灌高度','m','/','0.83','-'],['施工完成桩顶高程','m','/','-1.620','-'],['资料完整性','','必填','完整','归档记录']]
+    ];
+    const q4PileData = {
+      5: {code:'ZHZ-05', version:'V3.2', fields:[['桩型','钻孔灌注桩'],['设计桩径','Φ 1,200 mm'],['设计桩长','33.35 m'],['桩顶 / 桩底标高','-2.450 / -35.800 m'],['混凝土强度','C35 水下混凝土']]},
+      6: {code:'ZHZ-06', version:'V3.1', fields:[['桩型','钻孔灌注桩'],['设计桩径','Φ 1,000 mm'],['设计桩长','31.20 m'],['桩顶 / 桩底标高','-2.300 / -33.500 m'],['混凝土强度','C35 水下混凝土']]},
+      11:{code:'ZHZ-11', version:'V3.2', fields:[['桩型','钻孔灌注桩'],['设计桩径','Φ 1,200 mm'],['设计桩长','36.80 m'],['桩顶 / 桩底标高','-2.600 / -39.400 m'],['混凝土强度','C40 水下混凝土']]}
+    };
+    const q4MonitorModes = [
+      ['RTK-05 / 全站仪联机','坐标测量'], ['倾角仪 + 标高采集','垂直度监控'], ['旋挖钻机采集','土层钻进'], ['钻机采集 + 岩样记录','持力层判定'],
+      ['井径仪 / 测绳数据','成孔检测'], ['泥浆循环记录','清孔监测'], ['超声成孔检测仪','四向扫描'], ['钢筋加工区移动终端','加工验收'],
+      ['吊装监控 + 深度计','下放监控'], ['泥浆循环记录','二次清孔'], ['超声成孔检测仪','复测对比'], ['监理移动验收端','联合验收'],
+      ['压力传感器 + 影像','导管试压'], ['灌注方量计 + 视频','连续灌注'], ['起重监控 + 位移计','拔管监控'], ['资料归档中心','闭环归档']
+    ];
+    const homePileStatus = {
+      B39: { type: '支护工程 · 支护灌注桩', stage: '未开始', task: '未开始', time: '今日 08:00', device: 'XR-02', team: '班组一队', zone: 'B段', plan: true },
+      D61: { type: '支护工程 · 支护灌注桩', stage: '成孔进行中', task: '进行中', time: '今日 15:10', device: 'XR-02', team: '班组一队', zone: 'D段', plan: true },
+      B27: { type: '支护工程 · 支护灌注桩', stage: '成孔完成', task: '待复核', time: '今日 09:30', device: 'XR-05', team: '班组三队', zone: 'B段', plan: true },
+      C357: { type: '工程桩 · 旋挖灌注桩', stage: '浇筑完成', task: '已完成', time: '今日 14:00', device: 'PB-01', team: '浇筑一队', zone: 'C区', plan: true }
+    };
+    function updateHomePileStatus(pileNo) {
+      const fallback = { type: '支护工程 · 支护灌注桩', stage: '未开始', task: '无今日任务', time: '-', device: '-', team: '-', zone: '未分区', plan: false };
+      const data = homePileStatus[pileNo] || fallback;
+      const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+      setText('homePileNo', pileNo);
+      setText('homePileType', data.type);
+      setText('homePileStage', data.stage);
+      setText('homePileTask', data.task);
+      setText('homePileTime', data.time);
+      setText('homePileDevice', data.device);
+      setText('homePileTeam', data.team);
+      setText('homePileZone', data.zone);
+      setText('homePileTip', data.plan ? '该桩点今日已创建任务，地图点位闪烁提示。' : '该桩点今日未创建任务，仅展示桩点基础状态。');
+      const tag = document.getElementById('homePilePlanTag');
+      if (tag) {
+        tag.textContent = data.plan ? '今日计划' : '无今日任务';
+        tag.className = `tag ${data.plan ? 'orange' : 'gray'}`;
+      }
+      document.querySelectorAll('[data-home-pile]').forEach((dot) => dot.classList.toggle('selected', dot.dataset.homePile === pileNo));
+    }
+    document.querySelectorAll('[data-home-pile]').forEach((dot) => {
+      dot.addEventListener('mouseenter', () => updateHomePileStatus(dot.dataset.homePile));
+      dot.addEventListener('click', () => updateHomePileStatus(dot.dataset.homePile));
+    });
+    updateHomePileStatus('B39');
+    const q4Requirements = [
+      ['核对设计坐标、控制点及桩点编号','设备校准有效，测量记录须上传','实测桩位偏差不大于 ±50 mm','监理签认后方可进入下一节点'],
+      ['护筒内径、壁厚及长度满足设计','中心偏差≤50 mm，垂直度≤1%','顶标高与埋深实测值完整留档','回填密实并上传埋设完成照片'],
+      ['泥浆液面持续高于地下水位','比重、含砂率超限时预警','每钻进 5 m 复测一次孔深','地层变化与钻进参数同步记录'],
+      ['入持力层起始标高必须留档','持力层性质由地勘与监理联合判定','每个代表性岩层留存岩样照片','满足设计入岩深度后联合终孔'],
+      ['孔深、孔径和垂直度均应实测','孔底沉渣与理论方量同步核对','检测原始文件及成孔照片上传','形成成孔检查报验记录'],
+      ['清孔循环连续且返浆稳定','泥浆三项指标满足验收要求','沉渣厚度不大于控制值','上传清孔过程及完成影像'],
+      ['设备标定在有效期内','四个方位完成孔壁连续扫描','异常孔段必须进行复测','检测报告签发后自动归档'],
+      ['钢筋规格、数量与设计一致','接头质量及保护层垫块合格','声测管安装牢固并密封','完成隐蔽验收后允许起吊'],
+      ['吊装前完成安全技术交底','分节接头逐节验收并留痕','钢筋笼安装深度满足设计','下放完成照片及笼顶标高上传'],
+      ['导管密封状态正常','循环时长和返浆状态持续记录','泥浆三项指标再次复测','最终沉渣值合格后提交确认'],
+      ['声测管通畅且通道配置正确','复测数据完整率不低于 95%','一次与二次检测结果自动比对','异常差异必须发起处置流程'],
+      ['沉渣、比重、含砂率联合复测','灌注条件由施工、质检共同确认','上传清孔完毕验收影像','监理签认后方可开始灌注'],
+      ['导管水密试验压力满足方案','导管长度、节数逐节记录','底口距孔底保持 0.3～0.5 m','料斗连接和容量检查合格'],
+      ['首车配合比和坍落度核验','灌注必须连续并记录方量','导管埋深保持 2～6 m','结束时核对实际方量与超灌高度'],
+      ['导管分节拔除并同步清点','护筒必须缓慢、垂直拔除','桩顶标高及超灌高度最终复核','完成孔口防护和场地清理'],
+      ['施工原始记录完整且逻辑一致','影像、检测和监测数据全部归档','质量验收资料自动组卷','项目负责人完成单桩闭环签认']
+    ];
+    let q4ActivePile = '5';
+    let q4ActiveIndex = 0;
+    function q4StageSvg(label, index) {
+      const blue = '#1677ff', green = '#12b76a', pale = '#dce7fa', ink = '#52627b', orange = '#faad14';
+      const symbols = [
+        '<circle cx="54" cy="28" r="19" fill="none" stroke="'+blue+'" stroke-width="3"/><path d="M54 4v48M30 28h48" stroke="'+blue+'" stroke-width="2"/><circle cx="54" cy="28" r="4" fill="'+blue+'"/>',
+        '<rect x="28" y="6" width="52" height="54" rx="5" fill="none" stroke="'+blue+'" stroke-width="4"/><path d="M20 60h68M36 17h36" stroke="#718fca" stroke-width="3"/>',
+        '<path d="M54 0v62M40 12l14-12 14 12M38 62h32" stroke="'+blue+'" stroke-width="4" fill="none"/><path d="M45 21h18M45 31h18M45 41h18" stroke="#7a96cb" stroke-width="2"/>',
+        '<path d="M54 0v62" stroke="'+blue+'" stroke-width="6"/><path d="m39 14 15-14 15 14M37 60h34" stroke="#456db9" stroke-width="3" fill="none"/>',
+        '<circle cx="54" cy="30" r="26" fill="none" stroke="'+blue+'" stroke-width="3"/><path d="m40 30 9 9 20-22" fill="none" stroke="'+green+'" stroke-width="5"/>',
+        '<path d="M25 12h58v42H25z" fill="none" stroke="'+blue+'" stroke-width="3"/><path d="M30 20c12 8 36-8 48 0M30 31c12 8 36-8 48 0M30 42c12 8 36-8 48 0" fill="none" stroke="#5e87d8" stroke-width="3"/>',
+        '<path d="M25 52c12-44 46-44 58 0" fill="none" stroke="'+blue+'" stroke-width="3"/><path d="M34 45c9-30 31-30 40 0M54 10v48" fill="none" stroke="#6d8fcf" stroke-width="2"/>',
+        '<path d="M35 2v58M73 2v58M35 10h38M35 22h38M35 34h38M35 46h38M45 2v58M63 2v58" fill="none" stroke="'+blue+'" stroke-width="2.5"/>',
+        '<path d="M30 4h48v18H30zM36 22v38M72 22v38" fill="none" stroke="'+blue+'" stroke-width="3"/><path d="m46 43 8 8 14-16" fill="none" stroke="'+green+'" stroke-width="4"/>',
+        '<path d="M25 12h58v42H25z" fill="none" stroke="'+blue+'" stroke-width="3"/><path d="M30 20c12 8 36-8 48 0M30 31c12 8 36-8 48 0M30 42c12 8 36-8 48 0" fill="none" stroke="#5e87d8" stroke-width="3"/>',
+        '<path d="M14 38h16l8-22 12 42 12-35 11 25 13-13 12 5 12-27 13 45 10-20h14" fill="none" stroke="'+blue+'" stroke-width="3"/>',
+        '<circle cx="54" cy="30" r="26" fill="#e8fff3" stroke="'+green+'" stroke-width="3"/><path d="m40 30 9 9 20-22" fill="none" stroke="'+green+'" stroke-width="5"/>',
+        '<path d="M38 2h32l-4 20H42zM50 22v38M58 22v38" fill="none" stroke="'+blue+'" stroke-width="3"/><path d="M31 60h46" stroke="#6688ca" stroke-width="3"/>',
+        '<path d="M28 2h52l-8 18H36zM54 20v40" fill="none" stroke="'+blue+'" stroke-width="3"/><rect x="86" y="36" width="14" height="25" fill="'+pale+'"/><rect x="108" y="24" width="14" height="37" fill="'+blue+'"/>',
+        '<path d="M28 4v45M72 4v45M28 15h44M28 29h44M28 43h44" fill="none" stroke="'+blue+'" stroke-width="3"/><path d="M95 54V9M87 18l8-9 8 9" fill="none" stroke="'+orange+'" stroke-width="3"/>',
+        '<circle cx="54" cy="30" r="26" fill="#e8fff3" stroke="'+green+'" stroke-width="3"/><path d="m39 30 10 10 21-23" fill="none" stroke="'+green+'" stroke-width="5"/>'
+      ];
+      return symbols[index] + '<text x="54" y="82" text-anchor="middle" fill="'+ink+'" font-size="13" font-weight="700">'+label+'</text>';
+    }
+    function q4VisualSvg(index) {
+      const blue = '#1677ff', pale = '#dce7fa', green = '#12b76a', ink = '#52627b', orange = '#faad14';
+      const visuals = [
+        '<circle cx="50" cy="30" r="24" fill="none" stroke="'+blue+'" stroke-width="3"/><path d="M50 0v60M20 30h60" stroke="'+blue+'" stroke-width="2"/><circle cx="50" cy="30" r="5" fill="'+blue+'"/><text x="90" y="25" fill="'+ink+'" font-size="11">ΔX +3 mm</text><text x="90" y="44" fill="'+ink+'" font-size="11">ΔY -2 mm</text>',
+        '<path d="M38 4h36v58H38z" fill="none" stroke="'+blue+'" stroke-width="4"/><path d="M56 7v52" stroke="'+pale+'" stroke-width="7"/><text x="84" y="53" fill="'+ink+'" font-size="11">垂直度 0.22%</text>',
+        '<path d="M18 58h132M28 10v48" stroke="'+pale+'" stroke-width="2"/><polyline points="28,18 47,25 67,22 87,38 107,35 127,49 146,44" fill="none" stroke="'+blue+'" stroke-width="3"/><circle cx="146" cy="44" r="4" fill="'+orange+'"/><text x="42" y="12" fill="'+ink+'" font-size="10">钻进深度曲线</text>',
+        '<rect x="22" y="8" width="58" height="16" fill="#e8d9bd"/><rect x="22" y="24" width="58" height="17" fill="#cfb890"/><rect x="22" y="41" width="58" height="22" fill="#9ba7b8"/><path d="M51 3v59" stroke="'+blue+'" stroke-width="4"/><text x="92" y="57" fill="'+blue+'" font-size="10">中风化层</text>',
+        '<circle cx="54" cy="32" r="27" fill="none" stroke="'+pale+'" stroke-width="8"/><circle cx="54" cy="32" r="27" fill="none" stroke="'+green+'" stroke-width="8" stroke-dasharray="145 24" transform="rotate(-90 54 32)"/><text x="54" y="36" text-anchor="middle" fill="'+green+'" font-size="13" font-weight="700">合格</text>',
+        '<path d="M18 22c17-11 34 11 51 0s34 11 51 0 24 0 30 3M18 42c17-11 34 11 51 0s34 11 51 0 24 0 30 3" fill="none" stroke="'+blue+'" stroke-width="3"/><text x="104" y="61" fill="'+ink+'" font-size="10">返浆稳定</text>',
+        '<path d="M18 60c14-48 45-48 59 0M27 53c10-34 31-34 41 0M47 12v49" fill="none" stroke="'+blue+'" stroke-width="3"/><path d="M94 16h52M94 30h44M94 44h50" stroke="'+pale+'" stroke-width="6"/><circle cx="138" cy="30" r="4" fill="'+green+'"/>',
+        '<path d="M25 2v60M69 2v60M25 12h44M25 25h44M25 38h44M25 51h44M37 2v60M57 2v60" fill="none" stroke="'+blue+'" stroke-width="2"/><path d="m94 34 10 10 20-23" fill="none" stroke="'+green+'" stroke-width="4"/>',
+        '<rect x="28" y="4" width="50" height="58" fill="none" stroke="'+pale+'" stroke-width="3"/><path d="M42 4v58M64 4v58M42 15h22M42 28h22M42 41h22M42 54h22" stroke="'+blue+'" stroke-width="2"/><path d="M100 4v58" stroke="'+ink+'" stroke-width="2"/><text x="112" y="35" fill="'+ink+'" font-size="10">22.4 m</text>',
+        '<path d="M18 22c17-11 34 11 51 0s34 11 51 0 24 0 30 3M18 42c17-11 34 11 51 0s34 11 51 0 24 0 30 3" fill="none" stroke="'+blue+'" stroke-width="3"/><path d="M25 57h116" stroke="'+green+'" stroke-width="4"/><text x="89" y="13" fill="'+ink+'" font-size="10">沉渣 34 mm</text>',
+        '<path d="M14 38h16l8-22 12 42 12-35 11 25 13-13 12 5 12-27 13 45 10-20h14" fill="none" stroke="'+blue+'" stroke-width="3"/><text x="31" y="12" fill="'+ink+'" font-size="10">一次 / 二次波形比对</text>',
+        '<circle cx="50" cy="31" r="27" fill="#e8fff3" stroke="'+green+'" stroke-width="3"/><path d="m35 31 10 10 21-23" fill="none" stroke="'+green+'" stroke-width="5"/><text x="90" y="45" fill="'+blue+'" font-size="10">待监理签认</text>',
+        '<circle cx="52" cy="32" r="27" fill="none" stroke="'+pale+'" stroke-width="7"/><path d="M52 32 70 15" stroke="'+orange+'" stroke-width="4"/><text x="91" y="29" fill="'+ink+'" font-size="10">试压 0.80 MPa</text>',
+        '<path d="M24 8h38l-6 15H30zM43 23v38" fill="none" stroke="'+blue+'" stroke-width="3"/><rect x="83" y="36" width="14" height="25" fill="'+pale+'"/><rect x="103" y="25" width="14" height="36" fill="#9ebbf5"/><rect x="123" y="13" width="14" height="48" fill="'+blue+'"/>',
+        '<path d="M28 4v45M72 4v45M28 15h44M28 29h44M28 43h44" fill="none" stroke="'+blue+'" stroke-width="3"/><path d="M95 54V9M87 18l8-9 8 9" fill="none" stroke="'+orange+'" stroke-width="3"/>',
+        '<rect x="22" y="8" width="56" height="50" rx="5" fill="#fff" stroke="'+pale+'" stroke-width="3"/><path d="M32 21h34M32 31h34M32 41h23" stroke="'+blue+'" stroke-width="3"/><circle cx="115" cy="33" r="25" fill="#e8fff3" stroke="'+green+'" stroke-width="3"/><path d="m102 33 9 9 18-20" fill="none" stroke="'+green+'" stroke-width="4"/>'
+      ];
+      return visuals[index];
+    }
+    function renderQ4Pile(pileNo) {
+      const data = q4PileData[pileNo];
+      if (!data) return;
+      q4ActivePile = pileNo;
+      const pileSelect = document.getElementById('q4PileSelect');
+      if (pileSelect) pileSelect.value = String(pileNo);
+      document.getElementById('q4PileCurrent').textContent = `当前查看：${pileNo}#桩施工过程`;
+      document.getElementById('q4DesignHeading').textContent = `${pileNo}#桩 · 基本设计信息`;
+      document.getElementById('q4DesignSub').textContent = `设计编号：${data.code}　｜　图纸版本：${data.version}　｜　原型演示数据`;
+      document.getElementById('q4DesignGrid').innerHTML = data.fields.map((field, i) => `<div class="q4-design-item"><label>${field[0]}</label><strong class="${i===1?'blue':''}">${field[1]}</strong></div>`).join('');
+    }
+    function renderQ4Nodes() {
+      const el = document.getElementById('q4Nodes');
+      if (!el) return;
+      el.innerHTML = q4Steps.map((s, i) => {
+        const state = i < q4ActiveIndex ? 'done' : i === q4ActiveIndex ? 'active' : '';
+        return `<button class="q4-node ${state}" title="${s.name}" data-q4-step="${i}"><span class="q4-num"><span>${i+1}</span></span><span class="q4-name">${s.name}</span></button>`;
+      }).join('');
+    }
+    function selectQ4Step(index) {
+      q4ActiveIndex = index;
+      const s = q4Steps[index];
+      renderQ4Nodes();
+      document.getElementById('q4OpTitle').textContent = `过程填报 · ${s.name}`;
+      document.getElementById('q4StageBadge').textContent = `节点 ${String(index+1).padStart(2,'0')} / 16`;
+      document.getElementById('q4OwnerBadge').textContent = `责任人 · ${s.owner}`;
+      document.getElementById('q4MonitorCaption').textContent = s.caption;
+      document.getElementById('q4MonitorSource').textContent = q4MonitorModes[index][0].replace('-05', `-${String(q4ActivePile).padStart(2,'0')}`);
+      document.getElementById('q4ModeTag').textContent = q4MonitorModes[index][1];
+      document.getElementById('q4StageIcon').innerHTML = q4StageSvg(s.icon, index);
+      document.getElementById('q4VisualLayer').innerHTML = q4VisualSvg(index);
+      const fillHeight = Math.max(6, Math.round((index + 1) / 16 * 151));
+      const pileFill = document.getElementById('q4PileFill');
+      pileFill.setAttribute('y', 231 - fillHeight);
+      pileFill.setAttribute('height', fillHeight);
+      document.getElementById('q4Metrics').innerHTML = s.metrics.map((m) => `<div class="q4-metric"><label>${m[0]}</label><div class="q4-metric-row"><span><strong>${m[1]}</strong> <small>${m[2]}</small></span><span class="q4-trend">已采集</span></div></div>`).join('') +
+        (s.photo ? `<div class="q4-photo-upload"><div class="q4-photo-icon"></div><div class="q4-photo-copy"><strong>${s.photo} · 必传</strong><span>支持 JPG / PNG，记录上传时间</span></div><button class="q4-upload-btn" data-q4-toast="上传${s.photo}">上传照片</button></div>` : '');
+      const fillRows = q4FillFields[index] || [];
+      document.getElementById('q4KeyData').innerHTML = `<div class="q4-key-head"><strong>节点关键数据</strong><span>本区域即当前节点需要填报的字段内容</span></div>
+        <table class="q4-fill-table">
+          <thead><tr><th style="width:24%">填报项</th><th style="width:10%">单位</th><th style="width:24%">预警 / 规则</th><th style="width:24%">填报值</th><th style="width:18%">附件</th></tr></thead>
+          <tbody>${fillRows.map((p) => `<tr><td>${p[0]}</td><td>${p[1] || '-'}</td><td>${p[2]}</td><td><input class="q4-fill-value" value="${p[3]}" ${index < q4ActiveIndex ? 'readonly' : ''}></td><td>${p[4] === '-' ? '-' : `<span class="q4-attach ${p[4].includes('照片') || p[4].includes('验收') || p[4].includes('报告') || p[4].includes('记录') ? 'required' : ''}">${p[4]}</span>`}</td></tr>`).join('')}</tbody>
+        </table>`;
+    }
+    document.addEventListener('click', (event) => {
+      const step = event.target.closest('[data-q4-step]');
+      if (step) selectQ4Step(Number(step.dataset.q4Step));
+      const toastBtn = event.target.closest('[data-q4-toast]');
+      if (toastBtn) openPrototypeModal('原型交互', `<p>${toastBtn.dataset.q4Toast}</p><p class="panel-subtitle">实际系统中这里会打开文件上传或移动端拍照上传入口。</p>`);
+    });
+    document.getElementById('q4PileSelect')?.addEventListener('change', (e) => {
+      renderQ4Pile(e.target.value);
+      selectQ4Step(q4ActiveIndex);
+    });
+    renderQ4Pile(q4ActivePile);
+    selectQ4Step(q4ActiveIndex);
+    document.querySelectorAll('[data-drawing-tabs] button').forEach((button) => {
+      button.addEventListener('click', () => {
+        const key = button.dataset.drawingTab;
+        document.querySelectorAll('[data-drawing-tabs] button').forEach((b) => b.classList.toggle('active', b === button));
+        document.querySelectorAll('.drawing-tab-panel').forEach((panel) => panel.classList.toggle('active', panel.id === key));
+      });
+    });
+    const prototypeMask = document.getElementById('prototypeModalMask');
+    let pendingEnableCard = null;
+    function openPrototypeModal(id) {
+      prototypeMask.querySelectorAll('.modal').forEach((modal) => modal.hidden = true);
+      document.getElementById(id).hidden = false;
+      prototypeMask.classList.add('show');
+    }
+    function closePrototypeModal() {
+      prototypeMask.classList.remove('show');
+      prototypeMask.querySelectorAll('.modal').forEach((modal) => modal.hidden = true);
+    }
+    document.querySelectorAll('.preview-drawing').forEach((button) => {
+      button.addEventListener('click', () => openPrototypeModal('drawingPreviewModal'));
+    });
+    document.addEventListener('click', (event) => {
+      const enableButton = event.target.closest('.enable-drawing-check');
+      if (!enableButton) return;
+      pendingEnableCard = enableButton.closest('.drawing-card');
+      openPrototypeModal('enableValidationModal');
+    });
+    document.getElementById('confirmEnableDrawing').addEventListener('click', () => {
+      if (pendingEnableCard) {
+        pendingEnableCard.classList.add('active-source');
+        const badge = pendingEnableCard.querySelector('.drawing-card-head .tag');
+        if (badge) {
+          badge.textContent = '已启用';
+          badge.className = 'tag blue';
+        }
+        const enableButton = pendingEnableCard.querySelector('.enable-drawing-check');
+        if (enableButton) enableButton.outerHTML = '<button class="button ghost" disabled>已启用</button>';
+        const enabledCount = document.querySelectorAll('.drawing-card.active-source').length;
+        const enabledCountEl = document.getElementById('enabledDrawingCount');
+        if (enabledCountEl) enabledCountEl.textContent = `${enabledCount}张`;
+      }
+      closePrototypeModal();
+    });
+    document.querySelectorAll('[data-pile-parent-tabs] button').forEach((button) => {
+      button.addEventListener('click', () => {
+        const key = button.dataset.pileParent;
+        document.querySelectorAll('[data-pile-parent-tabs] button').forEach((b) => b.classList.toggle('active', b === button));
+        document.querySelectorAll('[data-pile-child-group]').forEach((group) => {
+          group.style.display = group.dataset.pileChildGroup === key ? 'inline-flex' : 'none';
+        });
+        const firstTarget = key === 'support' ? 'support-bored' : 'project-bored';
+        document.querySelectorAll('.pile-type-panel').forEach((panel) => panel.classList.toggle('active', panel.id === firstTarget));
+      });
+    });
+    document.querySelectorAll('[data-pile-panel-target]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const target = button.dataset.pilePanelTarget;
+        button.parentElement.querySelectorAll('button').forEach((b) => b.classList.toggle('active', b === button));
+        document.querySelectorAll('.pile-type-panel').forEach((panel) => panel.classList.toggle('active', panel.id === target));
+      });
+    });
+    document.getElementById('generatePileInfo').addEventListener('click', () => openPrototypeModal('generatePileInfoModal'));
+    document.getElementById('confirmGeneratePileInfo').addEventListener('click', () => {
+      const note = document.getElementById('generationNote');
+      note.textContent = '已按当前启用图纸生成桩点信息版本 PV-05。后续若重新解析图纸或导入 Excel，将先进行同桩号与同坐标比对；已完工桩点保持冻结，历史版本可回溯查看。';
+      note.classList.add('show');
+      closePrototypeModal();
+    });
+    document.getElementById('importPileExcel').addEventListener('click', () => openPrototypeModal('pileExcelImportModal'));
+    document.getElementById('confirmImportPileExcel').addEventListener('click', () => {
+      const note = document.getElementById('generationNote');
+      note.textContent = '已完成 Excel 导入比对：保留现行版本，新增 126 条非冲突桩点，1 条坐标缺失数据未写入；如需覆盖冲突项，将生成新的桩点版本并保留历史。';
+      note.classList.add('show');
+      closePrototypeModal();
+    });
+    document.getElementById('openPileVersionHistory')?.addEventListener('click', () => openPrototypeModal('pileVersionHistoryModal'));
+    document.addEventListener('click', (event) => {
+      const editButton = event.target.closest('.edit-pile-row');
+      const saveButton = event.target.closest('.save-pile-row');
+      const cancelButton = event.target.closest('.cancel-pile-row');
+      if (editButton) {
+        const row = editButton.closest('tr');
+        row.classList.add('inline-editing');
+        row.querySelectorAll('td[data-editable]').forEach((cell) => {
+          cell.dataset.oldValue = cell.textContent.trim();
+          cell.innerHTML = `<input class="inline-input" value="${cell.dataset.oldValue}">`;
+        });
+        editButton.closest('.row-actions').innerHTML = '<button class="button ghost save-pile-row">保存</button><button class="button ghost cancel-pile-row">取消</button>';
+      }
+      if (saveButton) {
+        const row = saveButton.closest('tr');
+        row.querySelectorAll('td[data-editable]').forEach((cell) => {
+          const input = cell.querySelector('input');
+          cell.textContent = input ? input.value : cell.dataset.oldValue;
+        });
+        row.classList.remove('inline-editing');
+        saveButton.closest('.row-actions').innerHTML = '<button class="button ghost">详情</button><button class="button ghost edit-pile-row">编辑</button>';
+      }
+      if (cancelButton) {
+        const row = cancelButton.closest('tr');
+        row.querySelectorAll('td[data-editable]').forEach((cell) => {
+          cell.textContent = cell.dataset.oldValue || cell.textContent;
+        });
+        row.classList.remove('inline-editing');
+        cancelButton.closest('.row-actions').innerHTML = '<button class="button ghost">详情</button><button class="button ghost edit-pile-row">编辑</button>';
+      }
+    });
+    document.querySelectorAll('[data-task-tabs] button').forEach((button) => {
+      button.addEventListener('click', () => {
+        const key = button.dataset.taskTab;
+        document.querySelectorAll('[data-task-tabs] button').forEach((b) => b.classList.toggle('active', b === button));
+        document.querySelectorAll('.task-panel').forEach((panel) => panel.classList.toggle('active', panel.id === `task-${key}`));
+      });
+    });
+    const pileStatusMap = { B39: '未开始', D61: '成孔进行中', C357: '检测完成', A65: '未开始' };
+    const targetOptions = ['成孔完成', '检测完成', '浇筑完成'];
+    let currentTaskStep = 1;
+    function selectedPiles() {
+      return Array.from(document.querySelectorAll('.pile-select-card.active')).map((card) => card.dataset.pileCard);
+    }
+    function splitTasks(status, target) {
+      const order = ['打桩任务', '检测任务', '浇筑任务'];
+      const start = status.includes('检测完成') ? 2 : status.includes('成孔') ? 1 : 0;
+      const end = target === '浇筑完成' ? 3 : target === '检测完成' ? 2 : 1;
+      return order.slice(start, end);
+    }
+    function updateTaskWizard(step) {
+      currentTaskStep = Math.max(1, Math.min(3, step));
+      document.querySelectorAll('[data-step-indicator]').forEach((node) => node.classList.toggle('active', node.dataset.stepIndicator === String(currentTaskStep)));
+      document.querySelectorAll('[data-wizard-panel]').forEach((panel) => panel.classList.toggle('active', panel.dataset.wizardPanel === String(currentTaskStep)));
+      document.getElementById('prevTaskStep').hidden = currentTaskStep === 1;
+      document.getElementById('nextTaskStep').hidden = currentTaskStep === 3;
+      document.getElementById('confirmTaskCreate').hidden = currentTaskStep !== 3;
+      if (currentTaskStep === 2) renderStatusRows();
+      if (currentTaskStep === 3) renderLeafRows();
+    }
+    function renderStatusRows() {
+      const rows = selectedPiles().map((pile) => {
+        const status = pileStatusMap[pile] || '未开始';
+        const defaultTarget = status.includes('检测完成') ? '浇筑完成' : status.includes('成孔') ? '检测完成' : '浇筑完成';
+        const options = targetOptions.map((item) => `<option ${item === defaultTarget ? 'selected' : ''}>${item}</option>`).join('');
+        const split = splitTasks(status, defaultTarget).join('、') || '无需拆分';
+        return `<tr data-status-pile="${pile}"><td>${pile}</td><td>${status}</td><td><select class="select target-status-select">${options}</select></td><td class="split-desc">${split}</td></tr>`;
+      }).join('');
+      document.getElementById('taskStatusRows').innerHTML = rows || '<tr><td colspan="4">请先选择桩点</td></tr>';
+    }
+    function renderLeafRows() {
+      const time = document.getElementById('taskPlanTime').value.replace('T', ' ');
+      const rows = Array.from(document.querySelectorAll('#taskStatusRows tr[data-status-pile]')).flatMap((row) => {
+        const pile = row.dataset.statusPile;
+        const status = pileStatusMap[pile] || '未开始';
+        const target = row.querySelector('.target-status-select').value;
+        return splitTasks(status, target).map((task) => {
+          const pre = task === '打桩任务' ? '无' : task === '检测任务' ? '成孔完成' : '检测完成';
+          const team = task === '检测任务' ? '检测一组' : task === '浇筑任务' ? '浇筑一队' : '班组一队';
+          const device = task === '检测任务' ? 'CK-01' : task === '浇筑任务' ? 'PB-01' : 'XR-02';
+          return `<tr><td>${pile}</td><td>${task}</td><td>${pre}</td><td>${time}</td><td><select class="select"><option>${team}</option><option>班组二队</option><option>检测二组</option></select></td><td><select class="select"><option>${device}</option><option>XR-03</option><option>CK-02</option><option>PB-02</option></select></td></tr>`;
+        });
+      }).join('');
+      document.getElementById('taskLeafRows').innerHTML = rows || '<tr><td colspan="6">没有需要生成的任务</td></tr>';
+    }
+    document.getElementById('openTaskCreate').addEventListener('click', () => {
+      updateTaskWizard(1);
+      openPrototypeModal('taskCreateModal');
+    });
+    document.querySelectorAll('.pile-select-card').forEach((card) => {
+      card.addEventListener('click', () => card.classList.toggle('active'));
+    });
+    document.addEventListener('change', (event) => {
+      const target = event.target.closest('.target-status-select');
+      if (!target) return;
+      const row = target.closest('tr');
+      row.querySelector('.split-desc').textContent = splitTasks(pileStatusMap[row.dataset.statusPile] || '未开始', target.value).join('、') || '无需拆分';
+    });
+    document.getElementById('prevTaskStep').addEventListener('click', () => updateTaskWizard(currentTaskStep - 1));
+    document.getElementById('nextTaskStep').addEventListener('click', () => updateTaskWizard(currentTaskStep + 1));
+    document.getElementById('confirmTaskCreate').addEventListener('click', () => {
+      document.getElementById('taskResultNote').classList.add('show');
+      closePrototypeModal();
+      document.querySelector('[data-task-tab="detail"]').click();
+    });
+    let pendingDeleteRow = null;
+    document.addEventListener('click', (event) => {
+      const deleteButton = event.target.closest('.task-delete');
+      const reviewButton = event.target.closest('.task-review');
+      if (deleteButton) {
+        pendingDeleteRow = deleteButton.closest('tr');
+        const pile = pendingDeleteRow.dataset.pile || pendingDeleteRow.children[1]?.textContent || '';
+        const type = pendingDeleteRow.dataset.taskType || pendingDeleteRow.children[2]?.textContent || '';
+        let warning = `确认删除 ${pile} 的${type}。`;
+        if (type.includes('打桩')) warning = `删除 ${pile} 的打桩任务，将同时删除同一桩点的检测任务和浇筑任务，请确认。`;
+        if (type.includes('检测')) warning = `删除 ${pile} 的检测任务，将同时删除同一桩点的浇筑任务，请确认。`;
+        document.getElementById('deleteWarningText').textContent = warning;
+        openPrototypeModal('taskDeleteModal');
+      }
+      if (reviewButton) {
+        const row = reviewButton.closest('tr');
+        if (row.closest('#task-detail')) {
+          const statusCell = row.querySelector('td:nth-last-child(3)');
+          if (statusCell) statusCell.innerHTML = '<span class="tag green">已完成</span>';
+          const doneCell = row.querySelector('td:nth-last-child(4)');
+          if (doneCell && doneCell.textContent.trim() === '-') doneCell.textContent = '2026-07-14 16:30';
+        } else {
+          const statusCell = row.children[3];
+          if (statusCell) statusCell.innerHTML = '<span class="tag green">已完成</span>';
+        }
+      }
+    });
+    document.getElementById('confirmTaskDelete').addEventListener('click', () => {
+      if (pendingDeleteRow) {
+        pendingDeleteRow.style.opacity = '.45';
+        pendingDeleteRow.querySelector('td:last-child').textContent = '已删除';
+      }
+      closePrototypeModal();
+    });
+    document.querySelectorAll('[data-live-stat-tabs] button').forEach((button) => {
+      button.addEventListener('click', () => {
+        const key = button.dataset.liveStat;
+        document.querySelectorAll('[data-live-stat-tabs] button').forEach((b) => b.classList.toggle('active', b === button));
+        document.querySelectorAll('.live-stat-panel').forEach((panel) => panel.classList.toggle('active', panel.id === `live-stat-${key}`));
+      });
+    });
+    document.addEventListener('click', (event) => {
+      const pileButton = event.target.closest('.open-dispatch-modal');
+      if (!pileButton) return;
+      document.getElementById('dispatchPile').value = pileButton.dataset.pile;
+      openPrototypeModal('dispatchModal');
+    });
+    document.getElementById('confirmDispatch').addEventListener('click', () => {
+      const pile = document.getElementById('dispatchPile').value || '未开始桩点';
+      const tip = document.querySelector('.operation-tip');
+      if (tip) {
+        tip.insertAdjacentHTML('beforeend', `<div class="list-line"><span>${pile} 已下发作业并更新设备</span><span class="tag blue">已下发</span></div>`);
+      }
+      closePrototypeModal();
+    });
+    document.querySelectorAll('.close-prototype-modal').forEach((button) => button.addEventListener('click', closePrototypeModal));
+    prototypeMask.addEventListener('click', (event) => {
+      if (event.target === prototypeMask) closePrototypeModal();
+    });
+    const drawer = document.getElementById('nodeDrawer');
+    document.getElementById('openNodes').addEventListener('click', () => drawer.classList.add('show'));
+    document.getElementById('openNodes2').addEventListener('click', () => drawer.classList.add('show'));
+    document.getElementById('closeDrawer').addEventListener('click', () => drawer.classList.remove('show'));
+  </script>
+</body>
+</html>
